@@ -1,5 +1,10 @@
+"""
+    header_strings(; kwargs...)
+        --> [ String(Tuple name [Value unit]]
 
-
+Take kwarg names, add value units in brackets.
+Strings don't contain colour codes around units.
+"""
 function header_strings(; kwargs...)
     vs = String[]
     for arg in kwargs
@@ -7,7 +12,6 @@ function header_strings(; kwargs...)
         value = arg[2]
         str = string(symbol)
         str *= " ["
-        
         str *= if value isa AbstractArray
             string(unit(value[1]))
         else
@@ -18,36 +22,57 @@ function header_strings(; kwargs...)
     end
     vs
 end
+
+"""
+    rounded_stripped(quantity, digits)
+        --> Value of same numeric type as quantity
+"""
 function rounded_stripped(quantity, digits)
     rounded = round(typeof(quantity), quantity, digits = digits)
     ustrip(rounded)
 end
-function value_strings(rws, cls; kwargs...)
-    ms = Matrix{Union{Missing, String}}(missing, rws, cls)
-    for col in 1:cls
+
+"""
+    value_strings(n_rows, n_columns, digits = 2; kwargs...)
+    --> Matrix{Union{Missing, String}}
+
+Integer values won't be affected by rounding to digits.
+"""
+function value_strings(n_rows, n_columns, digits = 2; kwargs...)
+    ms = Matrix{Union{Missing, String}}(missing, n_rows, n_columns)
+    for col in 1:n_columns
         ve = kwargs[col]
-        for row in 1:rws
+        for row in 1:n_rows
             q = ve[row]
-            v = rounded_stripped(q, 2)
+            v = rounded_stripped(q, digits)
             ms[row, col] = string(v)
         end
     end
     ms
 end
 
-function column_widths(;kwargs...)
-    hstr = header_strings(;kwargs...)
-    map(hstr) do str
-        x_bearing, y_bearing, twidth, theight, x_advance, y_advance = textextents(str * "   ")
-        twidth
-    end
-end
-function row_height()
-    _, _, _, rowheight, _, _ = textextents("|")
-    rowheight
-end
+"Pixel width using current settings"
+pixelwidth(s::String) = textextents(s)[3]
 
-function t_rows(;kwargs...) 
+"""
+    column_widths(;kwargs...)
+    --> ['pixel width']
+Based on header text widths with two spaces padding on both sides
+"""
+column_widths(;kwargs...) = map(pixelwidth, header_strings(;kwargs...) .* "   ")
+
+
+"""
+    row_height()
+    --> 'Pixel' height of one row
+"""
+row_height() = textextents("|")[4]
+
+"""
+    value_rows(;kwargs...)
+    --> number of value rows in table
+"""
+function value_rows(;kwargs...)
     vs = Int64[]
     for (_, value) in kwargs
         s = if value isa AbstractArray
@@ -60,41 +85,79 @@ function t_rows(;kwargs...)
     maximum(vs)
 end
 
-
+"Number of columns"
 t_cols(;kwargs...) = length(header_strings(; kwargs...))
-function draw_header(pos::Point, widths, hdrs)
+
+"""
+    draw_header(pos::Point, pixel_widths, hdrs)
+Two left spaces for padding, which means centered.
+"""
+function draw_header(pos::Point, pixel_widths, hdrs)
     p = pos
     for (i, hdr) in enumerate(hdrs)
-        text(hdr, p)
-        p += (widths[i], 0.0)
+        # Center header
+        columnpixelwidth = pixel_widths[i]
+        phdr = pixelwidth(hdr)
+        Δpx =  (columnpixelwidth - phdr) /2
+        #= debug line
+        line(p, p + (0, -row_height()), :stroke)
+        =#
+        text(hdr, p + (Δpx, 0))
+        p += (columnpixelwidth, 0.0)
     end
     p
 end
 
+"""
+    draw_values(pos, rows, pixel_widths; kwargs...)
+"""
+function draw_values(pos, rows, pixel_widths; kwargs...)
+    strs_including_missing = value_strings(rows, length(pixel_widths); kwargs...)
+    strs = map(s-> ismissing(s) ? "" : String(s), strs_including_missing)
+    strs_before_dot = map(stupl-> stupl[1], splitext.(strs))
+    colpos = 0.0
+    for col in 1:length(pixel_widths)
+        rowpos = 0.0
+        columnpixelwidth = pixel_widths[col]
+        maxpixelwidth = maximum(pixelwidth, strs[:, col])
+        maxleadingpixelwidth = maximum(pixelwidth, strs_before_dot[:, col])
+        maxtrailingpixelwidth = maxpixelwidth - maxleadingpixelwidth
+        sumpixelwidth = maxleadingpixelwidth + maxtrailingpixelwidth
 
-function draw_values(pos, v_rows, widths; kwargs...)
-    ms = value_strings(v_rows, length(widths); kwargs...)
-    p = pos
-    cp = 0.0
-    @show ms, p, cp
-    for col in 1:length(widths)
-        rp = 0.0
-        for row in 1:v_rows
-            rp += row_height()
-            p = pos + (cp, rp)
-            s = ms[row, col]
-            text(s, p)
+
+
+        # If there are no dots, reldotpos = 1.
+        # If there are no digits before any of the values, reldotpos = 0,
+        # but that would require no leading digits.
+        reldotpos = maxleadingpixelwidth / sumpixelwidth
+        Δpx_textbox = (columnpixelwidth - sumpixelwidth) / 2
+        for row in 1:rows
+            rowpos += row_height()
+            p = pos + (colpos, rowpos)
+            s = strs[row, col]
+            # Find offset for centering within sumpixelwidth
+            sleading = strs_before_dot[row, col]
+            ps = pixelwidth(s)
+            psleading = pixelwidth(sleading)
+            Δpx_sumpixelwidth = sumpixelwidth * reldotpos - psleading
+            text(s, p + (Δpx_textbox + 1.0* Δpx_sumpixelwidth, 0))
+            #= debug lines
+            line(p, p + (Δpx_textbox, -row_height()), :stroke)
+            line(p + (columnpixelwidth, 0), p + (Δpx_textbox + sumpixelwidth, -row_height()), :stroke)
+            =#
         end
-        cp += widths[col]
+        colpos += columnpixelwidth
     end
-    ms
+    strs
 end
+
+
 function text_table(pos::Point; kwargs...)
-    widths = column_widths(;kwargs...)
-    v_rows = t_rows(;kwargs...)
+    pixel_widths = column_widths(;kwargs...)
+    valrows = value_rows(;kwargs...)
     cols = t_cols(;kwargs...)
     hdrs = header_strings(;kwargs...)
-    draw_header(pos, widths, hdrs)
-    pos += row_height()
-    draw_values(pos, v_rows, widths; kwargs...)
+    draw_header(pos, pixel_widths, hdrs)
+    pos += (0.0, row_height())
+    draw_values(pos, valrows, pixel_widths; kwargs...)
 end

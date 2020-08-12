@@ -117,7 +117,7 @@ const σ_TS_SK75 = 3600N/mm^2
 "
 Fill factors reduce the fibre area compared to the circumscribed circle, see 'test_17.jl'.
 "
-fill_factor(d) = (-0.003*d/mm + 0.853) 
+fill_factor(d) = (-0.003*d/mm + 0.853)
 
 """
 Spin factors reduce the fibre breaking strength, see 'test_17.jl'.
@@ -132,7 +132,7 @@ circle_area(d) = π / 4 * d^2
 """
 Area filled with fibres as a function of diameter, see 'test17.jl'.
 """
-area_filled(d) = fill_factor(d)* circle_area(d) 
+area_filled(d) = fill_factor(d)* circle_area(d)
 
 """
 Assuming no fibre breaking strenght reduction, but including the fibre fill factor

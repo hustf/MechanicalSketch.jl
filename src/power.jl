@@ -1,6 +1,6 @@
 """
-    showpower(p::Point, power::P; 
-        maxpower = 10.0kW, 
+    showpower(p::Point, power::P;
+        maxpower = 10.0kW,
         fs = EM,
         symbsize = 1.5fs,
         backgroundcolor = colorant"white",
@@ -14,8 +14,8 @@ symbsize = 1.5EM    lightning bolt size.
 backgroundcolor     is used to pick a color for an outline.
 labelpower = true   text or no text
 """
-function showpower(p::Point, power::Power; 
-                   maxpower = 15.0kW, 
+function showpower(p::Point, power::Power;
+                   maxpower = 15.0kW,
                    fs = EM,
                    symbsize = 1.5fs,
                    backgroundcolor = colorant"white",
@@ -65,7 +65,7 @@ function showpower(p::Point, power::Power;
     fillpreserve()
     clip()
     translate(-p)
-    
+
     # fill the symbol from bottom according to relative power
     sethue(curcol)
     rect(p, WI , -fractionpower * HE, :fill)

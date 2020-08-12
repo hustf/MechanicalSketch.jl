@@ -2,7 +2,7 @@ import MechanicalSketch
 import MechanicalSketch: color_with_luminance, empty_figure, background, sethue, O, W, H, finish, Point,
     PALETTE,
     kN, mm, km, kg, rope_breaking_strength, rope_weight,
-    header_strings, column_widths, t_rows, t_cols, text_table,
+    header_strings, column_widths, text_table,
     area_filled, setscale_dist, circle, °, text, g
 let
 BACKCOLOR = color_with_luminance(PALETTE[8], 0.8);
