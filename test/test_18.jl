@@ -60,6 +60,7 @@ let
 end
 
 finish()
+setscale_dist(20m / H)
 
 nothing
 end

@@ -5,6 +5,7 @@ scalevelocityy() = -SCALEVELOCITY
 "y is up, same scale as x"
 scaleforcey() = -SCALEFORCE
 
+
 """
     setscale_dist(s::L) where {L <: Length}
 
@@ -37,3 +38,7 @@ function setscale_force(s::F) where {F <: Force}
     global SCALEFORCE = s
 end
 setscale_force() = setscale_force(20kN / H)
+
+scale(q::Length) = q / SCALEDIST
+scale(q::Velocity) = q/ SCALVELOCITY
+scale(q::Force) = q/ SCALEFORCE

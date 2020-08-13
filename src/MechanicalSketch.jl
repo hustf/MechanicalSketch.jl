@@ -181,6 +181,7 @@ global SCALEFORCE = 20kN / H
 
 # Note, this could be extended by modulus, such that points to the left of the screen
 # would appear at right. But that could make some strange bugs too.
+# CONSIDER generalize to quantity, let scale(x) do the transformation?
 Point(x::T, y::T) where T<:Length = Point(x / SCALEDIST, y / scaledisty())
 Point(x::T, y::T) where T<:Velocity = Point(x / SCALEVELOCITY , y / scalevelocityy())
 Point(x::T, y::T) where T<:Force = Point(x / SCALEFORCE , y / scaleforcey())
@@ -254,9 +255,6 @@ function empty_figure(filename = "HiThere.png")
 end
 
 
-
-circle(p::Point, r::L, action) where L <: Length = circle(p, r / SCALEDIST, action)
-
 """
     text(t, pt::Point, angle::T; kwargs) where {T <: Angle}
 For angles with unit, use rotation around z axis.
@@ -272,5 +270,7 @@ include("cart.jl")
 include("rope.jl")
 include("power.jl")
 include("table.jl")
+include("curves.jl")
+include("flow.jl")
 
 end # module
