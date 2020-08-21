@@ -28,7 +28,7 @@ let
     posy = 0
     posx = -this_fig.width / 2
     sethue("green")
-    stri = "Da jeg var på vei til kirken i dag morges så kom jeg forbi en liten sjømann. En frisk og hyggelig liten sjømann som hilste meg."
+    stri = "Da jeg var på vei til kirken ∈ dag morges så kom jeg forbi en liten sjømann. En frisk og hyggelig liten sjømann som hilste meg."
     text(stri, posx, posy)
     sethue("yellow")
     posy += EM

@@ -129,6 +129,7 @@ import ColorSchemes: getinverse, get
 import ColorSchemes: HSL, HSLA, RGB, RGBA, HSV
 import Base: -, +, *, /, abs
 import Colors: @colorant_str
+import FileIO: @format_str, File, save
 export Drawing, empty_figure,
     color_from_palette,
     color_with_luminance,
@@ -165,7 +166,7 @@ For line thickness, we are used to points.
 """
 const PT = Int(round(EM / 12))
 """
-We want to make high quality figures for A4 with 5 cm margin. Width and height are
+We want to make high quality figures for A4 with 5 cm total margin. Width and height are
     a4_w_72dpi, _ = Luxor.paper_sizes["A4"]
     marginfrac = 50 / 210
     w_300f = a4_w_72dpi * (1 - marginfrac) * 300 / 72
@@ -235,7 +236,8 @@ black on white figure, line width 3 pt  default.
 """
 function empty_figure(filename = "HiThere.png")
     fig = Drawing(W, H, filename)
-
+    # Font for the 'toy' text interface
+    # (use e.g. JuliaMono for unicode symbols like ∈. There are no nice fonts for text AND math.
     fontface("Calibri")
     # 1 pt font size = 12/72 inch - by the book.
     # Letter spacing works differently here than in Word, so we adjust a little.
