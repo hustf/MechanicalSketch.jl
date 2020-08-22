@@ -4,6 +4,7 @@ They are a subset of quantities, although some function methods may
 need extending outside T<:Real
 """
 const ComplexQuantity = Quantity{<:Complex}
+const RealQuantity = Quantity{<:Real}
 QuantityTuple(z::ComplexQuantity) =  reim(z)
 ComplexQuantity(p::QuantityTuple) = complex(p[1] , p[2])
 +(p1::Point, shift::ComplexQuantity) = p1 + QuantityTuple(shift)
@@ -111,6 +112,7 @@ function quantities_at_pixels(function_complex_argument;
 end
 
 absolute_scale() = ColorSchemes.linear_grey_10_95_c0_n256
+complex_arg0_scale() = ColorSchemes.linear_ternary_red_0_50_c52_n256
 
 
 """
@@ -119,7 +121,7 @@ magnitude for complex numbers. But would hide information for
 real-valued A.
 """
 function lenient_min_max_complex(A::AbstractArray) 
-    magnitude = norm.(quantities)
+    magnitude = norm.(A)
     extrema(filter(!isnan, magnitude))
 end
 
@@ -130,13 +132,41 @@ Neglecting NaN values, return (minimum, maximum) from the collection.
 
 For complex values, this is taken to mean the norm, the distance to origo.
 """
-lenient_min_max(A) = extrema(filter(!isnan, A))
-lenient_min_max(A::Matrix{ComplexQuantity}) = lenient_min_max_complex(A)
-lenient_min_max(A::Matrix{<:Complex}) = lenient_min_max_complex(A)
+lenient_min_max(A::AbstractArray{<:RealQuantity}) = extrema(filter(!isnan, A))
+lenient_min_max(A::AbstractArray{<:Real}) = extrema(filter(!isnan, A))
+lenient_min_max(A) = lenient_min_max_complex(A)
+
+normalizereal(mi, ma, A) = map( x -> (x - mi) / (ma - mi), A)
+normalizecomplex(mi, ma, A) =  map(x -> (norm(x) - mi) / (ma - mi), A)
+normalize(mi, ma, A::AbstractArray{<:RealQuantity}) = normalizereal(mi, ma, A)
+normalize(mi, ma, A) = normalizecomplex(mi, ma, A)
 
 # Domain colouring https://en.wikipedia.org/wiki/Domain_coloring
 # https://www.maa.org/visualizing-complex-valued-functions-in-the-plane
 
+"""
+Take a matrix of colors, modify elements of it by changing hue to be according to
+the argument (polar angle) of a complex number
+"""
+function hue_from_complex_argument!(color_values, A)
+    @assert length(A) == length(color_values)
+    for i in 1:length(A) # Works for matrices also
+        col = color_values[i]
+        if col != RGB(0.0, 0.0, 0.0)
+            LCHuvcol = convert(Colors. LCHuv, col)
+            ang = angle(complex(A[i]))
+            deltahue = ang * 180 / π
+            luminance = LCHuvcol.l # 0.0-255.0
+            chroma  = LCHuvcol.c
+            hue = LCHuvcol.h
+            modhue = mod(hue + deltahue, 360.0)
+            LCHuvmod = Colors.LCHuv(luminance, chroma, modhue)
+            rgbmod = convert(Colors.RGB, LCHuvmod)
+            color_values[i] = rgbmod
+        end
+    end
+end
+# TO DO NaN-> transparent, how?
 """
     pngimage(quantities)
 Convert a matrix to a png image, one pixel per value
@@ -145,9 +175,19 @@ function pngimage(quantities)
     # Map quantities to dimensionless real values, 0..1
     mi, ma = lenient_min_max(quantities)
     replace!(x-> isnan(x) ? ma : x, quantities)
-    norm_values = map( x -> (x - mi) / (ma - mi), quantities)
-    # Map normalized values to visually linear grey scale, convert to png format
-    color_values = get(absolute_scale(), norm_values)
+    norm_values = normalize(mi, ma, quantities)
+    # Map normalized real values to visually linear grey scale,
+    # complex numbers to visually red scale when on the positive real axis
+    color_values = if eltype(quantities) <: RealQuantity
+        get(absolute_scale(), norm_values)
+    else
+        get(complex_arg0_scale(), norm_values)
+    end;
+    # If complex, modify the grey color
+    if !isa(eltype(quantities), RealQuantity)
+        hue_from_complex_argument!(color_values, quantities)
+    end
+    # Convert nomralized values to png format
     tempfilename = joinpath(@__DIR__, "tempsketch.png")
     save(File(format"PNG", tempfilename), color_values)
     img = readpng(tempfilename);

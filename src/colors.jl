@@ -13,7 +13,7 @@ function lumin2(colo)
     c = RGB(colo)
     r, g, b = c.r, c.g, c.b
     γ = 2.2
-    lumin2 = 0.2126 * r^γ + 0.7152 * g^γ + 0.0722 * b^γ
+    0.2126 * r^γ + 0.7152 * g^γ + 0.0722 * b^γ
 end
 
 "The L in HSL."
@@ -27,7 +27,8 @@ get_current_luminance() = luminance(get_current_RGB())
 """
 color_with_lumin2(color::T, luminance::Float64) where T
         -> T
-
+The name of this function is somewhat illogical, consider removing. Generally
+use the LCHuv colorspace to modify luminance of a color.
 """
 function color_with_lumin2(color::T, lumin2::Float64) where T
     c = RGBA(color)
