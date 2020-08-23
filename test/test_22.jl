@@ -10,7 +10,7 @@ if !@isdefined m²
     @import_expand s
 end
 
-
+let
 BACKCOLOR = color_with_luminance(PALETTE[8], 0.8)
 function restart()
     empty_figure(joinpath(@__DIR__, "test_22.png"))
@@ -18,6 +18,8 @@ function restart()
     sethue(PALETTE[5])
 end
 restart()
+
+
 
 "A complex domain function defined in the unit circle"
  foo(z)= norm(z) <= 1.0m ? z : NaN*m
@@ -31,7 +33,20 @@ A = quantities_at_pixels(foo,
     height_relative_width = height_relative_width);
 upleftpoint, lowrightpoint = draw_color_map(O, A)
 
+
+setfont("DejaVu Sans", FS)
+str = "f: Z ↣ Z ,  f(z) = z \r inside the unit circle"
+settext(str, O + (-W/2 + 2EM, 0.5H - 3EM), markup = true)
+setfont("Calibri", FS)
+
+
+
+
 legendpos = lowrightpoint + (EM, 0) + (0.0m, physheight)
+
+
+
 
 finish()
 setscale_dist(20m / H)
+end # let

@@ -128,19 +128,46 @@ end
 """
     lenient_min_max(A)
 
-Neglecting NaN values, return (minimum, maximum) from the collection.
+Neglecting NaN and Inf values, return 
+- Minimum and maximum value out of real arrays.
+- Minimum and maximum magnitude out of complex valued arrays.
 
-For complex values, this is taken to mean the norm, the distance to origo.
 """
-lenient_min_max(A::AbstractArray{<:RealQuantity}) = extrema(filter(!isnan, A))
-lenient_min_max(A::AbstractArray{<:Real}) = extrema(filter(!isnan, A))
+lenient_min_max(A::AbstractArray{<:RealQuantity}) = extrema(filter(x-> !isnan(x) && !isinf(x), A))
+lenient_min_max(A::AbstractArray{<:Real}) = extrema(filter(x-> !isnan(x) && !isinf(x), A))
 lenient_min_max(A) = lenient_min_max_complex(A)
 
-normalizereal(mi, ma, A) = map( x -> (x - mi) / (ma - mi), A)
-normalizecomplex(mi, ma, A) =  map(x -> (norm(x) - mi) / (ma - mi), A)
-normalize(mi, ma, A::AbstractArray{<:RealQuantity}) = normalizereal(mi, ma, A)
-normalize(mi, ma, A) = normalizecomplex(mi, ma, A)
+normalizereal(mi, ma, A) = map(A) do x
+    if isnan(x) || isinf(x)
+        1.0
+    else
+        (x - mi) / (ma - mi)
+    end
+end
 
+normalizecomplex(mi, ma, A) = map(A) do x
+    if isnan(x) || isinf(x)
+        1.0
+    else
+        (norm(x) - mi) / (ma - mi)
+    end
+end
+
+function normalize(A::AbstractArray{<:RealQuantity})
+    # Minimum and maximum value
+    mi, ma = lenient_min_max(A)
+    normalizereal(mi, ma, A)
+end
+function normalize(A::AbstractArray{<:Real})
+    # Minimum and maximum value
+    mi, ma = lenient_min_max(A)
+    normalizereal(mi, ma, A)
+end
+function normalize(A)
+    # Minimum and maximum magnitude  
+    mi, ma = lenient_min_max(A)
+    normalizecomplex(mi, ma, A)
+end
 # Domain colouring https://en.wikipedia.org/wiki/Domain_coloring
 # https://www.maa.org/visualizing-complex-valued-functions-in-the-plane
 
@@ -151,45 +178,63 @@ the argument (polar angle) of a complex number
 function hue_from_complex_argument!(color_values, A)
     @assert length(A) == length(color_values)
     for i in 1:length(A) # Works for matrices also
-        col = color_values[i]
-        if col != RGB(0.0, 0.0, 0.0)
-            LCHuvcol = convert(Colors. LCHuv, col)
-            ang = angle(complex(A[i]))
-            deltahue = ang * 180 / π
-            luminance = LCHuvcol.l # 0.0-255.0
-            chroma  = LCHuvcol.c
-            hue = LCHuvcol.h
-            modhue = mod(hue + deltahue, 360.0)
-            LCHuvmod = Colors.LCHuv(luminance, chroma, modhue)
-            rgbmod = convert(Colors.RGB, LCHuvmod)
-            color_values[i] = rgbmod
+        cqua = A[i]
+        if !isnan(cqua) && !isinf(cqua)
+            col = color_values[i]
+            if col != RGB(0.0, 0.0, 0.0)
+                LCHuvcol = convert(Colors. LCHuv, col)
+                ang = angle(complex(cqua))
+                deltahue = ang * 180 / π
+                luminance = LCHuvcol.l # 0.0-255.0
+                chroma  = LCHuvcol.c
+                hue = LCHuvcol.h
+                modhue = mod(hue + deltahue, 360.0)
+                LCHuvmod = Colors.LCHuv(luminance, chroma, modhue)
+                rgbmod = convert(Colors.RGB, LCHuvmod)
+                color_values[i] = rgbmod
+            end
         end
     end
 end
-# TO DO NaN-> transparent, how?
+# Convert nornalized values to png format
 """
-    pngimage(quantities)
-Convert a matrix to a png image, one pixel per value
+Map a collection of quantities to colors, transparent
+pixels for NaN and Inf values.
 """
-function pngimage(quantities)
-    # Map quantities to dimensionless real values, 0..1
-    mi, ma = lenient_min_max(quantities)
-    replace!(x-> isnan(x) ? ma : x, quantities)
-    norm_values = normalize(mi, ma, quantities)
-    # Map normalized real values to visually linear grey scale,
-    # complex numbers to visually red scale when on the positive real axis
-    color_values = if eltype(quantities) <: RealQuantity
+function color_matrix(qua::AbstractArray)
+    # Boolean collection, valid elements which should be opaque
+    valid_element = map(x-> isnan(x) || isinf(x) ? false : true, qua)
+    
+     # Map value or magnitude to [0.0, 1.0], invalid elements are 1.0
+    norm_values = normalize(qua)
+
+    # Map [0.0, 1.0] to perceived luminosity color map
+    color_values = if eltype(qua) <: RealQuantity
         get(absolute_scale(), norm_values)
     else
         get(complex_arg0_scale(), norm_values)
-    end;
-    # If complex, modify the grey color
-    if !isa(eltype(quantities), RealQuantity)
-        hue_from_complex_argument!(color_values, quantities)
     end
-    # Convert nomralized values to png format
+    # If input is complex
+    if !(eltype(qua) <: RealQuantity)
+        # Set hue from complex argument (angle)
+        # while not changing perceived luminance
+        hue_from_complex_argument!(color_values, qua)
+    end
+
+    # Add transparency for any invalid elements
+    map(color_values, valid_element) do co, valid
+        RGBA(ColorSchemes.red(co), ColorSchemes.green(co), ColorSchemes.blue(co), Float64(valid))
+    end
+end
+
+
+"""
+    pngimage(quantities)
+Convert a matrix to a png image, one pixel per element
+"""
+function pngimage(quantities)
     tempfilename = joinpath(@__DIR__, "tempsketch.png")
-    save(File(format"PNG", tempfilename), color_values)
+    save(File(format"PNG", tempfilename), color_matrix(quantities))
     img = readpng(tempfilename);
     rm(tempfilename)
     img

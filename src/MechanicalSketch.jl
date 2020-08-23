@@ -126,7 +126,7 @@ import LinearAlgebra: norm
 import REPL.TerminalMenus
 import ColorSchemes
 import ColorSchemes: getinverse, get
-import ColorSchemes: HSL, HSLA, RGB, RGBA, HSV
+import ColorSchemes: HSL, HSLA, RGB, RGBA, HSV, LCHuv, LCHuvA
 import Base: -, +, *, /, abs
 import Colors: @colorant_str
 import FileIO: @format_str, File, save
