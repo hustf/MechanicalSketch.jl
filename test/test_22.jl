@@ -3,7 +3,7 @@ import MechanicalSketch: color_with_luminance, empty_figure, background, sethue,
        PALETTE, color_from_palette, setopacity
 import MechanicalSketch: SCALEDIST,  dimension_aligned, settext, arrow, placeimage, readpng, setfont, gsave, grestore
 import MechanicalSketch: ComplexQuantity, generate_complex_potential_vortex, @import_expand, string_polar_form
-import MechanicalSketch: quantities_at_pixels, draw_color_map, draw_absolute_value_legend, norm, setscale_dist
+import MechanicalSketch: quantities_at_pixels, draw_color_map, draw_complex_legend, norm, setscale_dist, lenient_min_max
 
 if !@isdefined m²
     @import_expand m # Will error if m² already is in the namespace
@@ -27,7 +27,7 @@ restart()
 physwidth = 2.2m
 height_relative_width = 1 / 1
 physheight = physwidth * height_relative_width
-setscale_dist(2.2m / H)
+setscale_dist(1.1physwidth / H)
 A = quantities_at_pixels(foo, 
     physwidth = physwidth, 
     height_relative_width = height_relative_width);
@@ -39,13 +39,14 @@ str = "f: Z ↣ Z ,  f(z) = z \r inside the unit circle"
 settext(str, O + (-W/2 + 2EM, 0.5H - 3EM), markup = true)
 setfont("Calibri", FS)
 
+legendpos = lowrightpoint + (0.0m, physheight)
 
+mi, ma = lenient_min_max(A)
+mea = (mi + ma) / 2
 
+legendvalues = reverse(sort([ma, mi, mea]))
 
-legendpos = lowrightpoint + (EM, 0) + (0.0m, physheight)
-
-
-
+draw_complex_legend(legendpos, mi, ma, legendvalues)
 
 finish()
 setscale_dist(20m / H)

@@ -50,3 +50,20 @@ function color_with_luminance(color::T, luminance::Float64) where T
     c = HSLA(color)
     T( HSLA(c.h, c.s, luminance, c.alpha)  )
 end
+
+"""
+    rotate_hue(colo::RGB, angle::Angle) -> RGB
+
+In the luminance-chroma-hue cylindrical colorspace, rotation of hue gives
+continuous variation while not chaninging chroma or perceptual luminance.
+"""
+function rotate_hue(col::RGB, ang::Angle)
+    if col != RGB(0.0, 0.0, 0.0)
+        lchuv = convert(Colors. LCHuv, col)
+        modhue = mod(lchuv.h + ang / °, 360.0)
+        lchuvmod = Colors.LCHuv(lchuv.l, lchuv.c, modhue)
+        convert(Colors.RGB, lchuvmod)
+    else
+        col
+    end
+end

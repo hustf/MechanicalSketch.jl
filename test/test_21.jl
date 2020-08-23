@@ -3,7 +3,7 @@ import MechanicalSketch: color_with_luminance, empty_figure, background, sethue,
        PALETTE, color_from_palette, setopacity
 import MechanicalSketch: SCALEDIST,  dimension_aligned, settext, arrow, placeimage, readpng, setfont, gsave, grestore
 import MechanicalSketch: ComplexQuantity, generate_complex_potential_vortex, @import_expand, string_polar_form
-import MechanicalSketch: quantities_at_pixels, draw_color_map, draw_absolute_value_legend
+import MechanicalSketch: quantities_at_pixels, draw_color_map, draw_real_legend
 
 if !@isdefined m²
     @import_expand m # Will error if m² already is in the namespace
@@ -73,7 +73,7 @@ mi = minimum(A)
 ze = zero(typeof(ma))
 legendvalues = reverse(sort([ma, mi, ze]))
 
-draw_absolute_value_legend(legendpos, mi, ma, legendvalues)
+draw_real_legend(legendpos, mi, ma, legendvalues)
 
 finish()
 end # let

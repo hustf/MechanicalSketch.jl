@@ -168,36 +168,35 @@ function normalize(A)
     mi, ma = lenient_min_max(A)
     normalizecomplex(mi, ma, A)
 end
-# Domain colouring https://en.wikipedia.org/wiki/Domain_coloring
-# https://www.maa.org/visualizing-complex-valued-functions-in-the-plane
+
 
 """
+    hue_from_complex_argument!(color_values, A)
+    Changes the hue in collection color_values by roting based on complex arguments in A
+
 Take a matrix of colors, modify elements of it by changing hue to be according to
 the argument (polar angle) of a complex number
+
+Ref. domain colouring, complex plane https://en.wikipedia.org/wiki/Domain_coloring
 """
 function hue_from_complex_argument!(color_values, A)
     @assert length(A) == length(color_values)
     for i in 1:length(A) # Works for matrices also
         cqua = A[i]
         if !isnan(cqua) && !isinf(cqua)
+            ang = angle(complex(cqua))rad
             col = color_values[i]
             if col != RGB(0.0, 0.0, 0.0)
-                LCHuvcol = convert(Colors. LCHuv, col)
-                ang = angle(complex(cqua))
-                deltahue = ang * 180 / π
-                luminance = LCHuvcol.l # 0.0-255.0
-                chroma  = LCHuvcol.c
-                hue = LCHuvcol.h
-                modhue = mod(hue + deltahue, 360.0)
-                LCHuvmod = Colors.LCHuv(luminance, chroma, modhue)
-                rgbmod = convert(Colors.RGB, LCHuvmod)
-                color_values[i] = rgbmod
+                color_values[i] = rotate_hue(col, ang)
             end
         end
     end
 end
-# Convert nornalized values to png format
+
+
 """
+    color_matrix(qua::AbstractArray) -> RGBA
+
 Map a collection of quantities to colors, transparent
 pixels for NaN and Inf values.
 """
@@ -250,23 +249,75 @@ The color map is centered on p, one pixel per value in the matrix
 function draw_color_map(centerpoint::Point, quantities::Matrix)
     img = pngimage(quantities)
     # Put the png format picture on screen
-    gsave()
+    gsave() # Possible bug in placeimage, guard against it.
     placeimage(img, centerpoint; centered = true)
     grestore()
     pixheight, pixwidth = size(quantities)
     (centerpoint - (pixwidth / 2, pixheight / 2), centerpoint + (pixwidth / 2, pixheight / 2))
 end
+"""
+    draw_real_legend(p::Point, min_quantity, max_quantity, legendvalues)
+    -> text values (the function also draws the legend)
 
-function draw_absolute_value_legend(p::Point, min_abs_quantity, max_abs_quantity, legendvalues)
+p is the upper left position for the legend
+min_quantity and max_quantity is used for determining the color.
+legendvalues is an iterable collection with the same units as min_quantity and max_quantity.
+
+The legend is vertically aligned on the dots in legendvalues
+"""
+function draw_real_legend(p::Point, min_quantity, max_quantity, legendvalues)
     gsave()
     rowhe = row_height()
     for (i, v) in enumerate(legendvalues)
-        dimless = (v - min_abs_quantity) / (max_abs_quantity - min_abs_quantity)
+        dimless = (v - min_quantity) / (max_quantity - min_quantity)
         colo = get(absolute_scale(), dimless)
         sethue(colo)
         box(p + (0.0, i * rowhe), p + (EM, (i + 1 ) * rowhe ), :fillpreserve)
         strvalue = string(round(typeof(v), v, digits = 3))
     end
     grestore()
+    text_table(p, Legend = legendvalues)
+end
+
+"""
+    draw_complex_legend(p::Point, min_abs_quantity, max_abs_quantity, legendvalues)
+    -> text values (the function also draws the legend)
+
+p is the upper left position for the legend
+min_abs_quantity and max_abs_quantity is used for determining the color.
+legendvalues is an iterable collection with the same units.
+
+The legend is vertically aligned on the dots in legendvalues
+"""
+function draw_complex_legend(p::Point, min_abs_quantity::T, max_abs_quantity::T, legendvalues::AbstractArray{T}) where {T<:RealQuantity}
+    gsave()
+    rowhe = row_height()
+    # Legend magnitude
+    for (i, v) in enumerate(legendvalues)
+        dimless = (v - min_abs_quantity) / (max_abs_quantity - min_abs_quantity)
+        upleft = p + (0.0, i * rowhe)
+        downright = p + (EM, (i + 1 ) * rowhe)
+        realcolo = get(complex_arg0_scale(), dimless)
+        n = EM
+        for (j, x) in enumerate(range(upleft[1], downright[1], length=n))
+            sethue(rotate_hue(realcolo, (j - 1) * 360° / n))
+            box(Point(x, upleft[2]), downright, :fillpreserve)
+        end
+        strvalue = string(round(typeof(v), v, digits = 3))
+    end
+    # Legend argument
+    argumentwidth = 5EM
+    upleft = p + (0.0, (length(legendvalues) + 3) * rowhe)
+    downright = p + (argumentwidth, ((length(legendvalues) + 4)) * rowhe)
+    realcolo = get(complex_arg0_scale(), 1.0)
+    n =  argumentwidth
+    for (j, x) in enumerate(range(upleft[1], downright[1], length=n))
+        sethue(rotate_hue(realcolo, (j - 1) * 360° / n))
+        box(Point(x, upleft[2]), downright, :fillpreserve)
+    end
+    grestore()
+    strangles = "0°  120°  240°"
+    draw_header(upleft + (0.0, - FS / 3 ), [pixelwidth(strangles)], [strangles])
+    # Print magnitude text
     text_table(p, Legend = legendvalues)
 end
