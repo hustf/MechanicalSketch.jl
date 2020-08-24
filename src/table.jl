@@ -90,7 +90,8 @@ t_cols(;kwargs...) = length(header_strings(; kwargs...))
 
 """
     draw_header(pos::Point, pixel_widths, hdrs)
-Two left spaces for padding, which means centered.
+    -> positions of potentially next column
+Each header centered to corresponding pixel_widths
 """
 function draw_header(pos::Point, pixel_widths, hdrs)
     p = pos
@@ -110,6 +111,7 @@ end
 
 """
     draw_values(pos, rows, pixel_widths; kwargs...)
+    -> Array{String}
 """
 function draw_values(pos, rows, pixel_widths; kwargs...)
     strs_including_missing = value_strings(rows, length(pixel_widths); kwargs...)
@@ -151,7 +153,10 @@ function draw_values(pos, rows, pixel_widths; kwargs...)
     strs
 end
 
-
+"""
+    text_table(pos::Point; kwargs...)
+    -> Array{String, 2}, text output without alignmnent
+"""
 function text_table(pos::Point; kwargs...)
     pixel_widths = column_widths(;kwargs...)
     valrows = value_rows(;kwargs...)
@@ -159,5 +164,14 @@ function text_table(pos::Point; kwargs...)
     hdrs = header_strings(;kwargs...)
     draw_header(pos, pixel_widths, hdrs)
     pos += (0.0, row_height())
-    draw_values(pos, valrows, pixel_widths; kwargs...)
+    vcat(reshape(hdrs,1,:), draw_values(pos, valrows, pixel_widths; kwargs...))
+end
+"""
+   settext_centered_above_with_markup(str, pos::Point)
+
+The string can include Pango-style mark-up. Line break: \r, otherwise html-like
+"""
+function settext_centered_above_with_markup(str, pos::Point)
+    pixel_width = pixelwidth(str)
+    settext(str, pos + (-pixelwidth(str) / 2, 0), markup = true)
 end

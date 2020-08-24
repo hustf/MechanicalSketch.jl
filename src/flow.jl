@@ -83,7 +83,7 @@ quantities_at_pixels(function_complex_argument;
     width_relative_screen = 2 / 3,
     height_relative_width = 1 / 3)
 
-Return a matrix where each element contains 
+Return a matrix where each element contains
    pixel position |> physical position |> complex valued position |> function value
 """
 function quantities_at_pixels(function_complex_argument;
@@ -120,7 +120,7 @@ Returns (min, max) of norm(A), which often is the relevant
 magnitude for complex numbers. But would hide information for
 real-valued A.
 """
-function lenient_min_max_complex(A::AbstractArray) 
+function lenient_min_max_complex(A::AbstractArray)
     magnitude = norm.(A)
     extrema(filter(!isnan, magnitude))
 end
@@ -128,7 +128,7 @@ end
 """
     lenient_min_max(A)
 
-Neglecting NaN and Inf values, return 
+Neglecting NaN and Inf values, return
 - Minimum and maximum value out of real arrays.
 - Minimum and maximum magnitude out of complex valued arrays.
 
@@ -164,7 +164,7 @@ function normalize(A::AbstractArray{<:Real})
     normalizereal(mi, ma, A)
 end
 function normalize(A)
-    # Minimum and maximum magnitude  
+    # Minimum and maximum magnitude
     mi, ma = lenient_min_max(A)
     normalizecomplex(mi, ma, A)
 end
@@ -203,7 +203,7 @@ pixels for NaN and Inf values.
 function color_matrix(qua::AbstractArray)
     # Boolean collection, valid elements which should be opaque
     valid_element = map(x-> isnan(x) || isinf(x) ? false : true, qua)
-    
+
      # Map value or magnitude to [0.0, 1.0], invalid elements are 1.0
     norm_values = normalize(qua)
 
@@ -320,4 +320,41 @@ function draw_complex_legend(p::Point, min_abs_quantity::T, max_abs_quantity::T,
     draw_header(upleft + (0.0, - FS / 3 ), [pixelwidth(strangles)], [strangles])
     # Print magnitude text
     text_table(p, Legend = legendvalues)
+end
+
+## Automatic differentiation with units, using some internal functions for the legwork
+## of stripping and adding units appropriately. The alternative would be to extending
+## the automatic differentiation package to support complex numbers with units.
+"Internal function generator used by 'generate_∇_R2_to_R2_unitless_function'"
+function generate_R2_to_R2_unitless_function_from_Z_to_Z_function(fz, unitin_fz, unitout_fz)
+    p::Vector -> fz(complex(p[1]∙unitin_fz, p[2]∙unitin_fz)) / unitout_fz
+end
+
+"Internal function generator used by 'generate_∇fz_Z_to_Z_from_fz'"
+function generate_∇_R2_to_R2_unitless_function_from_Z_to_Z_function(fz, unitin_fz, unitout_fz)
+    R2_to_R2_unitless_function = generate_R2_to_R2_unitless_function_from_Z_to_Z_function(fz, unitin_fz,  unitout_fz)
+    p::Vector ->  gradient(R2_to_R2_unitless_function, p)
+end
+"""
+    generate_∇fz_Z_to_Z_from_fz(fz, typein_fz::Type, typeout_fz::Type)
+
+Using ForwardDiff, this function wraps the process of removing units, finding the gradient
+and replacing the proper units.
+
+Example:
+typein_fz: typeof(a typical unitful quantity used to evaluate fz)
+typeout_fz: typeof(a typical unitful quantity produced by fz)
+
+The generated gradient function will have units 'units_in / units_out'.
+"""
+function generate_∇fz_Z_to_Z_from_fz(fz, typein_fz::Type, typeout_fz::Type)
+    unitin = oneunit(typein_fz)
+    unitout = oneunit(typeout_fz)
+    ∇_R2_to_R2_unitless_function = generate_∇_R2_to_R2_unitless_function_from_Z_to_Z_function(fz, unitin, unitout)
+    p::ComplexQuantity -> begin
+        unitless_vector = [real(p/unitin), imag(p/unitin)]
+        unitless_result = ∇_R2_to_R2_unitless_function(unitless_vector)
+        quantity_vector = unitless_result∙unitout / unitin
+        complex(quantity_vector[1], quantity_vector[2])
+    end
 end
