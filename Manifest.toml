@@ -77,9 +77,9 @@ version = "0.8.5"
 
 [[Colors]]
 deps = ["ColorTypes", "FixedPointNumbers", "InteractiveUtils", "Reexport"]
-git-tree-sha1 = "5639e44833cfcf78c6a73fbceb4da75611d312cd"
+git-tree-sha1 = "008d6bc68dea6beb6303fdc37188cb557391ebf2"
 uuid = "5ae59095-9a9b-59fe-a467-6f913c188581"
-version = "0.12.3"
+version = "0.12.4"
 
 [[CommonSubexpressions]]
 deps = ["MacroTools", "Test"]
@@ -267,9 +267,9 @@ version = "0.21.0"
 
 [[JSONSchema]]
 deps = ["HTTP", "JSON", "ZipFile"]
-git-tree-sha1 = "2646fb3efdb60f35a8c053250a2647358ae0629f"
+git-tree-sha1 = "a9ecdbc90be216912a2e3e8a8e38dc4c93f0d065"
 uuid = "7d188eb4-7ad8-530c-ae41-71a32a6d4692"
-version = "0.3.1"
+version = "0.3.2"
 
 [[JpegTurbo_jll]]
 deps = ["Libdl", "Pkg"]
