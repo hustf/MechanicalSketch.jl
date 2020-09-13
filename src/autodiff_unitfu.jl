@@ -55,32 +55,40 @@ where
     CQ = ComplexQuantity
     R² = Vector{<:Real}
 """
-function generate_R²_to_R_from_CQ_to_Q(CQ_to_Q, one_q_in)
-    Q²_to_Q = generate_Q²_to_Q_from_CQ_to_Q(CQ_to_Q)
-    R²_to_Q = generate_R²_to_Q_from_Q²_to_Q(Q²_to_Q, one_q_in)
-    R²_to_R = generate_R²_to_R_from_R²_to_Q(R²_to_Q)
-end
 
-function gradient_real_in_out(CQ_to_Q, ulxy, one_q_in)
-    R²_to_R = generate_R²_to_R_from_CQ_to_Q(CQ_to_Q, one_q_in)
+function gradient_real_in_CQ_out(R²_to_R, ulxy, one_q_out)
     chnk = ForwardDiff.Chunk{2}()
     cfg = ForwardDiff.GradientConfig(R²_to_R, ulxy[1,1], chnk)
     #D = ForwardDiff.DiffResults.DiffResult()
     # 398 ms, 336Mb
     out = similar(ulxy)
-#    for (index, value) in enumerate(ulxy)
-#       out[index] = ForwardDiff.gradient(R²_to_R, value, cfg, Val{false}())
-#    end
-
-    # 321 ms, 308 Mb
     map(ulxy) do ul
-        ForwardDiff.gradient(R²_to_R, ul, cfg, Val{false}())
+        r² = ForwardDiff.gradient(R²_to_R, ul, cfg, Val{false}())::Vector{Float64}
+        complex(r²[1]*one_q_out, r²[2]∙one_q_out)
     end
 end
-function gradient_quantities_in(CQ_to_Q, xyq::Array{Vector{S}}) where {S<:Quantity{<:Real}}
-    one_q_in = oneunit(eltype(xyq[1]))
+function gradient_quantities(CQ_to_Q, xyq::Array{Vector{S}}) where {S<:Quantity{T}} where T
+    # 362 ms, 316 Mb
+    # 334 ms, 316 Mb
+    q_in_first = complex(xyq[firstindex(xyq)]...)
+    one_q_in = oneunit(eltype(xyq[firstindex(xyq)]))
+    one_q_value = oneunit(CQ_to_Q(q_in_first))
+    typeout = typeof(one_q_value / one_q_in)
+    typecout = typeof(complex(one_q_value / one_q_in, one_q_value / one_q_in))
     ulxy = xyq / one_q_in
-    gradient_real_in_out(CQ_to_Q, ulxy, one_q_in)
+
+    #389.962 ms (3803545 allocations: 316.44 MiB)
+    Q²_to_Q = generate_Q²_to_Q_from_CQ_to_Q(CQ_to_Q)
+    R²_to_Q = generate_R²_to_Q_from_Q²_to_Q(Q²_to_Q, one_q_in)
+    R²_to_R = generate_R²_to_R_from_R²_to_Q(R²_to_Q)
+    # 394 ms due to T
+    # 340 ms
+    #map(gradient_real_in_out(R²_to_R, ulxy)) do (x, y)
+    #    complex(x,y)∙one_q_value
+    #end
+    # 334 ms, 312 Mb
+    
+    gradient_real_in_CQ_out(R²_to_R, ulxy, one_q_value / one_q_in )
 end
 
 function gradient_complex_quantity_in(CQ_to_Q;
@@ -99,5 +107,5 @@ function gradient_complex_quantity_in(CQ_to_Q;
 
     # Matrix of 2-element vectors, one per pixel
     xyq = [[ix * SCALEDIST, -iy * SCALEDIST] for iy = pixitery, ix = pixiterx]
-    gradient_quantities_in(CQ_to_Q, xyq)
+    gradient_quantities(CQ_to_Q, xyq)
 end

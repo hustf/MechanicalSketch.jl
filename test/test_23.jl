@@ -39,9 +39,9 @@ K = 1.0m²/s / 2π
 ϕ_vortex(p_source)
 
 import MechanicalSketch.gradient_complex_quantity_in
-
-gradient_complex_quantity_in(ϕ_vortex)
-
+using BenchmarkTools
+@btime gradient_complex_quantity_in(ϕ_vortex)
+#=
 """
     ϕ(p::ComplexQuantity)
     Z -> R
@@ -149,3 +149,4 @@ end
 ϕ_vortex_xvec((0.1, 0.2)m)
 
 gradient(ϕ_vortex_xvec, [(0.1, 0.2)m, (0.2, 0.23)m])
+=#
