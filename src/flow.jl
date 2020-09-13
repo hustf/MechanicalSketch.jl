@@ -5,6 +5,7 @@ need extending outside T<:Real
 """
 const ComplexQuantity = Quantity{<:Complex}
 const RealQuantity = Quantity{<:Real}
+
 QuantityTuple(z::ComplexQuantity) =  reim(z)
 ComplexQuantity(p::QuantityTuple) = complex(p[1] , p[2])
 +(p1::Point, shift::ComplexQuantity) = p1 + QuantityTuple(shift)
@@ -17,6 +18,7 @@ end
 
 """
     generate_complex_potential_source(; pos = ComplexQuantity((0.0, 0.0)m)::ComplexQuantity, massflowout = 1.0m²/s)
+    -> f::Z->R
 
 We find the velocity potential function of a source or sink by realizing that
 ´´´
@@ -35,21 +37,23 @@ can be defined as we want. With the limitation above:
     ϕ = ∫ q / (2πr) dr = q / (2πr) · ∫ 1 / r dr = q / (2πr) · ln(r)
 ´´´
 """
-function generate_complex_potential_source(; pos = ComplexQuantity((0.0, 0.0)m)::ComplexQuantity, massflowout = 1.0m²/s)
+function generate_complex_potential_source(; pos = complex(0.0, 0.0)m, massflowout = 1.0m²/s)
     # Note: log means natural logarithm, not log10
     #
     # Note: natural logarithm of a quantity gives no meaning. We can drop the unit as long as we
     # use the scalar consistently.
+    @assert massflowout != zero(massflowout)
+    # Would call this ϕ_s(p)
     (p::ComplexQuantity) -> begin
         Δp = p - pos
         r = norm(Δp)
-        massflowout ∙ log(r / m) / (2π)
+        massflowout ∙ log(r / oneunit(r)) / (2π)
     end
 end
 
-
 """
     generate_complex_potential_vortex(; pos = ComplexQuantity((0.0, 0.0)m)::ComplexQuantity, vorticity= 1.0m²/s)
+    -> f::Z->R
 
 We find the velocity potential function of a vortex by realizing that
 ´´´
@@ -63,15 +67,16 @@ velocity along the velocity gradient. The sign and endpoint of the integration
 can be defined as we want. With the limitation above:
 ´´´
 XXX    u_θ  = ∇ϕ = δu_θ / δr
-    ⇑
+XXX TODO    ⇑
 XXX    ϕ = ∫ K / r dr = K  · ∫ 1 / r dr = q / (2πr) · ln(r)
 ´´´
 """
-function generate_complex_potential_vortex(; pos = ComplexQuantity((0.0, 0.0)m)::ComplexQuantity, vorticity = 1.0m²/s)
+function generate_complex_potential_vortex(; pos = complex(0.0, 0.0)m, vorticity = 1.0m²/s)
+    # Would call this ϕ_v(p)
     (p::ComplexQuantity) -> begin
         Δp = p - pos
-        Θ = angle(Δp)
-        -vorticity ∙ Θ
+        Θ = -angle(Δp)
+        vorticity ∙ Θ
     end
 end
 
@@ -84,31 +89,24 @@ quantities_at_pixels(function_complex_argument;
     height_relative_width = 1 / 3)
 
 Return a matrix where each element contains
-   pixel position |> physical position |> complex valued position |> function value
+   pixel position |> physical position |> complex valued position |> complex value
 """
 function quantities_at_pixels(function_complex_argument;
-    physwidth = 20m,
-    width_relative_screen = 2 / 3,
-    height_relative_width = 1 / 3)
+    physwidth = 20.0,
+    width_relative_screen = 2.0 / 3,
+    height_relative_width = 1.0 / 3)
 
     physheight = physwidth * height_relative_width
 
     # Discretize per pixel
-    nx = round(Int, W * width_relative_screen)
-    ny = round(Int, nx * height_relative_width)
+    nx = round(Int64, W * width_relative_screen)
+    ny = round(Int64, nx * height_relative_width)
     # Iterators for each pixel relative to the center, O
-    pixiterx = (1:nx) .- (nx + 1)  / 2
-    pixitery = (1:ny) .- (ny + 1) / 2
+    pixiterx = (1 - div(nx + 1, 2):(nx - div(nx, 2)))
+    pixitery = (1 - div(ny + 1, 2):(ny - div(ny, 2)))
 
-    # Iterators for each pixel mapped to physical dimension
-    iterx = pixiterx * SCALEDIST
-    itery = pixitery * -SCALEDIST
-
-    # Matrix of physical position, one per pixel
-    plane_coordinates = [(ix, iy) for iy = itery, ix = iterx]
-
-    # Matrix of plot quantity, one per pixel
-    map(qt -> function_complex_argument(ComplexQuantity(qt)), plane_coordinates)
+    # # Matrix of plot quantity, one per pixel
+    [function_complex_argument(complex(ix * SCALEDIST, -iy * SCALEDIST)) for iy = pixitery, ix = pixiterx]
 end
 
 absolute_scale() = ColorSchemes.linear_grey_10_95_c0_n256
@@ -320,41 +318,4 @@ function draw_complex_legend(p::Point, min_abs_quantity::T, max_abs_quantity::T,
     draw_header(upleft + (0.0, - FS / 3 ), [pixelwidth(strangles)], [strangles])
     # Print magnitude text
     text_table(p, Legend = legendvalues)
-end
-
-## Automatic differentiation with units, using some internal functions for the legwork
-## of stripping and adding units appropriately. The alternative would be to extending
-## the automatic differentiation package to support complex numbers with units.
-"Internal function generator used by 'generate_∇_R2_to_R2_unitless_function'"
-function generate_R2_to_R2_unitless_function_from_Z_to_Z_function(fz, unitin_fz, unitout_fz)
-    p::Vector -> fz(complex(p[1]∙unitin_fz, p[2]∙unitin_fz)) / unitout_fz
-end
-
-"Internal function generator used by 'generate_∇fz_Z_to_Z_from_fz'"
-function generate_∇_R2_to_R2_unitless_function_from_Z_to_Z_function(fz, unitin_fz, unitout_fz)
-    R2_to_R2_unitless_function = generate_R2_to_R2_unitless_function_from_Z_to_Z_function(fz, unitin_fz,  unitout_fz)
-    p::Vector ->  gradient(R2_to_R2_unitless_function, p)
-end
-"""
-    generate_∇fz_Z_to_Z_from_fz(fz, typein_fz::Type, typeout_fz::Type)
-
-Using ForwardDiff, this function wraps the process of removing units, finding the gradient
-and replacing the proper units.
-
-Example:
-typein_fz: typeof(a typical unitful quantity used to evaluate fz)
-typeout_fz: typeof(a typical unitful quantity produced by fz)
-
-The generated gradient function will have units 'units_in / units_out'.
-"""
-function generate_∇fz_Z_to_Z_from_fz(fz, typein_fz::Type, typeout_fz::Type)
-    unitin = oneunit(typein_fz)
-    unitout = oneunit(typeout_fz)
-    ∇_R2_to_R2_unitless_function = generate_∇_R2_to_R2_unitless_function_from_Z_to_Z_function(fz, unitin, unitout)
-    p::ComplexQuantity -> begin
-        unitless_vector = [real(p/unitin), imag(p/unitin)]
-        unitless_result = ∇_R2_to_R2_unitless_function(unitless_vector)
-        quantity_vector = unitless_result∙unitout / unitin
-        complex(quantity_vector[1], quantity_vector[2])
-    end
 end

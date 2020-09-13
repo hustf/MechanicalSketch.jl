@@ -117,8 +117,7 @@ get_current_redvalue, get_current_greenvalue, get_current_bluevalue, weighted_co
 Colors, parse
 
 using MechanicalUnits
-import MechanicalUnits.Unitfu.Power
-import MechanicalUnits.Unitfu.oneunit
+import MechanicalUnits.Unitfu: Power, oneunit, numtype
 @import_expand kW # Don't use ~ since that would also import W, which we use elsewhere.
 
 import LinearAlgebra: norm
@@ -130,7 +129,7 @@ import ColorSchemes: HSL, HSLA, RGB, RGBA, HSV, LCHuv, LCHuvA
 import Base: -, +, *, /, abs
 import Colors: @colorant_str
 import FileIO: @format_str, File, save
-import ForwardDiff: gradient
+import ForwardDiff
 export Drawing, empty_figure,
     color_from_palette,
     color_with_luminance,
@@ -275,5 +274,6 @@ include("power.jl")
 include("table.jl")
 include("curves.jl")
 include("flow.jl")
+include("autodiff_unitfu.jl")
 
 end # module
