@@ -30,8 +30,8 @@ q_source = 1.0m²/s
 physwidth = 20m
 height_relative_width = 1 / 3
 physheight = physwidth * height_relative_width
-A = quantities_at_pixels(ϕ_source, 
-    physwidth = physwidth, 
+A = quantities_at_pixels(ϕ_source,
+    physwidth = physwidth,
     height_relative_width = height_relative_width);
 upleftpoint, lowrightpoint = draw_color_map(O, A)
 

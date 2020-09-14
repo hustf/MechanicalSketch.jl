@@ -28,8 +28,8 @@ physwidth = 2.2m
 height_relative_width = 1 / 1
 physheight = physwidth * height_relative_width
 setscale_dist(1.1physwidth / H)
-A = quantities_at_pixels(foo, 
-    physwidth = physwidth, 
+A = quantities_at_pixels(foo,
+    physwidth = physwidth,
     height_relative_width = height_relative_width);
 upleftpoint, lowrightpoint = draw_color_map(O, A)
 

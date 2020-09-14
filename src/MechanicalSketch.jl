@@ -130,6 +130,8 @@ import Base: -, +, *, /, abs
 import Colors: @colorant_str
 import FileIO: @format_str, File, save
 import ForwardDiff
+import StaticArrays
+import StaticArrays: SA, SVector
 export Drawing, empty_figure,
     color_from_palette,
     color_with_luminance,

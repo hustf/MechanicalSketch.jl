@@ -6,11 +6,11 @@ Output:
 where
     Q = Quantity
     CQ = ComplexQuantity
-    Q² = Vector{Quantity{T, D, U}} where {T, D, U})
+    Q² = SVector{2, Quantity{T, D, U}} where {T <: Real, D, U})
 """
 function generate_Q²_to_Q_from_CQ_to_Q(CQ_to_Q)
-    (p::Vector{Quantity{T, D, U}} where {T, D, U}) -> begin
-        CQ_to_Q(complex(p[1], p[2]))
+    function λ1(p::SVector{2, Quantity{T, D, U}}) where {T, D, U}
+        CQ_to_Q(complex(p[1], p[2]))::Quantity{T}
     end
 end
 
@@ -21,12 +21,12 @@ Output:
     f: R²  → Q
 where
     Q = Quantity
-    Q² = Vector{Quantity{T, D, U}} where {T, D, U})
-    R² = Vector{<:Real}
+    Q² = SVector{2, Quantity{T, D, U}} where {T <: Real, D, U})
+    R² = SVector{2, <:Real}
 """
 function generate_R²_to_Q_from_Q²_to_Q(Q²_to_Q, one_q_in::Quantity)
-    (p::Vector{<:Real}) -> begin
-        Q²_to_Q(p∙one_q_in)
+    function λ2(p::SVector{2, T}) where {T}
+        Q²_to_Q(p∙one_q_in)::Quantity{T}
     end
 end
 
@@ -37,61 +37,82 @@ Output:
     f: R²  → R
 where
     Q = Quantity
-    R² = Vector
+    R² = SVector{2, <:Real}
+    R  <: Real
 """
 function generate_R²_to_R_from_R²_to_Q(R²_to_Q)
-    (p::Vector{<:Real})-> begin
-        R²_to_Q(p) / oneunit(R²_to_Q(p))
+    function λ3(p::SVector{2, T}) where {T}
+        q = R²_to_Q(p)
+        (q / oneunit(q))::T
     end
 end
 
 """
 Input:
-    f: CQ  → Q, one_q_in
+    f: R² → R, one_q_in
+    ulxy:: R², all unitless coordinates for which we want the gradient
+    one_q_out    One unit of the output quantity
 Output:
-    f: R²  → R
+    CQ²    A matrix of complex output quantitities, i.e. gradients with units.
 where
-    Q = Quantity
+    Q = Quantity{complex or dual}
     CQ = ComplexQuantity
     R² = Vector{<:Real}
 """
-
-function gradient_real_in_CQ_out(R²_to_R, ulxy, one_q_out)
+function ∇_R²_in_CQ_out(R²_to_R, ulxy, one_q_out::Quantity{T}) where {T}
     chnk = ForwardDiff.Chunk{2}()
     cfg = ForwardDiff.GradientConfig(R²_to_R, ulxy[1,1], chnk)
-    #D = ForwardDiff.DiffResults.DiffResult()
-    # 398 ms, 336Mb
-    out = similar(ulxy)
+    # Note could be sped up using in-place evaluation, but would need to drop StaticArrays.
     map(ulxy) do ul
-        r² = ForwardDiff.gradient(R²_to_R, ul, cfg, Val{false}())::Vector{Float64}
+        r² = ForwardDiff.gradient(R²_to_R, ul, cfg, Val{false}())::SVector{2, T}
         complex(r²[1]*one_q_out, r²[2]∙one_q_out)
     end
 end
-function gradient_quantities(CQ_to_Q, xyq::Array{Vector{S}}) where {S<:Quantity{T}} where T
-    # 362 ms, 316 Mb
-    # 334 ms, 316 Mb
-    q_in_first = complex(xyq[firstindex(xyq)]...)
-    one_q_in = oneunit(eltype(xyq[firstindex(xyq)]))
-    one_q_value = oneunit(CQ_to_Q(q_in_first))
-    typeout = typeof(one_q_value / one_q_in)
-    typecout = typeof(complex(one_q_value / one_q_in, one_q_value / one_q_in))
-    ulxy = xyq / one_q_in
 
-    #389.962 ms (3803545 allocations: 316.44 MiB)
+
+"""
+    ∇_matrix(CQ_to_Q, xyq::Array{SVector{2, R}} where {R<:Quantity{T}} where T
+    → CQ²    A matrix of complex output quantitities, i.e. gradients with units.
+where
+    CQ_to_Q: CQ  → Q
+    other parameters define the points for which to evaluate the gradient ∇ of function CQ_to_Q
+where
+    CQ is a complex valued Quantity (a coordinate in a vector field, or a vector at a point)
+    Q is a real valued Quantity
+
+Calculates the gradient given a matrix of coordinates. Coordinates are complex valued quantities.
+Normally used by ∇_rectangle
+"""
+function ∇_matrix(CQ_to_Q, xyq::AbstractArray{SVector{2, R}}) where {R<:Quantity{T}} where T
+    q_in_first = complex(first(xyq)[1], first(xyq)[2])
+    one_q_in = oneunit(eltype(first(xyq)))
+    one_q_value = oneunit(CQ_to_Q(q_in_first))
+    ulxy = xyq / one_q_in
+    # Make a wrapper function to make ForwardDiff work with complex quantities
+    # Do it in several steps to make the compiler understand
     Q²_to_Q = generate_Q²_to_Q_from_CQ_to_Q(CQ_to_Q)
     R²_to_Q = generate_R²_to_Q_from_Q²_to_Q(Q²_to_Q, one_q_in)
     R²_to_R = generate_R²_to_R_from_R²_to_Q(R²_to_Q)
-    # 394 ms due to T
-    # 340 ms
-    #map(gradient_real_in_out(R²_to_R, ulxy)) do (x, y)
-    #    complex(x,y)∙one_q_value
-    #end
-    # 334 ms, 312 Mb
-    
-    gradient_real_in_CQ_out(R²_to_R, ulxy, one_q_value / one_q_in )
+    # Take the gradient of real-valued, non-quantity functions and then add units again.
+    ∇_R²_in_CQ_out(R²_to_R, ulxy, one_q_value / one_q_in )
 end
 
-function gradient_complex_quantity_in(CQ_to_Q;
+"""
+    ∇_rectangle(CQ_to_Q;
+        physwidth = 20.0,
+        width_relative_screen = 2.0 / 3,
+        height_relative_width = 1.0 / 3)
+    → CQ²    A matrix of complex output quantitities, i.e. gradients with units.
+where
+    CQ_to_Q: CQ  → Q
+    other parameters define the points for which to evaluate the gradient ∇ of function CQ_to_Q
+where
+    CQ is a complex valued Quantity (a coordinate in a vector field, or a vector at a point)
+    Q is a real valued Quantity
+
+Calculates the gradient given the extents of a rectangle and how they relate to screen pixels.
+"""
+function ∇_rectangle(CQ_to_Q;
     physwidth = 20.0,
     width_relative_screen = 2.0 / 3,
     height_relative_width = 1.0 / 3)
@@ -105,7 +126,7 @@ function gradient_complex_quantity_in(CQ_to_Q;
     pixiterx = (1 - div(nx + 1, 2):(nx - div(nx, 2)))
     pixitery = (1 - div(ny + 1, 2):(ny - div(ny, 2)))
 
-    # Matrix of 2-element vectors, one per pixel
-    xyq = [[ix * SCALEDIST, -iy * SCALEDIST] for iy = pixitery, ix = pixiterx]
-    gradient_quantities(CQ_to_Q, xyq)
+    # Matrix of 2-element static vectors, one per pixel
+    xyq = [SA[ix * SCALEDIST, -iy * SCALEDIST] for iy = pixitery, ix = pixiterx]
+    ∇_matrix(CQ_to_Q, xyq)
 end

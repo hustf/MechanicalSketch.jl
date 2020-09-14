@@ -68,3 +68,6 @@ end end
 @testset "22" begin let
     include("test_22.jl")
 end end
+@testset "23" begin let
+    include("test_23.jl")
+end end
