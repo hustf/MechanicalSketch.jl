@@ -1,13 +1,12 @@
 using MechanicalSketch
-import MechanicalSketch: °, background, sethue, O, finish,
+import MechanicalSketch: °, background, sethue, O, PT, EM, finish,
       color_from_palette, color_with_luminance,
-      m, dimension_aligned, EM, PT, °, kN, mm, kg,
-      m, m², m³, s, N, kN, kPa, rad, g,
-      arrow, drawcart, circle, label, foil_draw,
-      PositionTuple, line, preview, showpower
-import MechanicalSketch: rope_pos_tension, SCALEDIST, setline, ustrip, kW
+      m, °, kN, mm,
+      m, m², m³, s, N, kN, kPa, g, kg,
+      arrow, drawcart, circle, foil_draw,
+      line, showpower
+import MechanicalSketch: rope_pos_tension, SCALEDIST, setline, kW
 
-using LinearAlgebra
 let
 BACKCOLOR = color_with_luminance(PALETTE[8], 0.7);
 function restart()
@@ -64,7 +63,7 @@ w_generated = (-v_cart, 0m/s)
 w_rel = w + w_generated
 
 "Relative wind velocity"
-v = norm(w_rel)
+v = hypot(w_rel)
 
 "Relative wind direction to screen x-axis"
 α_w_rel = atan(w_rel[2], w_rel[1]) |> °
@@ -127,7 +126,7 @@ ps =  map(p-> p + p_foil, psf);
 Δ = ps[end-1] - ps[end]
 
 "Unit vector, rope end"
-eΔ = Δ ./ norm(Δ)
+eΔ = Δ ./ hypot(Δ)
 
 "Force vector, rope end"
 Fc = eΔ .* Ts[end]
@@ -171,7 +170,7 @@ sethue(color_with_luminance(color_from_palette("blue"), 0.7))
 arrow(O + p + 0.5w_rel , w_rel,
     backgroundcolor = BACKCOLOR,
     labellength = true)
-    
+
 
 # Draw the foil
 sethue(color_from_palette("blue"))

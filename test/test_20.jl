@@ -1,15 +1,16 @@
 import MechanicalSketch
-import MechanicalSketch: color_with_luminance, empty_figure, background, sethue, O, W, H, EM, FS, finish, Point,
-       PALETTE, color_from_palette, setopacity
-import MechanicalSketch: SCALEDIST,  dimension_aligned, settext, arrow, placeimage, readpng, setfont, gsave, grestore
+import MechanicalSketch: color_with_luminance, empty_figure, background, sethue, O, WI, HE, EM, FS, finish,
+       PALETTE
+import MechanicalSketch: dimension_aligned, settext, arrow, placeimage, readpng, setfont, gsave, grestore
 import MechanicalSketch: ComplexQuantity, generate_complex_potential_source, @import_expand, string_polar_form
 import MechanicalSketch: quantities_at_pixels, draw_color_map, draw_real_legend
 
+let
 if !@isdefined m²
     @import_expand m # Will error if m² already is in the namespace
     @import_expand s
 end
-let
+
 BACKCOLOR = color_with_luminance(PALETTE[8], 0.8)
 function restart()
     empty_figure(joinpath(@__DIR__, "test_20.png"))
@@ -39,6 +40,7 @@ upleftpoint, lowrightpoint = draw_color_map(O, A)
 sethue(color_with_luminance(PALETTE[5], 0.3))
 dimension_aligned(O + (-physwidth / 2, physheight / 2), O + (physwidth / 2, physheight / 2))
 dimension_aligned(O + p_source, O + (-7.5 + 1.0im)m)
+dimension_aligned(O + (-physwidth / 2, - physheight / 2 ),  O +  (-physwidth / 2, physheight / 2 ))
 
 begin # Leader for a value
     p0 = (-7.5 + 1.0im)m

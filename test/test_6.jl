@@ -1,8 +1,7 @@
-push!(LOAD_PATH, pwd())
 using MechanicalSketch
 import MechanicalSketch: sethue, background, foil_spline_local, boxtopleft, boxtopright,
-    boxbottomright, boxbottomleft, BoundingBox, m, mm, °, polyrotate!, polymove!,
-    O, poly, luminance, EM, get_current_luminance, get_current_RGB, gsave, grestore,
+    BoundingBox, m, mm, °, polyrotate!, polymove!,
+    O, EM, poly, luminance, get_current_luminance, get_current_RGB, gsave, grestore,
     color_with_luminance
 let
 BACKCOLOR = color_with_luminance(PALETTE[8], 0.7)

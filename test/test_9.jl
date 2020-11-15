@@ -1,6 +1,6 @@
 using MechanicalSketch
-import MechanicalSketch: °, background, sethue, O, finish,
-      m, color_with_luminance, PT, drawcart, setline
+import MechanicalSketch: °, background, sethue, O, PT, finish,
+      m, color_with_luminance, drawcart, setline, circle
 let
 BACKCOLOR = color_with_luminance(PALETTE[3], 0.7)
 function restart()

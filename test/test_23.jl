@@ -1,9 +1,9 @@
 import MechanicalSketch
-import MechanicalSketch: color_with_luminance, empty_figure, background, sethue, O, W, H, EM, FS, finish, Point,
-       PALETTE, color_from_palette, setfont, settext
+import MechanicalSketch: color_with_luminance, background, O, WI, HE, EM, FS, finish,
+       PALETTE, color_from_palette, setfont, settext, empty_figure, sethue
 import MechanicalSketch: dimension_aligned
 import MechanicalSketch: ComplexQuantity, generate_complex_potential_source, generate_complex_potential_vortex
-import MechanicalSketch: @import_expand, norm
+import MechanicalSketch: @import_expand
 import MechanicalSketch: quantities_at_pixels, draw_color_map, draw_real_legend, draw_complex_legend, setscale_dist, lenient_min_max
 import MechanicalSketch: ∙, ∇_rectangle
 
@@ -43,26 +43,28 @@ K = 1.0m²/s / 2π
 ϕ(p) = ϕ_vortex(p) + ϕ_source(p) + ϕ_sink(p)
 
 ϕ(p_source)
-ϕ(p_vortex+p_source)
+ϕ(p_vortex + p_source)
 
 # Plot the real-valued function
-physwidth = 5.0m
+physwidth = 10.0m
 height_relative_width = 0.4
 physheight = physwidth * height_relative_width
-setscale_dist(3.0physwidth / W)
+screen_width_frac = 2 / 3
+setscale_dist(physwidth / (screen_width_frac * WI))
 A = quantities_at_pixels(ϕ,
     physwidth = physwidth,
     height_relative_width = height_relative_width);
-upleftpoint, lowrightpoint = draw_color_map(O + (0.0, -0.25H + EM), A)
+OT = O + (0.0, -0.25HE + EM)
+upleftpoint, lowrightpoint = draw_color_map(OT, A)
 legendpos = lowrightpoint + (EM, 0) + (0.0m, physheight)
 ma = maximum(A)
 mi = minimum(A)
 ze = zero(typeof(ma))
-legendvalues = reverse(sort([ma, mi, ze]))
+legendvalues = reverse(sort([ma, (ma + mi) / 2, ze]))
 draw_real_legend(legendpos, mi, ma, legendvalues)
 setfont("DejaVu Sans", FS)
 str = "ϕ: Z ↣ R  is the flow potenial"
-settext(str, O + (-W/2 + EM, -0.5H + 2EM), markup = true)
+settext(str, O + (-WI/2 + EM, -0.5HE + 2EM), markup = true)
 setfont("Calibri", FS)
 
 
@@ -72,14 +74,15 @@ B = begin
             physwidth = physwidth,
             height_relative_width = height_relative_width);
         map(unclamped) do u
-            norm(u) > 0.5m/s ? NaN∙u : u
+            hypot(u) > 0.5m/s ? NaN∙u : u
         end
     end
 
-upleftpoint, lowrightpoint = draw_color_map(O + (0.0, + 0.25H + 0.5EM ), B)
+OB = O + (0.0, + 0.25HE + 0.5EM )
+upleftpoint, lowrightpoint = draw_color_map(OB, B)
 setfont("DejaVu Sans", FS)
 str = "∇ϕ: Z ↣ Z  is the flow gradient, aka velocity vectors"
-settext(str, O + (-W/2 + EM, 1.5EM), markup = true)
+settext(str, O + (-WI/2 + EM, 1.5EM), markup = true)
 setfont("Calibri", FS)
 
 legendpos = lowrightpoint + (0.0m, physheight)
@@ -89,6 +92,9 @@ mea = (mi + ma) / 2
 legendvalues = reverse(sort([ma, mi, mea]))
 draw_complex_legend(legendpos, mi, ma, legendvalues)
 
+dimension_aligned(OB + (-physwidth / 2, physheight / 2), OB + (physwidth / 2, physheight / 2))
+dimension_aligned(OB + p_vortex, OB)
+dimension_aligned(OB + (-physwidth / 2, - physheight / 2 ),  OB +  (-physwidth / 2, physheight / 2 ))
 
 finish()
 end #let

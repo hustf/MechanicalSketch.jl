@@ -1,6 +1,6 @@
 using MechanicalSketch
-import MechanicalSketch: get, getinverse, textextents,  Point, rect, arrow,
-    EM, TXTOFFV, weighted_color_mean, O, PT, setline, Point, W, H,
+import MechanicalSketch: Point, rect, arrow, line,
+    EM, TXTOFFV, O, PT, Point, WI, HE,
     RGB, HSL, color_with_lumin2, background, sethue, text, fontsize,
     settext, setfont, setopacity, FS
 
@@ -22,12 +22,12 @@ let
     end
     setopacity(1)
     ncol = length(PALETTE)
-    dw =  W / ncol
+    dw =  WI / ncol
     for i = 1:ncol
-        posy = -H/2
+        posy = -HE/2
         curcol = PALETTE[i]
         sethue(curcol)
-        xs = -W/2 + (i-1) * dw
+        xs = -WI/2 + (i-1) * dw
         ps = Point(xs, posy)
         rect( ps, dw, EM, :fill)
         sethue("white")

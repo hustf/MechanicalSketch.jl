@@ -59,15 +59,30 @@ end end
 @testset "19" begin let
     include("test_19.jl")
 end end
-@testset "20" begin let
+@time @testset "20" begin let
     include("test_20.jl")
 end end
-@testset "21" begin let
+@time @testset "21" begin let
     include("test_21.jl")
 end end
-@testset "22" begin let
+@time @testset "22" begin let
     include("test_22.jl")
 end end
-@testset "23" begin let
+@time @testset "23" begin let
     include("test_23.jl")
+end end
+@time @testset "24" begin let
+    include("test_24.jl")
+end end
+@time @testset "25" begin let
+    include("test_25.jl")
+end end
+@time @testset "26" begin let
+    include("test_26.jl")
+end end
+@time @testset "27" begin let
+    include("test_27.jl")
+end end
+@time @testset "28" begin let
+    include("test_28.jl")
 end end

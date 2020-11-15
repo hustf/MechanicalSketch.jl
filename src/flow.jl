@@ -11,7 +11,7 @@ ComplexQuantity(p::QuantityTuple) = complex(p[1] , p[2])
 +(p1::Point, shift::ComplexQuantity) = p1 + QuantityTuple(shift)
 
 function string_polar_form(z::ComplexQuantity)
-    strarg_r = string(round(typeof(norm(z)), norm(z), digits = 3))
+    strarg_r = string(round(typeof(hypot(z)), hypot(z), digits = 3))
     strarg_θ = string(round(angle(z), digits = 3))
     strargument = strarg_r * "∙exp(" * strarg_θ * "im)"
 end
@@ -46,7 +46,7 @@ function generate_complex_potential_source(; pos = complex(0.0, 0.0)m, massflowo
     # Would call this ϕ_s(p)
     (p::ComplexQuantity) -> begin
         Δp = p - pos
-        r = norm(Δp)
+        r = hypot(Δp)
         massflowout ∙ log(r / oneunit(r)) / (2π)
     end
 end
@@ -99,7 +99,7 @@ function quantities_at_pixels(function_complex_argument;
     physheight = physwidth * height_relative_width
 
     # Discretize per pixel
-    nx = round(Int64, W * width_relative_screen)
+    nx = round(Int64, WI * width_relative_screen)
     ny = round(Int64, nx * height_relative_width)
     # Iterators for each pixel relative to the center, O
     pixiterx = (1 - div(nx + 1, 2):(nx - div(nx, 2)))
@@ -114,12 +114,12 @@ complex_arg0_scale() = ColorSchemes.linear_ternary_red_0_50_c52_n256
 
 
 """
-Returns (min, max) of norm(A), which often is the relevant
+Returns (min, max) of hypot(A), which often is the relevant
 magnitude for complex numbers. But would hide information for
 real-valued A.
 """
 function lenient_min_max_complex(A::AbstractArray)
-    magnitude = norm.(A)
+    magnitude = hypot.(A)
     extrema(filter(!isnan, magnitude))
 end
 
@@ -135,7 +135,7 @@ lenient_min_max(A::AbstractArray{<:RealQuantity}) = extrema(filter(x-> !isnan(x)
 lenient_min_max(A::AbstractArray{<:Real}) = extrema(filter(x-> !isnan(x) && !isinf(x), A))
 lenient_min_max(A) = lenient_min_max_complex(A)
 
-normalizereal(mi, ma, A) = map(A) do x
+normalize_datarange_real(mi, ma, A) = map(A) do x
     if isnan(x) || isinf(x)
         1.0
     else
@@ -143,28 +143,33 @@ normalizereal(mi, ma, A) = map(A) do x
     end
 end
 
-normalizecomplex(mi, ma, A) = map(A) do x
+normalize_datarange_complex(mi, ma, A) = map(A) do x
     if isnan(x) || isinf(x)
         1.0
     else
-        (norm(x) - mi) / (ma - mi)
+        (hypot(x) - mi) / (ma - mi)
     end
 end
+"""
+    normalize_datarange(A)
 
-function normalize(A::AbstractArray{<:RealQuantity})
+normalize the elements in matrix A from 0 to 1 or equivalient depending on type.
+This includes complex values, in which case the magnitude is normalize_datarange_datarange_datarange_datarange_datarange_dataranged.
+"""
+function normalize_datarange(A::AbstractArray{<:RealQuantity})
     # Minimum and maximum value
     mi, ma = lenient_min_max(A)
-    normalizereal(mi, ma, A)
+    normalize_datarange_real(mi, ma, A)
 end
-function normalize(A::AbstractArray{<:Real})
+function normalize_datarange(A::AbstractArray{<:Real})
     # Minimum and maximum value
     mi, ma = lenient_min_max(A)
-    normalizereal(mi, ma, A)
+    normalize_datarange_real(mi, ma, A)
 end
-function normalize(A)
+function normalize_datarange(A)
     # Minimum and maximum magnitude
     mi, ma = lenient_min_max(A)
-    normalizecomplex(mi, ma, A)
+    normalize_datarange_complex(mi, ma, A)
 end
 
 
@@ -203,16 +208,17 @@ function color_matrix(qua::AbstractArray)
     valid_element = map(x-> isnan(x) || isinf(x) ? false : true, qua)
 
      # Map value or magnitude to [0.0, 1.0], invalid elements are 1.0
-    norm_values = normalize(qua)
+    norm_values = normalize_datarange(qua)
 
     # Map [0.0, 1.0] to perceived luminosity color map
-    color_values = if eltype(qua) <: RealQuantity
+    color_values = if eltype(qua) <: RealQuantity || eltype(qua) <: Real
         get(absolute_scale(), norm_values)
     else
+        # Complex quanitity
         get(complex_arg0_scale(), norm_values)
     end
     # If input is complex
-    if !(eltype(qua) <: RealQuantity)
+    if !(eltype(qua) <: RealQuantity || eltype(qua) <: Real)
         # Set hue from complex argument (angle)
         # while not changing perceived luminance
         hue_from_complex_argument!(color_values, qua)
@@ -271,7 +277,11 @@ function draw_real_legend(p::Point, min_quantity, max_quantity, legendvalues)
         colo = get(absolute_scale(), dimless)
         sethue(colo)
         box(p + (0.0, i * rowhe), p + (EM, (i + 1 ) * rowhe ), :fillpreserve)
-        strvalue = string(round(typeof(v), v, digits = 3))
+        strvalue = string(if v isa  Quantity
+            round(typeof(v), v, digits = 3)
+        else
+            round(v, digits = 3)
+        end)
     end
     grestore()
     text_table(p, Legend = legendvalues)
@@ -319,3 +329,4 @@ function draw_complex_legend(p::Point, min_abs_quantity::T, max_abs_quantity::T,
     # Print magnitude text
     text_table(p, Legend = legendvalues)
 end
+

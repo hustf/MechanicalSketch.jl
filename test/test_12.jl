@@ -1,13 +1,12 @@
 using MechanicalSketch
-import MechanicalSketch: °, background, sethue, O, finish,
+import MechanicalSketch: °, background, sethue, O, PT, EM, finish,
       color_from_palette, color_with_luminance,
-      m, dimension_aligned, EM, PT, °, kN, mm, kg,
-      m, m², m³, s, N, kN, kPa, rad, g,
-      arrow, drawcart, circle, label, foil_draw,
-      PositionTuple, line, preview, showpower
-import MechanicalSketch: rope_pos_tension, SCALEDIST, setline, ustrip, kW
+      mm, °, kN, kg,
+      m, m², m³, s, N, kN, kPa, g, kW,
+      arrow, drawcart, circle, foil_draw,
+      line, showpower
+import MechanicalSketch: rope_pos_tension, SCALEDIST, setline
 
-using LinearAlgebra
 let
 BACKCOLOR = color_with_luminance(PALETTE[8], 0.7);
 function restart()
@@ -24,6 +23,7 @@ drawcart(p = O +p)
 
 "Wind speed scalar"
 v_w = 10m/s
+
 "Wind velocity vector"
 w = (0m/s, v_w)
 sethue(color_with_luminance(color_from_palette("red"), 0.7))
@@ -45,7 +45,7 @@ arrow(O + p + 0.5w_generated + 2w,
 "Relative wind velocity vector"
 w_rel = w + w_generated
 "Relative wind velocity"
-v = norm(w_rel)
+v = hypot(w_rel)
 sethue(color_with_luminance(color_from_palette("blue"), 0.7))
 arrow(O + p + 0.5w_rel , w_rel,
     backgroundcolor = BACKCOLOR,
@@ -134,7 +134,7 @@ setline(0.5PT)
 "Tangent at rope end"
 Δ = ps[end-1] - ps[end]
 "Unit vector, rope end"
-eΔ = Δ ./ norm(Δ)
+eΔ = Δ ./ hypot(Δ)
 "Force vector, rope end"
 Fc = eΔ .* Ts[end]
 sethue(PALETTE[5])

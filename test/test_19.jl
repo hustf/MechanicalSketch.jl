@@ -1,9 +1,8 @@
 import MechanicalSketch
-import MechanicalSketch: color_with_luminance, empty_figure, background, sethue, O, W, H, finish, Point,
-    PALETTE, color_from_palette, setopacity
-import MechanicalSketch: m, scale
+import MechanicalSketch: color_with_luminance, color_from_palette, empty_figure, background, sethue, O, finish
+import MechanicalSketch: PALETTE, m
 import MechanicalSketch: circle, ellipse, squircle
-import MechanicalSketch: box, clipreset, readpng, placeimage
+import MechanicalSketch: box, clipreset, readpng, placeimage, setopacity
 
 let
 BACKCOLOR = color_with_luminance(PALETTE[8], 0.8);

@@ -28,7 +28,11 @@ end
         --> Value of same numeric type as quantity
 """
 function rounded_stripped(quantity, digits)
-    rounded = round(typeof(quantity), quantity, digits = digits)
+    rounded = if quantity isa  Quantity
+        round(typeof(quantity), quantity, digits = digits)
+    else
+        round(quantity, digits = digits)
+    end
     ustrip(rounded)
 end
 

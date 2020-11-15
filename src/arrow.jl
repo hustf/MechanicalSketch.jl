@@ -4,7 +4,7 @@
 Draw a single force arrow with filled head.
 
     p        starting position.
-    v        scalar force.
+    f        scalar force quantity.
     α = 0°   is direction to the right, positive values rotate around z axis.
 
 """
@@ -12,14 +12,24 @@ arrow(p::Point, f::F; kwargs...) where F <: Force = arrow(p, f, 0 * f; kwargs...
 
 
 """
-    arrow(p::Point, F::ForceTuple; kwargs...)
+    arrow(p::Point, f::ForceTuple; kwargs...)
 
 Draw a single velocity arrow - no filled arrow head.
 
 p     starting position (at the normal between vanes tip and arrow spine)
-F     is a 2-tuple here, but you can optionally rotate the x-axis by keyword argument α.
+F     is a force tuple referred to an x-axis which can optionally be rotated around z by
+      keyword argument α.
+components = false: No components forces on the x and y axes are drawn.
 """
-arrow(p::Point, f::ForceTuple; kwargs...) = arrow(p, f[1], f[2]; kwargs...)
+function arrow(p::Point, f::ForceTuple; components = true, kwargs...)
+    if !components
+        αcalc = atan(f[2], f[1]) |> rad |> °
+        F = hypot(f)
+        arrow(p, F, 0.0 * f[2]; kwargs..., α = αcalc)
+    else
+        arrow(p, f[1], f[2]; kwargs...)
+    end
+end
 
 """
     arrow(p::Point, Fx::F, Fy::F;
@@ -52,17 +62,17 @@ function arrow(p::Point, Fx::F, Fy::F;
     avglumin = (luminback + luminfront) / 2
     curcol = get_current_RGB()
     avgcol = color_with_luminance(curcol, avglumin)
-    # Draw the components, both only if the resultant is not coincident with one of them.
-    if norm(ΔFx) > 0 && norm(ΔFy) > 0
+    # Draw the components, but only if the resultant is not coincident with one of them.
+    if hypot(ΔFx) > 0 && hypot(ΔFy) > 0
         gsave()
         setdash("longdashed")
         deltalumin = luminback - luminfront
         lesscontrast = color_with_luminance(get_current_RGB(), luminfront + deltalumin)
         sethue(lesscontrast)
-        shaftlength = norm(ΔFx)
+        shaftlength = hypot(ΔFx)
         arrowheadlength = shaftlength > 3 * EM ? EM :  shaftlength / 3
         arrow_nofill(p, p + ΔFx, arrowheadlength = arrowheadlength, arrowheadangle = pi/12, linewidth = PT / 2)
-        shaftlength = norm(ΔFy)
+        shaftlength = hypot(ΔFy)
         arrowheadlength = shaftlength > 3 * EM ? EM :  shaftlength / 3
         arrow_nofill(p, p + ΔFy, arrowheadlength = arrowheadlength, arrowheadangle = pi/12, linewidth = PT / 2)
         grestore()
@@ -70,11 +80,18 @@ function arrow(p::Point, Fx::F, Fy::F;
 
     # Draw the resultant arrow
     endpoint = p + ΔF
-    shaftlength = norm(ΔF)
+    shaftlength = hypot(ΔF)
     arrowheadlength = shaftlength > 3 * EM ? EM :  shaftlength / 3
-    arrow(p, endpoint, arrowheadlength = arrowheadlength, arrowheadangle = pi/12, linewidth = PT)
+    if !isapprox(shaftlength, 0.0)
+        arrow(p, endpoint, arrowheadlength = arrowheadlength, arrowheadangle = pi/12, linewidth = PT)
+    else
+        # with shaft length approximately zero, draw two opposing arrows with minimum possible shaft lengths
+        tiny = oneunit(shaftlength) # almost zero
+        arrow(p + ( tiny, 0), endpoint, arrowheadlength = arrowheadlength, arrowheadangle = pi/12, linewidth = PT)
+        arrow(p + (-tiny, 0), endpoint, arrowheadlength = arrowheadlength, arrowheadangle = pi/12, linewidth = PT)
+    end
 
-    # add a label with the euclidean length of the resultant, at the tip of it.
+    # add an optional label with the euclidean length of the resultant, at the tip of it.
     if labellength
         sethue(avgcol)
         fontface("Calibri bold")
@@ -165,7 +182,7 @@ function setlabel(endpoint, vx, vy, α)
     Δvx = (vx * cos(α), vx *sin(α))
     Δvy = (-vy * sin(α), vy *cos(α))
     Δv = Δvx + Δvy
-    l = norm(Δv)
+    l = hypot(Δv)
     rounded = round(typeof(l), l, digits = 1)
     direction = atan(Δv[2], Δv[1]) |> °
     labdir = direction + 90°
@@ -194,7 +211,7 @@ function curved_point_arrow_with_vanes(p, Δv, endpoint, linewidth)
     arrowheadangle = pi/24
 
     isapprox(Δv, Point(0,0)) && throw(error("can't draw velocity arrow between two identical points"))
-    shaftlength = sqrt( Δv.x^2 + Δv.y^2)
+    shaftlength = hypot(Δv)
     arrowheadlength = shaftlength > 3 * EM ? EM :  shaftlength / 3
 
     shaftangle = atan(p.y - endpoint.y, p.x - endpoint.x)
@@ -315,4 +332,3 @@ function arrow_nofill(startpoint::Point, endpoint::Point;
     end
     grestore()
 end
-

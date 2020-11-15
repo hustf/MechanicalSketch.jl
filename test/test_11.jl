@@ -1,8 +1,9 @@
 using MechanicalSketch
-import MechanicalSketch: °, background, sethue, O, finish,
-      m, dimension_aligned, EM
+import MechanicalSketch: °, background, sethue, O, EM, finish,
+      m, dimension_aligned
 using JuMP    # Julia Mathematical Programming language
 using Ipopt   # Nonlinear solver
+
 let
 BACKCOLOR = color_with_luminance(PALETTE[1], 0.7)
 function restart()
@@ -18,6 +19,8 @@ Catenary Problem
 # Based on https://github.com/StaffJoy/jump-examples/blob/master/src/catenary.jl
 =#
 
+# Since Ipopt is a depencency with executables, we don't include it in MechanicalSketch.
+#
 # TODO: Define a subset of Quantity where the numeric type is <:Real. See if that works directly as a variable for JuMP
 
 NP = 20             # number of start and end points of chainlinks

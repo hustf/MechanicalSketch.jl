@@ -1,7 +1,10 @@
 """
-   rope_pos_tension(Ls, Ns, ds, diameter_rope, Cs, ρ_air, v, β₀)
+    rope_pos_tension(dF,Ls, Ns, ds, diameter_rope, Cs, ρ_air, v, β₀)
                     -> Vector{PositionTuple} , Vector{Force}
-Rope positions and tensions, starting at the kite, ending at the cart
+Rope positions and tensions, starting at the unknown position anchor,
+ending at the known position anchor. Should resemble a catenary.
+
+TODO: Currently, rope mass is neglected. Make wind + inerta an input function df(ds, β) -> ForceTuple. Check against catenary.
 
 Ls       scalar length of rope.
 Ns       Number of rope sections (one less than rope nodes).
@@ -29,7 +32,7 @@ function rope_pos_tension(Ls, Ns, diameter_rope, Cs, ρ_air, v, α_w_rel, Fk, α
     β₀  = α_chord + atan(Fk[2], Fk[1]) - π |> °
     x₀, y₀ = 0.0m, 0.0m
     β₋₁ = β₀
-    Ts₀ = norm(Fk) |> N
+    Ts₀ = hypot(Fk) |> N
     curL = 0.0m
     while curL < Ls
         push!(ps, (x₀, y₀))
@@ -43,9 +46,9 @@ function rope_pos_tension(Ls, Ns, diameter_rope, Cs, ρ_air, v, α_w_rel, Fk, α
         # Force vector, buggy end, from force equilibrium
         F₁ = -(F₀ + df)
         # Check that this is actually tension
-        @assert norm(F₀ + F₁) < norm(F₁)  "Failed simple tension check, norm(F₀ + F₁) < norm(F₁) at $curL"
+        @assert hypot(F₀ + F₁) < hypot(F₁)  "Failed simple tension check, hypot(F₀ + F₁) < hypot(F₁) at $curL"
         # Tension, buggy end
-        Ts₁ = norm(F₁)
+        Ts₁ = hypot(F₁)
         # Angle, buggy end
         β₁ = atan(F₁[2], F₁[1]) |> °
         # Averaged angle over span
@@ -96,6 +99,8 @@ dq(diameter_rope, Cs, ρ_air, v, α_w_rel, β) =  0.5ρ_air * Cs * diameter_rope
 
 "
     dF(ds, diameter_rope, Cs, ρ_air, v, β)
+    --> (force_x, force_y)::ForceTuple
+
 Wind load, globally oriented force vector per length of straight rope section
 
 ds scalar length of rope section

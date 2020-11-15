@@ -99,6 +99,7 @@ end
 
 """
     ∇_rectangle(CQ_to_Q;
+        cutoff = NaN,
         physwidth = 20.0,
         width_relative_screen = 2.0 / 3,
         height_relative_width = 1.0 / 3)
@@ -111,8 +112,12 @@ where
     Q is a real valued Quantity
 
 Calculates the gradient given the extents of a rectangle and how they relate to screen pixels.
+
+Optional argument cutoff: In case given, the magnitude (vector length) is limited to that
+value without changing vector direction.
 """
 function ∇_rectangle(CQ_to_Q;
+    cutoff = NaN,
     physwidth = 20.0,
     width_relative_screen = 2.0 / 3,
     height_relative_width = 1.0 / 3)
@@ -120,7 +125,7 @@ function ∇_rectangle(CQ_to_Q;
     physheight = physwidth * height_relative_width
 
     # Discretize per pixel
-    nx = round(Int64, W * width_relative_screen)
+    nx = round(Int64, WI * width_relative_screen)
     ny = round(Int64, nx * height_relative_width)
     # Iterators for each pixel relative to the center, O
     pixiterx = (1 - div(nx + 1, 2):(nx - div(nx, 2)))
@@ -128,5 +133,12 @@ function ∇_rectangle(CQ_to_Q;
 
     # Matrix of 2-element static vectors, one per pixel
     xyq = [SA[ix * SCALEDIST, -iy * SCALEDIST] for iy = pixitery, ix = pixiterx]
-    ∇_matrix(CQ_to_Q, xyq)
+    if isnan(cutoff)
+        ∇_matrix(CQ_to_Q, xyq)
+    else
+        unclamped = ∇_matrix(CQ_to_Q, xyq)
+        map(unclamped) do u
+            hypot(u) > cutoff ? cutoff * u / hypot(u) : u
+        end
+    end
 end

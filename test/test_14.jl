@@ -1,11 +1,12 @@
 using MechanicalSketch
-import MechanicalSketch: sethue, background, O, EM, H, m, color_with_luminance, finish, setscale_dist, dimension_aligned
+import MechanicalSketch: sethue, background, O, EM, HE, m, color_with_luminance, finish, setscale_dist, dimension_aligned
 
+let
 empty_figure(joinpath(@__DIR__, "test_14.png"))
 background(color_with_luminance(PALETTE[6], 0.9))
 sethue(PALETTE[4])
 
-let
+
 # 20m horizontal
 p1 = O + (-10.0m, -9.0m)
 p2 = O + (10.0m, -9.0m)
@@ -31,7 +32,7 @@ end
 
 for i = 1:10
     sethue(PALETTE[i])
-    setscale_dist(20m / H / i)
+    setscale_dist(20m / HE / i)
     scaleindicators(i * EM)
 end
 

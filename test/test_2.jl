@@ -1,6 +1,6 @@
 using MechanicalSketch
 import MechanicalSketch: get, getinverse, textextents,  Point, rect, label,
-    EM, TXTOFFV, @colorant_str, W, background, sethue, text
+    EM, TXTOFFV, WI, background, sethue, text, background, @colorant_str
 
 let
 
@@ -42,14 +42,14 @@ label("W" * stri, :W, Point(0 , 1EM), leader = true, offset = EM, leaderoffsets 
 
 
 sethue(get(PALETTE, getinverse(PALETTE, colorant"green" )))
-label("5N" * stri, :N, Point(-W/4, 5EM), leader = true, offset = EM, leaderoffsets = [2., 3.])
-label("5S" * stri, :S, Point(-W/4, 5EM), leader = true, offset = EM, leaderoffsets = [-2., -3.])
+label("5N" * stri, :N, Point(-WI/4, 5EM), leader = true, offset = EM, leaderoffsets = [2., 3.])
+label("5S" * stri, :S, Point(-WI/4, 5EM), leader = true, offset = EM, leaderoffsets = [-2., -3.])
 sethue(color_from_palette("darkblue"))
-label("5E" * stri, :E, Point(-W/4, 5EM), leader = true, offset = EM, leaderoffsets = [2., 3.])
-label("5W" * stri, :W, Point(-W/4 , 5EM), leader = true, offset = EM, leaderoffsets = [-2., -3.])
+label("5E" * stri, :E, Point(-WI/4, 5EM), leader = true, offset = EM, leaderoffsets = [2., 3.])
+label("5W" * stri, :W, Point(-WI/4 , 5EM), leader = true, offset = EM, leaderoffsets = [-2., -3.])
 
 sethue(get(PALETTE, getinverse(PALETTE, colorant"blue" )))
-label("7" * stri, :W, Point(W/4 , 7EM), leader = true, offset = EM, leaderoffsets = [-2., -3.])
+label("7" * stri, :W, Point(WI/4 , 7EM), leader = true, offset = EM, leaderoffsets = [-2., -3.])
 
 MechanicalSketch.finish()
 end

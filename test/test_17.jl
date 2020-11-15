@@ -1,17 +1,17 @@
 import MechanicalSketch
-import MechanicalSketch: mm, kg, m, setscale_dist, H, W, EM, circle, text, N, kN, GPa, PALETTE,
-    color_with_luminance, empty_figure, background, sethue, O, °, finish, Point,
-    PT, line, setline, setopacity
+import MechanicalSketch: mm, kg, m, setscale_dist, HE, WI, EM, PT, circle, text, N, kN, PALETTE,
+    color_with_luminance, empty_figure, background, sethue, O, °, finish,
+    line, setline, setopacity
 let
 # Rope data from https://www.hendrikvedergroup.com/_asset/_public/Hendrik-Veder-Group/Downloads/8896-03-Dyneema-folder-offset_LR-v4.pdf
-# Diameters below 12 mm are excluded here, because they vary too much for reasonable generalization. Properties are generally better for 
+# Diameters below 12 mm are excluded here, because they vary too much for reasonable generalization. Properties are generally better for
 # smaller rope
 ROPE_D = [12, 14, 16, 18, 20, 22, 24, 26, 28, 30, 32, 34, 36, 38, 40, 42, 44,
     46, 48, 50, 52, 56, 60, 64, 68, 72, 80, 88, 96]mm
-ROPE_WEIGHT = [9.50, 12.80, 16, 20.80, 25.50, 30.50, 35.80, 41, 46.50, 52, 57, 62.50, 68, 74, 84, 93, 
+ROPE_WEIGHT = [9.50, 12.80, 16, 20.80, 25.50, 30.50, 35.80, 41, 46.50, 52, 57, 62.50, 68, 74, 84, 93,
     102, 111, 121, 131, 141, 163, 175, 200, 226, 254, 313, 379, 451]kg/100m
-ROPE_MINIMUM_BREAK = [161.90, 215.80, 269.80, 343.30, 407.10, 490.50, 569, 647.40, 725.90, 799.50, 868.20, 941.70, 1020.20, 
-    1098.70, 1245.80, 1373.40, 1491.10, 1618.60, 1755.90, 1893.30, 2020.80, 2315.10, 2472, 2766.30, 3099.90, 3413.80, 4139.70, 
+ROPE_MINIMUM_BREAK = [161.90, 215.80, 269.80, 343.30, 407.10, 490.50, 569, 647.40, 725.90, 799.50, 868.20, 941.70, 1020.20,
+    1098.70, 1245.80, 1373.40, 1491.10, 1618.60, 1755.90, 1893.30, 2020.80, 2315.10, 2472, 2766.30, 3099.90, 3413.80, 4139.70,
     4934.30, 5768.10]kN
 ρ_SK75 = 0.975 * 0.001kg/(10mm)^3
 σ_TS_SK75 = 3600N/mm^2
@@ -21,7 +21,7 @@ function restart()
     empty_figure(joinpath(@__DIR__, "test_17.png"))
     background(BACKCOLOR)
     sethue(PALETTE[5])
-    setscale_dist(sum(ROPE_D) * 1.3/ H)
+    setscale_dist(sum(ROPE_D) * 1.3/ HE)
 end
 restart()
 
@@ -31,7 +31,7 @@ pts = let
     pop!(posx)
     for (i,d) in enumerate(ROPE_D)
         p = if i == 1
-                -0.45 * MechanicalSketch.W * MechanicalSketch.SCALEDIST
+                -0.45 * MechanicalSketch.WI * MechanicalSketch.SCALEDIST
         else
             posx[i-1] + max(60.0mm, d*1.1)
         end
@@ -70,8 +70,8 @@ map(tops, bottoms, area_rel) do t, b, rel
     line(b, b + (t - b) * rel, :stroke)
 end
 # lsq method applied
-fill_factor(d) = (-0.003*d/mm + 0.853) 
-area_filled(d) = fill_factor(d)* circlearea(d) 
+fill_factor(d) = (-0.003*d/mm + 0.853)
+area_filled(d) = fill_factor(d)* circlearea(d)
 
 # Plot appproximated area
 sethue(PALETTE[3])

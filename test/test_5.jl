@@ -1,11 +1,11 @@
 using MechanicalSketch
-import MechanicalSketch: sethue, background, O, EM, H, m, color_with_luminance
+import MechanicalSketch: sethue, background, O, EM, m, color_with_luminance
 
+let
 empty_figure(joinpath(@__DIR__, "test_5.png"))
 background(color_with_luminance(PALETTE[6], 0.3))
 sethue(PALETTE[3])
 
-let
     p1 = O
     p2 = (6EM, 2EM)
     dimension_aligned(O, O + (6EM, 2EM))

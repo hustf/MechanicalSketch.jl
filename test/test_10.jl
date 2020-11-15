@@ -1,8 +1,8 @@
 using MechanicalSketch
-import MechanicalSketch: background, background, sethue, O, finish,
+import MechanicalSketch: background, background, sethue, O, EM, finish,
     luminance, get_current_luminance, get_current_RGB, color_with_luminance,
-    sethue, fontface, textpath, textextents, EM, PT, fontsize, gsave, grestore,
-    newpath, translate, m, text, fillpreserve, clip, rect, clipreset, gettranslation,
+    sethue, fontface, textpath, textextents, PT, fontsize, gsave, grestore,
+    newpath, translate, m, text, fillpreserve, clip, rect, clipreset,
     setline
 let
 BACKCOLOR = color_with_luminance(PALETTE[2], 0.7);
@@ -11,6 +11,9 @@ function restart()
     background(BACKCOLOR)
     sethue(PALETTE[2])
 end
+
+
+# Electric power symbol, implemented in 'power.jl' `showpower`
 
 # parameters
 power = 3.0kW

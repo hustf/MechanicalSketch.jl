@@ -1,9 +1,8 @@
 import MechanicalSketch
-import MechanicalSketch: color_with_luminance, empty_figure, background, sethue, O, W, H, finish, Point,
+import MechanicalSketch: color_with_luminance, empty_figure, background, sethue, O, WI, HE, finish,
     PALETTE,
-    kN, mm, km, kg, rope_breaking_strength, rope_weight,
-    header_strings, column_widths, text_table,
-    area_filled, setscale_dist, circle, °, text, g
+    m, mm, km, kg, rope_breaking_strength, rope_weight,
+    text_table, area_filled, setscale_dist, circle, °, text, g
 let
 BACKCOLOR = color_with_luminance(PALETTE[8], 0.8);
 function restart()
@@ -18,25 +17,25 @@ weights = rope_weight.(diameters) |> kg/km
 circleradius(A) = sqrt(A/π)
 radius_filled = circleradius.(area_filled.(diameters))
 
-pos = O - (0.25W, 0.0)
+pos = O - (0.25WI, 0.0)
 text_table(pos, diameters = diameters,
-                packed_d = 2 .* radius_filled,  
-                MBL = mbls, 
-                mbl = mbls .|> g, 
+                packed_d = 2 .* radius_filled,
+                MBL = mbls,
+                mbl = mbls .|> g,
                 Lineweight = weights)
 
 #
 # Draw the rope cross sections
 #
 
-setscale_dist(sum(diameters) * 1.3/ H)
+setscale_dist(sum(diameters) * 1.3/ HE)
 # Horizontal positions per rope
 pts = let
     posx = [0.0]mm
     pop!(posx)
     for (i,d) in enumerate(diameters)
         p = if i == 1
-                -0.45 * MechanicalSketch.W * MechanicalSketch.SCALEDIST
+                -0.45 * MechanicalSketch.WI * MechanicalSketch.SCALEDIST
         else
             posx[i-1] + max(5.0mm, d*1.1)
         end
@@ -49,7 +48,7 @@ let
     labs = string.(diameters)
     plabs = map(diameters, pts) do d, p
         offset = (-0.25 , 0.65 ) .* d
-        p + offset 
+        p + offset
     end
     text.(labs, plabs, 10.0°)
 end
@@ -60,7 +59,7 @@ let
 end
 
 finish()
-setscale_dist(20m / H)
+setscale_dist(20m / HE)
 
 nothing
 end

@@ -32,7 +32,8 @@ intersectboundingboxes, boundingboxesintersect, pointcrossesboundingbox,
 
 boxmap,
 
-circle, circlepath, ellipse, hypotrochoid, epitrochoid, squircle, center3pts, curve,
+circle, circlepath, currentdrawing, ellipse, hypotrochoid, epitrochoid,
+squircle, center3pts, curve,
 arc, carc, arc2r, carc2r, isarcclockwise, arc2sagitta, carc2sagitta,
 spiral, sector, intersection2circles,
 intersection_line_circle, intersectionlinecircle, intersectioncirclecircle, ispointonline,
@@ -118,15 +119,14 @@ Colors, parse
 
 using MechanicalUnits
 import MechanicalUnits.Unitfu: Power, oneunit, numtype
-@import_expand kW # Don't use ~ since that would also import W, which we use elsewhere.
+@import_expand kW # Don't use ~ since that would also import WI, which we use elsewhere.
 
-import LinearAlgebra: norm
-# TODO: using, not import.
-import REPL.TerminalMenus
+# TODO: Cleanup
+import REPL.TerminalMenus ## Where used?
 import ColorSchemes
 import ColorSchemes: getinverse, get
 import ColorSchemes: HSL, HSLA, RGB, RGBA, HSV, LCHuv, LCHuvA
-import Base: -, +, *, /, abs
+import Base: -, +, *, /, hypot
 import Colors: @colorant_str
 import FileIO: @format_str, File, save
 import ForwardDiff
@@ -168,23 +168,28 @@ For line thickness, we are used to points.
 """
 const PT = Int(round(EM / 12))
 """
-We want to make high quality figures for A4 with 5 cm total margin. Width and height are
+WI is the pixel widt of the figure. See HE and origo, O.
+
+We want to make quality figures for A4 with 5 cm total margin. Width and height are
     a4_w_72dpi, _ = Luxor.paper_sizes["A4"]
     marginfrac = 50 / 210
     w_300f = a4_w_72dpi * (1 - marginfrac) * 300 / 72
-    W = Int(round(w_300f))
-    H = Int(round(w_300f * 2 / 3))
+    WI = Int(round(w_300f))
+    HE = Int(round(w_300f * 2 / 3))
+
 """
-const W = 1889
-const H = 1259
-global SCALEDIST = 20m / H
-global SCALEVELOCITY = 70m/s / H
-global SCALEFORCE = 20kN / H
+const WI = 1889
+"HE is the pixel height of the figure. See WI and orgo, O"
+const HE = 1259
+"Used for scaling quantities to pixels. Use setscale_dist to change"
+global SCALEDIST = 20m / HE
+"Used for scaling quantities to pixels. Use setscale_velocity to change"
+global SCALEVELOCITY = 70m/s / HE
+"Used for scaling quantities to pixels. Use setscale_force to change"
+global SCALEFORCE = 20kN / HE
 
 
-# Note, this could be extended by modulus, such that points to the left of the screen
-# would appear at right. But that could make some strange bugs too.
-# CONSIDER generalize to quantity, let scale(x) do the transformation?
+# CONSIDER generalize to quantity, let scale_sketch(x) do the transformation?
 Point(x::T, y::T) where T<:Length = Point(x / SCALEDIST, y / scaledisty())
 Point(x::T, y::T) where T<:Velocity = Point(x / SCALEVELOCITY , y / scalevelocityy())
 Point(x::T, y::T) where T<:Force = Point(x / SCALEFORCE , y / scaleforcey())
@@ -221,7 +226,9 @@ const ForceTuple = NTuple{2, <: Force}
 -(p1::Point, shift::Tuple{Real, Quantity}) = p1 - Point(shift[1], shift[2])
 *(p1::Point, shift::Tuple{Real, Quantity}) = p1 * Point(shift[1], shift[2])
 /(p1::Point, shift::Tuple{Real, Quantity}) = p1 / Point(shift[1], shift[2])
-
+# extend function in base with Point
+hypot(p::Point) = hypot(p.x, p.y)
+hypot(p::QuantityTuple) = hypot(p[1], p[2])
 """
 Rotations given with units occur around the positive z axis, when y is up and x is to the right.
 We don't dispatch on the dimension of angles, because the dimension is NonDims
@@ -231,13 +238,17 @@ polyrotate!(f, ang::Angle) = polyrotate!(f, - ustrip( ang |> rad))
 
 
 """
-    empty_figure(filename = "HiThere.png")
+    empty_figure(filename = "HiThere.png";
+    backgroundcolor = color_with_luminance(PALETTE[8], 0.1),
+    hue = PALETTE[8] )
 
 Establish a drawing sized for A4 300 dpi figures,
 black on white figure, line width 3 pt  default.
 """
-function empty_figure(filename = "HiThere.png")
-    fig = Drawing(W, H, filename)
+function empty_figure(filename = "HiThere.png";
+        backgroundcolor = color_with_luminance(PALETTE[8], 0.1),
+        hue = PALETTE[8] )
+    fig = Drawing(WI, HE, filename)
     # Font for the 'toy' text interface
     # (use e.g. JuliaMono for unicode symbols like ∈. There are no nice fonts for text AND math.
     fontface("Calibri")
@@ -245,19 +256,17 @@ function empty_figure(filename = "HiThere.png")
     # Letter spacing works differently here than in Word, so we adjust a little.
     fontsize(FS)
     setfont("Calibri", FS)
-    background("white")
-    sethue("black")
+    background(backgroundcolor)
+    sethue(hue)
     setline(0.5PT)
     setdash("solid")
     # Origo at centre
     origin()
     # Scale and rotation - x right, y up ('z' is in.). And rotations may
     # clockwise. Just deal with it. Or stick to using dimensions.
-
-    setmatrix([1, 0, 0, 1, W / 2, H / 2])
+    setmatrix([1, 0, 0, 1, WI / 2, HE / 2])
     fig
 end
-
 
 """
     text(t, pt::Point, angle::T; kwargs) where {T <: Angle}
@@ -277,5 +286,5 @@ include("table.jl")
 include("curves.jl")
 include("flow.jl")
 include("autodiff_unitfu.jl")
-
+include("streamline_convolution.jl")
 end # module
