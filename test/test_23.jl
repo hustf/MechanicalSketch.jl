@@ -1,6 +1,6 @@
 import MechanicalSketch
 import MechanicalSketch: color_with_luminance, background, O, WI, HE, EM, FS, finish,
-       PALETTE, color_from_palette, setfont, settext, empty_figure, sethue
+       PALETTE, color_from_palette, setfont, settext, empty_figure, sethue, @layer
 import MechanicalSketch: dimension_aligned
 import MechanicalSketch: ComplexQuantity, generate_complex_potential_source, generate_complex_potential_vortex
 import MechanicalSketch: @import_expand
@@ -65,6 +65,13 @@ draw_real_legend(legendpos, mi, ma, legendvalues)
 setfont("DejaVu Sans", FS)
 str = "ϕ: Z ↣ R  is the flow potenial"
 settext(str, O + (-WI/2 + EM, -0.5HE + 2EM), markup = true)
+
+settext("Source", OT + (real(p_source), imag(p_source)))
+settext("Vortex", OT + (real(p_vortex), imag(p_vortex)))
+@layer begin
+    sethue(BACKCOLOR)
+    settext("Sink", OT - (real(p_source), imag(p_source)))
+end
 setfont("Calibri", FS)
 
 
@@ -95,6 +102,7 @@ draw_complex_legend(legendpos, mi, ma, legendvalues)
 dimension_aligned(OB + (-physwidth / 2, physheight / 2), OB + (physwidth / 2, physheight / 2))
 dimension_aligned(OB + p_vortex, OB)
 dimension_aligned(OB + (-physwidth / 2, - physheight / 2 ),  OB +  (-physwidth / 2, physheight / 2 ))
+
 
 finish()
 end #let

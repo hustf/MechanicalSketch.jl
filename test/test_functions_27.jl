@@ -100,7 +100,7 @@ function convolute_image_3(xs, ys, f_xy, n_xy, h, cutoff)
         vx = vcat(reverse(vxf), vxb[1:(end -1)])
         vy = vcat(reverse(vyf), vyb[1:(end -1)])
         # Find the intensity for our one pixel.
-        pv  = convolute_pixel(fir, vx, vy, n_xy, cutoff)
+        pv  = convolute_pixel(fir, vx, vy, n_xy, h, cutoff)
         # Find the original indexes and update the image matrix
         ii = rowsy + 1 - j
         jj = i

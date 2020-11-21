@@ -83,6 +83,9 @@ end end
 @time @testset "27" begin let
     include("test_27.jl")
 end end
-@time @testset "28" begin let
+@testset "28" begin let
+    include("test_28.jl")
+end end
+@testset "29" begin let
     include("test_28.jl")
 end end

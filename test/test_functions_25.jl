@@ -99,7 +99,7 @@ function _convolve_contrib_1(prev, w, nxy, vx, vy, i)
 end
 
 """
-    convolute_pixel_1(wf, wb, vxf, vyf, vxb, vyb)
+    convolute_pixel_1(wf, wb, vxf, vyf, vxb, vyb, nxy, h, cutoff)
 where
     wf    Window forward: A vector defining a convolution (filter) window, or kernel, with the same length as buffers.
           The second value is used for weighting the second coordinate.
@@ -111,8 +111,10 @@ where
     vyb   Vector y, backwards direction
     fxy   Function, vector field (output is a tuple)
     nxy   Function, noise field
+    h     Step length, duration
+    cutoff Velocity, substituted to calculate out-of bounds streamlines
 """
-function convolute_pixel_1(wf, wb, vxf, vyf, vxb, vyb, nxy, cutoff, h)
+function convolute_pixel_1(wf, wb, vxf, vyf, vxb, vyb, nxy, h, cutoff)
     @assert length(vxf) == length(vyf)
     @assert length(vxb) == length(vyb)
     x0 = vxf[1]
@@ -167,13 +169,13 @@ function convolute_image_1(xs, ys, f_xy, n_xy, h, cutoff)
         rk4_steps_1!(f_xy, vxf, vyf, h)
         rk4_steps_1!(f_xy, vxb, vyb, -h)
         # Find the intensity for our one pixel.
-        pv  = convolute_pixel_1(wf, wb, vxf, vyf, vxb, vyb, n_xy, cutoff, h)
+        pv  = convolute_pixel_1(wf, wb, vxf, vyf, vxb, vyb, n_xy, h, cutoff)
         # Find the original indexes and update the image matrix
         ii = rowsy + 1 - j
         jj = i
         M[ii, jj] = pv / oneunit(pv)
     end
-    M
+    normalize_datarange(M)
 end
 
 
@@ -190,7 +192,7 @@ function draw_streamlines_1(origo, xs, ys, f_xy, h)
     vyb = similar(vxf)
     for (i::Int64, cx::Quantity{Float64}) in enumerate(xs), (j::Int64, cy::Quantity{Float64}) in enumerate(ys)
         vxf[1], vyf[1], vxb[1], vyb[1] = cx, cy, cx, cy
-        if rand() < 0.0001
+        if rand() < 0.0002
             # Find the streamline path
             rk4_steps_1!(f_xy, vxf, vyf, h)
             rk4_steps_1!(f_xy, vxb, vyb, -h)

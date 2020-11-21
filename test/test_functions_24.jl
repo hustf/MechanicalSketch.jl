@@ -216,3 +216,35 @@ end
         rk4_step_complex_4!(f, vx, vy, h, n)
     end
 end
+
+# Below, we're reusing code to generate the same flow field as in test_23. The cutoff value is no longer NaN.
+if !@isdefined m²
+    @import_expand m # Will error if m² already is in the namespace
+    @import_expand s
+end
+ϕ_vortex_23 =  generate_complex_potential_vortex(; pos = complex(0.0, 1.0)m, vorticity = 1.0m²/s / 2π)
+ϕ_source_23 = generate_complex_potential_source(; pos = complex(3.0, 0.0)m, massflowout = 1.0m²/s)
+ϕ_sink_23 = generate_complex_potential_source(; pos = -complex(3.0, 0.0)m, massflowout = -1.0m²/s)
+ϕ_23(p) = ϕ_vortex_23(p) + ϕ_source_23(p) + ϕ_sink_23(p)
+
+PHYSWIDTH_23 = 10.0m
+HEIGHT_RELATIVE_WIDTH_23 = 0.4
+PHYSHEIGHT_23 = PHYSWIDTH_23 * HEIGHT_RELATIVE_WIDTH_23
+SCREEN_WIDTH_FRAC_23 = 2 / 3
+CUTOFF_23 = 0.5m/s
+setscale_dist(PHYSWIDTH_23 / (SCREEN_WIDTH_FRAC_23 * WI))
+
+"""
+The test flow field from test_23 as a matrix of complex velocities with one element per pixel.
+We're filling the above-cutoff values with the cutoff value instead of with NaN.
+"""
+function flowfield_23()
+    begin
+        unclamped = ∇_rectangle(ϕ_23,
+            physwidth = PHYSWIDTH_23,
+            height_relative_width = HEIGHT_RELATIVE_WIDTH_23);
+        map(unclamped) do u
+            hypot(u) > CUTOFF_23 ? CUTOFF_23∙u / hypot(u) : u
+        end
+    end;
+end

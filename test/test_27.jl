@@ -59,7 +59,7 @@ A = ∇_rectangle(ϕ,
         cutoff = CUTOFF_27);
 
 setfont("DejaVu Sans", FS)
-str = "Noise has maximum wavelength $CUTOFF_27 · $DU_2 = $(CUTOFF_27 * DU_2)."
+str = "Noise has maximum wavelength $CUTOFF_27 · $DU_2 = $(CUTOFF_27 * DU_2). Experiments with noise spectrum."
 settext(str, O + (-WI/2 + EM, -0.5HE + 2EM), markup = true)
 setfont("Calibri", FS)
 
@@ -101,7 +101,7 @@ OB = O + (0.0, + 0.25HE + 0.5EM )
 global const NS_3 = 20
 
 # Step length (duration)
-h = DU_2 / (2 * (NS_3 -1 ))
+h = DU_2 / (NS_3 -1 )
 
 
 @time M = convolute_image_3(xs, ys, fxy, nxy, h, CUTOFF_27) # 36.019 s (10 allocations: 4.85 MiB)
@@ -117,7 +117,9 @@ draw_real_legend(legendpos, mi, ma, legendvalues)
 
 @layer begin
     sethue(PALETTE[1])
+    setline(8)
     draw_streamlines(OB, xs, ys, fxy, h)
+    setline(1)
 end
 
 dimension_aligned(OB + (-physwidth / 2, physheight / 2), OB + (physwidth / 2, physheight / 2))
@@ -125,9 +127,9 @@ dimension_aligned(OB, OB + p_vortex)
 dimension_aligned(OB + (-physwidth / 2, - physheight / 2 ),  OB +  (-physwidth / 2, physheight / 2 ))
 
 setfont("DejaVu Sans", FS)
-str = "Noise max wavelength is $CUTOFF_27 · $DU_2 = $(CUTOFF_27 * DU_2), experiment with spectrum shape "
+str = " "
 settext(str, O + (-WI/2 + EM, EM) , markup = true)
-str = "First implementation FIR filter, Blackman window."
+str = "First implementation Finite Impulse Response filter, Blackman window."
 settext(str, O + (-WI/2 + EM, 2 * EM) , markup = true)
 
 setfont("Calibri", FS)

@@ -13,65 +13,29 @@ BACKCOLOR = color_with_luminance(PALETTE[7], 0.1)
 
 include("test_functions_25.jl")
 restart_25(BACKCOLOR)
-if !@isdefined m²
-    @import_expand m # Will error if m² already is in the namespace
-    @import_expand s
-end
+include("test_functions_24.jl")
 
-"Source position"
-p_source = complex(3.0, 0.0)m
-"Flow rate, 2d flow"
-q_source = 1.0m²/s
-"Vortex position"
-p_vortex = complex(0.0, 1.0)m
-"Vorticity, 2d flow"
-K = 1.0m²/s / 2π
-
-ϕ_vortex =  generate_complex_potential_vortex(; pos = p_vortex, vorticity = K)
-ϕ_source = generate_complex_potential_source(; pos = p_source, massflowout = q_source)
-ϕ_sink = generate_complex_potential_source(; pos = -p_source, massflowout = -q_source)
-
-"""
-    ϕ(p::ComplexQuantity)
-    → Quantity
-2d velocity potential function. Complex quantity domain, real quantity range.
-"""
-ϕ(p) = ϕ_vortex(p) + ϕ_source(p) + ϕ_sink(p)
-
-# Make a matrix containing one complex quantity per pixel.
-# In test_23 we displayed this using colour for direction
-# and luminosity for magnitude.
-physwidth = 10.0m
-height_relative_width = 0.4
-physheight = physwidth * height_relative_width
-screen_width_frac = 2 / 3
-setscale_dist(physwidth / (screen_width_frac * WI))
-cutoff = 0.5m/s
-A = begin
-    unclamped = ∇_rectangle(ϕ,
-        physwidth = physwidth,
-        height_relative_width = height_relative_width);
-    map(unclamped) do u
-        hypot(u) > cutoff ? NaN∙u : u
-    end
-end;
+# Reuse the flow field from test_23.jl, a matrix of complex velocities with an element per pixel.
+A = flowfield_23();
+setscale_dist(PHYSWIDTH_23 / (SCREEN_WIDTH_FRAC_23 * WI))
 
 setfont("DejaVu Sans", FS)
-str = "Line integral convolution - RK4 streamlines, nine points each direction"
+str = "This noise image has three different spectra.\nFrequency along a line is value change per distance "
 settext(str, O + (-WI/2 + EM, -0.5HE + 2EM), markup = true)
 setfont("Calibri", FS)
-
 
 # We are going to use the velocity vector field in a lot of calculations,
 # and interpolate between the calculated pixel values
 using Interpolations
-xs = range(-physwidth/2, stop = physwidth / 2, length = size(A)[2]);
-ys = range(-height_relative_width * physwidth/2, stop = height_relative_width * physwidth / 2, length = size(A)[1]);
+xs = range(-PHYSWIDTH_23  /2, stop = PHYSWIDTH_23  / 2, length = size(A)[2]);
+ys = range(-HEIGHT_RELATIVE_WIDTH_23 * PHYSWIDTH_23 /2, stop = HEIGHT_RELATIVE_WIDTH_23 * PHYSWIDTH_23  / 2, length = size(A)[1]);
 fxy_inter = interpolate((xs, ys), map( cmplx -> (real(cmplx), imag(cmplx)), transpose(A)[ : , end:-1:1]), Gridded(Linear()));
 fxy = extrapolate(fxy_inter, Flat());
 fxy(0.0m, 0.0m)
 fxy(0.0m, 0.0001m)
-fxy(100.0m, 0.0001m)
+fxy(100.0m, 0.0001m) 
+
+
 
 
 # Generate a noise image for experimentation. Display it at the top of the figure.
@@ -84,7 +48,7 @@ ma = maximum(NO_1)
 mi = minimum(NO_1)
 ze = zero(typeof(ma))
 legendvalues = reverse(sort([ma, (ma + mi) / 2, ze]))
-legendpos = lowrightpoint + (EM, 0) + (0.0m, physheight)
+legendpos = lowrightpoint + (EM, 0) + (0.0m, PHYSHEIGHT_23 )
 
 draw_real_legend(legendpos, mi, ma, legendvalues)
 
@@ -96,38 +60,39 @@ nxy(0.1m, 0.02m)
 
 
 # Centre of the bottom figure
-OB_25 = O + (0.0, + 0.25HE + 0.5EM )
+OB_25 = O + (0.0, + 0.25HE + 0.75EM )
 
 
 # Duration to trace the streamlines forward and back
-DU_25 = 1.0s
+DU_25 = 2.0s
 
-# Number of sampling points along our streamline in each direction (effectively one less than this)
+# Number of sampling points along our streamline in each direction (the number of steps is one less )
 global const NS_1 = 10
 
 
 # Step length (duration)
-h = DU_25 / (NS_1 -1 ) * 2
+h = DU_25 / (NS_1 -1 )
 
-@time M = convolute_image_1(xs, ys, fxy, nxy, h, cutoff) # 36.019 s (10 allocations: 4.85 MiB)
+@time M = convolute_image_1(xs, ys, fxy, nxy, h, CUTOFF_23) # 36.019 s (10 allocations: 4.85 MiB)
                                                   # 27.331 s (50803210 allocations: 2.64 GiB)
                                                   # 30.744958 seconds (51.99 M allocations: 2.674 GiB, 1.58% gc time)
                                                   # 28.804882 seconds (1.96 M allocations: 88.599 MiB, 0.04% gc time)
                                                   # 28.647661 seconds (1.46 M allocations: 63.838 MiB)
+                                                  # 28.347597 seconds (1.46 M allocations: 63.849 MiB)
 # Normalize colors to 0..1
 M .-= minimum(M);
 M ./= maximum(M);
 upleftpoint, lowrightpoint = draw_color_map(OB_25, M )
 draw_streamlines_1(OB_25, xs, ys, fxy, h) # include coordinates for center in call
 
-dimension_aligned(OB_25 + (-physwidth / 2, physheight / 2), OB_25 + (physwidth / 2, physheight / 2))
-dimension_aligned(OB_25, OB_25 + p_vortex)
-dimension_aligned(OB_25 + (-physwidth / 2, - physheight / 2 ),  OB_25 +  (-physwidth / 2, physheight / 2 ))
+dimension_aligned(OB_25 + (-PHYSWIDTH_23  / 2, PHYSHEIGHT_23  / 2), OB_25 + (PHYSWIDTH_23  / 2, PHYSHEIGHT_23  / 2))
+dimension_aligned(OB_25, OB_25 + complex(0.0, 1.0)m)
+dimension_aligned(OB_25 + (-PHYSWIDTH_23  / 2, - PHYSHEIGHT_23  / 2 ),  OB_25 +  (-PHYSWIDTH_23  / 2, PHYSHEIGHT_23  / 2 ))
 
 
 setfont("DejaVu Sans", FS)
-str = "Note the darkening effect at sources and sinks, due to NaN regions "
-settext(str, upleftpoint, markup = true)
+str = "This is an attempt at LIC visualization. Streamlines cover $DU_25 forward (blue) and back."
+settext(str, O + (-WI / 2 + EM, + 1.8EM ), markup = true)
 setfont("Calibri", FS)
 
 finish()

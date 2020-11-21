@@ -12,52 +12,15 @@ import Interpolations: interpolate, Gridded, Linear, Flat, extrapolate
 let
 # This file is tested line by line using BenchmarkTools. Tests are commented out.
 
-BACKCOLOR = color_with_luminance(PALETTE[8], 0.1)
+BACKCOLOR = color_with_luminance(PALETTE[8], 0.1);
 include("test_functions_24.jl")
 restart(BACKCOLOR)
 
-
-if !@isdefined m²
-    @import_expand m # Will error if m² already is in the namespace
-    @import_expand s
-end
-
-"Source position"
-p_source = complex(3.0, 0.0)m
-"Flow rate, 2d flow"
-q_source = 1.0m²/s
-"Vortex position"
-p_vortex = complex(0.0, 1.0)m
-"Vorticity, 2d flow"
-K = 1.0m²/s / 2π
-
-ϕ_vortex =  generate_complex_potential_vortex(; pos = p_vortex, vorticity = K)
-ϕ_source = generate_complex_potential_source(; pos = p_source, massflowout = q_source)
-ϕ_sink = generate_complex_potential_source(; pos = -p_source, massflowout = -q_source)
-
-"""
-    ϕ(p::ComplexQuantity)
-    → Quantity
-2d velocity potential function. Complex quantity domain, real quantity range.
-"""
-ϕ(p) = ϕ_vortex(p) + ϕ_source(p) + ϕ_sink(p)
-
-# Plot the top figure
-PHYSWIDTH_1 = 10.0m
-HEIGHT_RELATIVE_WIDTH_1 = 0.4
-PHYSHEIGHT_1 = PHYSWIDTH_1 * HEIGHT_RELATIVE_WIDTH_1
-SCREEN_WIDTH_FRAC_1 = 2 / 3
-setscale_dist(PHYSWIDTH_1 / (SCREEN_WIDTH_FRAC_1 * WI))
-A = begin
-    unclamped = ∇_rectangle(ϕ,
-        physwidth = PHYSWIDTH_1,
-        height_relative_width = HEIGHT_RELATIVE_WIDTH_1);
-    map(unclamped) do u
-        hypot(u) > 0.5m/s ? NaN∙u : u
-    end
-end;
+# Plot the top figure, flow field from test_23.jl visualized with color for direction.
+A = flowfield_23();
+setscale_dist(PHYSWIDTH_23 / (SCREEN_WIDTH_FRAC_23 * WI))
 upleftpoint, lowrightpoint = draw_color_map(O + (0.0, -0.25HE + EM), A)
-legendpos = lowrightpoint + (EM, 0) + (0.0m, PHYSHEIGHT_1)
+legendpos = lowrightpoint + (EM, 0) + (0.0m, PHYSHEIGHT_23)
 mi, ma = lenient_min_max(A)
 ze = zero(typeof(ma))
 legendvalues = reverse(sort([ma, (ma + mi) / 2, ze]))
@@ -73,8 +36,8 @@ OB = O + (0.0, + 0.25HE + 0.5EM )
 # We are going to use the velocity vector field in a lot of calculations,
 # and interpolate between the calculated pixel values.
 # We start by defining increasing iterators for coordinates
-xs = range(-PHYSWIDTH_1/2, stop = PHYSWIDTH_1 / 2, length = size(A)[2])
-ys = range(-HEIGHT_RELATIVE_WIDTH_1 * PHYSWIDTH_1/2, stop = HEIGHT_RELATIVE_WIDTH_1 * PHYSWIDTH_1 / 2, length = size(A)[1])
+xs = range(-PHYSWIDTH_23 / 2, stop = PHYSWIDTH_23 / 2, length = size(A)[2])
+ys = range(-HEIGHT_RELATIVE_WIDTH_23 * PHYSWIDTH_23 / 2, stop = HEIGHT_RELATIVE_WIDTH_23 * PHYSWIDTH_23 / 2, length = size(A)[1])
 # Note that the image matrix has maximum y in the first index, minimum in the last first index.
 # Example image, small scale:
 # (x, y ) ∈ ({-2, 0.1, 2}, { -1, 1})
@@ -118,9 +81,9 @@ fxy(100.0m, 0.0001m)
 
 
 circle(OB, 0.999m, :stroke) # origo
-dimension_aligned(OB + (-PHYSWIDTH_1 / 2, PHYSHEIGHT_1 / 2), OB + (PHYSWIDTH_1 / 2, PHYSHEIGHT_1 / 2))
-dimension_aligned(OB, OB + p_vortex)
-dimension_aligned(OB + (-PHYSWIDTH_1 / 2, - PHYSHEIGHT_1 / 2 ),  OB +  (-PHYSWIDTH_1 / 2, PHYSHEIGHT_1 / 2 ))
+dimension_aligned(OB + (-PHYSWIDTH_23 / 2, PHYSHEIGHT_23 / 2), OB + (PHYSWIDTH_23 / 2, PHYSHEIGHT_23 / 2))
+dimension_aligned(OB, OB + (0.0, 1.0)m)
+dimension_aligned(OB + (-PHYSWIDTH_23 / 2, - PHYSHEIGHT_23 / 2 ),  OB +  (-PHYSWIDTH_23 / 2, PHYSHEIGHT_23 / 2 ))
 
 
 setfont("DejaVu Sans", FS)
@@ -130,8 +93,6 @@ setfont("Calibri", FS)
 
 
 # println("\nStarting point:")
-
-
 
 sethue(PALETTE[1])
 vx = collect(range(-0.0m, 0.0m, length = 10))
@@ -181,7 +142,16 @@ euler_forwardsteps_5!(fxy, vx, vy, 1.5s) # 2.745 μs (0 allocations: 0 bytes)
 rrk4_forwardsteps_5!(fxy, vx, vy, 1.5s) # 10.4 μs (0 allocations: 0 bytes)
 
 
-# Neither fastmath or inlining has any worthwhile effect.
+# Neither fastmath nor inlining has any worthwhile effect.
+
+setfont("DejaVu Sans", FS)
+str = """
+    Flowfield clamped at $CUTOFF_23.\n
+    RK4 is four times slower than\nEuler for the same number of\nsteps.\n
+    However, the Euler streamlines\n are visually inaccurate here.
+    """
+settext(str, O + (1.5m, -3.5m), markup = true)
+setfont("Calibri", FS)
 
 
 end # Let

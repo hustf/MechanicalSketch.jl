@@ -62,7 +62,7 @@ function _convolve_contrib(prev, w, nxy, vx, vy, i)
 end
 
 """
-    convolute_pixel(wf, wb, vxf, vyf, vxb, vyb, nxy, cutoff))
+    convolute_pixel(wf, wb, vxf, vyf, vxb, vyb, nxy, h, cutoff))
 where
     wf    Window forward: A vector defining a convolution (filter) window, or kernel, with the same length as buffers.
           The second value is used for weighting the second coordinate.
@@ -73,9 +73,10 @@ where
     vxb   Vector x, backward
     vyb   Vector y, backwards direction
     nxy   Function, noise field
-    cutoff Maximum magnitude
+    h     Step length, duration
+    cutoff Velocity, substituted to calculate out-of bounds streamlines
 """
-function convolute_pixel(wf, wb, vxf, vyf, vxb, vyb, nxy, cutoff)
+function convolute_pixel(wf, wb, vxf, vyf, vxb, vyb, nxy, h, cutoff)
     @assert length(vxf) == length(vyf)
     @assert length(vxb) == length(vyb)
     x0 = vxf[1]
@@ -102,15 +103,16 @@ function convolute_pixel(wf, wb, vxf, vyf, vxb, vyb, nxy, cutoff)
     pv
 end
 """
-    convolute_pixel(w, vx,  vy, nxy, cutoff)
+    convolute_pixel(w, vx,  vy, nxy, h, cutoff)
 where
     w     Window : A vector defining a convolution (filter) window, or kernel, with the same length as buffers.
     vx    Vector or buffer of x coordinates
     vy    Vector y coordinates
     nxy   Function, noise field
+    h     Step length, duration
     cutoff Maximum magnitude
-"""
-function convolute_pixel(w, vx, vy, nxy, cutoff)
+"""                     
+function convolute_pixel(w, vx, vy, nxy, h, cutoff)
     @assert length(vx) == length(vy)
     @assert length(w) == length(vy)
     x0 = vx[1]

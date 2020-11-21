@@ -4,8 +4,8 @@ function noisepic_2(A, physwidth, physheight)
     no = Matrix{Float64}(undef, n_rows, n_cols)
     n_rows = size(no)[1]
     n_cols_in_division = div(size(no)[2], 3)
-    length_one_cycle = CUTOFF_26 * DU_1
-    dimension_aligned(OU + (-0.4 * physwidth, 0.0m),  OU +  (-0.4 * physwidth, length_one_cycle ))
+    length_one_cycle = CUTOFF_23 * DU_26
+    dimension_aligned(OU_26 + (-0.4 * physwidth, 0.0m),  OU_26 +  (-0.4 * physwidth, length_one_cycle ))
     n_cycles = physheight / length_one_cycle
     for row in 1:n_rows
         for col in 1:n_cols
@@ -47,11 +47,11 @@ function convolute_image_2(xs, ys, f_xy, n_xy, h, cutoff)
         rk4_steps!(f_xy, vxf, vyf, h)
         rk4_steps!(f_xy, vxb, vyb, -h)
         # Find the intensity for our one pixel.
-        pv  = convolute_pixel(wf, wb, vxf, vyf, vxb, vyb, n_xy, cutoff)
+        pv  = convolute_pixel(wf, wb, vxf, vyf, vxb, vyb, n_xy, h, cutoff)
         # Find the original indexes and update the image matrix
         ii = rowsy + 1 - j
         jj = i
         M[ii, jj] = pv / oneunit(pv)
     end
-    M
+    normalize_datarange(M)
 end
