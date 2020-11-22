@@ -1,7 +1,7 @@
 #TODO revert change to not using NaN, see previous commit
 import MechanicalSketch
 import MechanicalSketch: empty_figure, sethue, O, WI, HE, EM, FS, finish,
-       PALETTE, setfont, settext
+       PALETTE, setfont, settext, setline
 import MechanicalSketch: dimension_aligned, noise
 import MechanicalSketch: ComplexQuantity, generate_complex_potential_source, generate_complex_potential_vortex
 import MechanicalSketch: @import_expand, Quantity, @layer
@@ -81,7 +81,7 @@ legendvalues = reverse(sort([ma, (ma + mi) / 2, ze]))
 legendpos = lowrightpoint + (EM, 0) + (0.0m, PHYSHEIGHT_23)
 draw_real_legend(legendpos, mi, ma, legendvalues)
 
-import MechanicalSketch: setline
+
 @layer begin
     sethue(PALETTE[1])
     setline(8)

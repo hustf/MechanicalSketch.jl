@@ -16,21 +16,9 @@ function noisepic_3(A, physheight, physwidth)
             # Noise is a function generating noisy data,
             # but where the lowest frequency has wavelength 1.41.
             # I.e., one full cycle when x or y varies from 0 to 1.41.
-            no[row, col] = if row < div(n_rows, 2)
-                noise(row * rate, col * rate, detail = octaves, persistence = 1.0)
-            else
-                noise(row * rate, col * rate, detail = octaves, persistence = 1.0)
-            end
-            no[row, col] += if row < div(n_rows, 2)
-                noise(row * rate * 0.75, col * rate * 0.75, detail = octaves, persistence = 1.0)
-            else
-                noise(row * rate * 0.75, col * rate * 0.75, detail = octaves, persistence = 1.0)
-            end
-            no[row, col] += if row < div(n_rows, 2)
+            no[row, col] = noise(row * rate, col * rate, detail = octaves, persistence = 1.0) +
+                noise(row * rate * 0.75, col * rate * 0.75, detail = octaves, persistence = 1.0) +
                 noise(row * rate * 0.25, col * rate * 0.25, detail = octaves, persistence = 1.0)
-            else
-                noise(row * rate * 0.25, col * rate * 0.25, detail = octaves, persistence = 1.0)
-            end
         end
     end
     normalize_datarange(no)
