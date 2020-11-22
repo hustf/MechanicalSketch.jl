@@ -6,6 +6,7 @@ import MechanicalSketch: ComplexQuantity, generate_complex_potential_source, gen
 import MechanicalSketch: @import_expand, Quantity
 import MechanicalSketch: draw_color_map, draw_real_legend, setscale_dist
 import MechanicalSketch: ∙, ∇_rectangle, SVector, normalize_datarange
+import Interpolations: interpolate, Gridded, Linear, Flat, extrapolate
 #using BenchmarkTools
 
 let
@@ -20,13 +21,12 @@ A = flowfield_23();
 setscale_dist(PHYSWIDTH_23 / (SCREEN_WIDTH_FRAC_23 * WI))
 
 setfont("DejaVu Sans", FS)
-str = "This noise image has three different spectra.\nFrequency along a line is value change per distance "
-settext(str, O + (-WI/2 + EM, -0.5HE + 2EM), markup = true)
+str = "This noise image has three different spectra.\nA noise frequency along a line is 1 / (wavelength [m])."
+settext(str, O + (-WI/2 + 1.25EM, -0.5HE + 2EM), markup = true)
 setfont("Calibri", FS)
 
 # We are going to use the velocity vector field in a lot of calculations,
 # and interpolate between the calculated pixel values
-using Interpolations
 xs = range(-PHYSWIDTH_23  /2, stop = PHYSWIDTH_23  / 2, length = size(A)[2]);
 ys = range(-HEIGHT_RELATIVE_WIDTH_23 * PHYSWIDTH_23 /2, stop = HEIGHT_RELATIVE_WIDTH_23 * PHYSWIDTH_23  / 2, length = size(A)[1]);
 fxy_inter = interpolate((xs, ys), map( cmplx -> (real(cmplx), imag(cmplx)), transpose(A)[ : , end:-1:1]), Gridded(Linear()));
@@ -91,7 +91,7 @@ dimension_aligned(OB_25 + (-PHYSWIDTH_23  / 2, - PHYSHEIGHT_23  / 2 ),  OB_25 + 
 
 
 setfont("DejaVu Sans", FS)
-str = "This is an attempt at LIC visualization. Streamlines cover $DU_25 forward (blue) and back."
+str = "The grey image below is a first attempt at LIC  flow visualization.\nStreamlines cover $DU_25 forward (blue) and back."
 settext(str, O + (-WI / 2 + EM, + 1.8EM ), markup = true)
 setfont("Calibri", FS)
 

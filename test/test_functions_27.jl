@@ -4,7 +4,7 @@ function noisepic_3(A, physheight, physwidth)
     no = Matrix{Float64}(undef, n_rows, n_cols)
     n_rows = size(no)[1]
     n_cols_in_division = div(size(no)[2], 3)
-    length_one_cycle = CUTOFF_27 * DU_2
+    length_one_cycle = CUTOFF_23 * DU_2
     length_one_pixel = physheight / n_rows
     octaves = round(Int, log2(length_one_cycle / length_one_pixel))
     dimension_aligned(OU_27 + (-0.4 * physwidth, 0.0m),  OU_27 +  (-0.4 * physwidth, length_one_cycle ))

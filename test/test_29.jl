@@ -12,7 +12,11 @@ if !@isdefined m²
 end
 include("test_functions_27.jl")
 empty_figure(joinpath(@__DIR__, "test_29.png"));
-text("Empty test", O + (-WI / 2 + EM, -HE / 2 + EM))
+
+global const V = range(0.05m/s, stop= 0.5m/s, length = 3)
+global const DU_28 = 2.0s
+
+text("Noise example along streamlines of velocities $V, duration $DU_28, physical dimensions", O + (-WI / 2 + EM, -HE / 2 + EM))
 
 finish()
 end

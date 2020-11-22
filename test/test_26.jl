@@ -1,4 +1,3 @@
-#TODO revert change to not using NaN, see previous commit
 import MechanicalSketch
 import MechanicalSketch: empty_figure, sethue, O, WI, HE, EM, FS, finish,
        PALETTE, setfont, settext, setline
@@ -8,7 +7,7 @@ import MechanicalSketch: @import_expand, Quantity, @layer
 import MechanicalSketch: draw_color_map, draw_real_legend, setscale_dist
 import MechanicalSketch: lenient_min_max, normalize_datarange
 import MechanicalSketch: ∙, ∇_rectangle, SA, SVector, rk4_steps!, convolute_pixel, draw_streamlines
-
+import Interpolations: interpolate, Gridded, Linear, Flat, extrapolate
 let
 empty_figure(joinpath(@__DIR__, "test_26.png"));
 include("test_functions_24.jl")
@@ -26,7 +25,6 @@ setfont("Calibri", FS)
 
 # We are going to use the velocity vector field in a lot of calculations,
 # and interpolate between the calculated pixel values
-using Interpolations
 xs = range(-PHYSWIDTH_23  /2, stop = PHYSWIDTH_23  / 2, length = size(A)[2]);
 ys = range(-HEIGHT_RELATIVE_WIDTH_23 * PHYSWIDTH_23 /2, stop = HEIGHT_RELATIVE_WIDTH_23 * PHYSWIDTH_23  / 2, length = size(A)[1]);
 fxy_inter = interpolate((xs, ys), map( cmplx -> (real(cmplx), imag(cmplx)), transpose(A)[ : , end:-1:1]), Gridded(Linear()));
