@@ -1,22 +1,100 @@
 import MechanicalSketch
-import MechanicalSketch: empty_figure, PALETTE, O, HE, WI, EM, finish
-import MechanicalSketch: @import_expand, text
-
+import MechanicalSketch: empty_figure, PALETTE, O, HE, WI, EM, finish, ∙, Point
+import MechanicalSketch: @import_expand, setscale_dist, SCALEDIST, settext
+import MechanicalSketch: noise, normalize_datarange, pngimage, placeimage, @layer
+import MechanicalSketch: poly, dimension_aligned, sethue, arrow, circle, prettypoly
+import DSP.Periodograms: spectrogram, Spectrogram
+import DSP.Util:         nextfastfft
+import DSP.Windows:      tukey
+import MechanicalSketch: MechanicalUnits.dimension, NoDims, upreferred, ComplexQuantity, Quantity
+import Statistics:       mean
 let
-
-
 if !@isdefined m²
     @import_expand ~m # Will error if m² already is in the namespace
-    @import_expand ~N
     @import_expand s
 end
-include("test_functions_27.jl")
 empty_figure(joinpath(@__DIR__, "test_29.png"));
 
-global const V = range(0.05m/s, stop= 0.5m/s, length = 3)
-global const DU_28 = 2.0s
+curpoint = O + (-WI / 2 + EM, -HE / 2 + 3EM)
+velocities = range(0.05m/s, stop= 0.5m/s, length = 3)
+settext("
+The flow field visualization should have a linear relationship between velocity and luminosity.
+We need to control the noise image wavelength spectrum to get that.
+", curpoint)
 
-text("Noise example along streamlines of velocities $V, duration $DU_28, physical dimensions", O + (-WI / 2 + EM, -HE / 2 + EM))
+
+curpoint += (0, 4EM)
+settext("
+For reference, let's first illustrate two equal amplitude wavelengths, <i>λ</i>, as greyscale:
+    <b>cos(<small>2π <sup>x</sup> / <sub>0.5m</sub></small>) + 0.5cos(2π <sup>x</sup> / <sub>0.05m</sub>)</b>
+", curpoint, markup = true)
+
+
+curpoint += (0, 3EM)
+n_pixels = 0.9WI
+physwidth = 2.0m
+setscale_dist(physwidth / n_pixels)
+length_one_pixel = physwidth / n_pixels
+twowave(x) = cos(2π∙x / 0.5m) + 0.5cos(2π∙x / 0.05m)
+no = [twowave(x) for x in (1:n_pixels)*length_one_pixel]
+nno = normalize_datarange(no)
+@layer begin
+    placeimage(pngimage(nno) , curpoint; centered = false)
+    placeimage(pngimage(nno) , curpoint + (0,1); centered = false)
+    placeimage(pngimage(nno) , curpoint + (0,2); centered = false)
+    sethue(PALETTE[3])
+    dimension_aligned(curpoint, curpoint + (physwidth, 0.0m), offset = -2.5EM)
+    dimension_aligned(curpoint, curpoint + (0.5m, 0.0m), offset = -EM, toextension = (0EM, 7EM))
+end
+
+
+curpoint += (0, 3EM)
+settext("
+The same greyscale values shown as a curve:", curpoint)
+curpoint += (0, EM)
+points = map(1:n_pixels, nno) do xul, yul
+    (xul, -yul * EM)
+end
+poly(curpoint .+ points, :stroke)
+
+
+curpoint += (0, 2EM)
+settext("
+Amplitude-wavelength spectrum from sampling the same values:", curpoint, markup=true)
+
+
+curpoint += (0, 3EM)
+include("test_functions_29.jl")
+spectrum = sampledspectrum_29(no .- 0.5, length_one_pixel, maximumwavelength = 0.5m)
+draw_spectrum_29(curpoint, spectrum)
+
+
+curpoint += (0, 2EM)
+
+
+
+(λ_1, a_1), (λ_2, a_2) = two_largest_maxima_amplitude_wavelength(spectrum)
+settext("
+    Local maxima are (λ, amplitude) = [$((λ_1, a_1)), $((λ_2, a_2))]",
+    curpoint, markup=true)
+
+
+curpoint += (0, 2EM)
+settext("
+We can sample from a longer example and get a finer spectrum resolution:", curpoint)
+
+
+curpoint += (0, 3EM)
+longnoise = [twowave(x) for x in (1:100n_pixels)*length_one_pixel]
+spectrum = sampledspectrum_29(longnoise, length_one_pixel, maximumwavelength = 0.5m)
+draw_spectrum_29(curpoint, spectrum)
+
+
+curpoint += (0, 2EM)
+(λ_1, a_1), (λ_2, a_2) = two_largest_maxima_amplitude_wavelength(spectrum)
+settext("
+    Local maxima are (λ, amplitude) = [$((λ_1, a_1)), $((λ_2, a_2))]",
+    curpoint, markup=true)
 
 finish()
 end

@@ -153,8 +153,8 @@ end
 """
     normalize_datarange(A)
 
-normalize the elements in matrix A from 0 to 1 or equivalient depending on type.
-This includes complex values, in which case the magnitude is normalize_datarange_datarange_datarange_datarange_datarange_dataranged.
+normalize the elements in matrix A from 0.0 to 1.0, type preserving type.
+This includes complex values, in which case the magnitude is normalized.
 """
 function normalize_datarange(A::AbstractArray{<:RealQuantity})
     # Minimum and maximum value

@@ -11,13 +11,15 @@ function header_strings(; kwargs...)
         symbol = arg[1]
         value = arg[2]
         str = string(symbol)
-        str *= " ["
-        str *= if value isa AbstractArray
-            string(unit(value[1]))
-        else
-            string(unit(value))
+        if !isa(value,  Array{String})
+            str *= " ["
+            str *= if value isa AbstractArray
+                string(unit(value[1]))
+            else
+                string(unit(value))
+            end
+            str *= "]"
         end
-        str *= "]"
         push!(vs, str)
     end
     vs
@@ -31,10 +33,12 @@ function rounded_stripped(quantity, digits)
     rounded = if quantity isa  Quantity
         round(typeof(quantity), quantity, digits = digits)
     else
-        round(quantity, digits = digits)
+         round(quantity, digits = digits)
     end
     ustrip(rounded)
 end
+rounded_stripped(quantity::String, digits) = quantity
+
 
 """
     value_strings(n_rows, n_columns, digits = 2; kwargs...)
@@ -129,9 +133,6 @@ function draw_values(pos, rows, pixel_widths; kwargs...)
         maxleadingpixelwidth = maximum(pixelwidth, strs_before_dot[:, col])
         maxtrailingpixelwidth = maxpixelwidth - maxleadingpixelwidth
         sumpixelwidth = maxleadingpixelwidth + maxtrailingpixelwidth
-
-
-
         # If there are no dots, reldotpos = 1.
         # If there are no digits before any of the values, reldotpos = 0,
         # but that would require no leading digits.
@@ -146,6 +147,7 @@ function draw_values(pos, rows, pixel_widths; kwargs...)
             ps = pixelwidth(s)
             psleading = pixelwidth(sleading)
             Δpx_sumpixelwidth = sumpixelwidth * reldotpos - psleading
+            # For the column contents, we don't use settext. Consider using Luxor's Table for text tables.
             text(s, p + (Δpx_textbox + 1.0* Δpx_sumpixelwidth, 0))
             #= debug lines
             line(p, p + (Δpx_textbox, -row_height()), :stroke)

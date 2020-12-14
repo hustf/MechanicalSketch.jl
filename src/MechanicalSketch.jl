@@ -180,7 +180,7 @@ We want to make quality figures for A4 with 5 cm total margin. Width and height 
 """
 const WI = 1889
 "HE is the pixel height of the figure. See WI and orgo, O"
-const HE = 1259
+global HE = 1259
 "Used for scaling quantities to pixels. Use setscale_dist to change"
 global SCALEDIST = 20m / HE
 "Used for scaling quantities to pixels. Use setscale_velocity to change"

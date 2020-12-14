@@ -42,3 +42,9 @@ setscale_force() = setscale_force(20kN / HE)
 scale_sketch(q::Length) = upreferred(q / SCALEDIST)
 scale_sketch(q::Velocity) = upreferred(q / SCALVELOCITY)
 scale_sketch(q::Force) = upreferred(q / SCALEFORCE)
+
+"Updates constant HE. This has effect when calling ´empty_figure´,
+and side effects if rescaling afterwards"
+function set_figure_height(h::Int)
+    global HE = h
+end

@@ -111,7 +111,7 @@ where
     nxy   Function, noise field
     h     Step length, duration
     cutoff Maximum magnitude
-"""                     
+"""
 function convolute_pixel(w, vx, vy, nxy, h, cutoff)
     @assert length(vx) == length(vy)
     @assert length(w) == length(vy)
@@ -167,9 +167,78 @@ function draw_streamlines(center, xs, ys, f_xy, h; nsteps = 10, probability = 0.
             # Reorder to most recent position to oldest position
             vx = vcat(reverse(vxf), vxb)
             vy = vcat(reverse(vyf), vyb)
-            diminishingtrace(center, vx, vy)
+            trace_diminishing(center, vx, vy)
         end
     end
     grestore()
     nothing
+end
+
+"""
+    noise_between_wavelengths(λ_min, λ_max, x)
+
+Generate one value of 1D OpenSimplex noise. Output has  rougly linear amplitude spectrum
+between wavelengths. There is also some noise at longer wavelengths.
+
+Wave lengths ´λ_min´, ´λ_max´ and position ´x´ are typically quantities of dimension length.
+
+Standard deviation for random ´x´ is 0.103.
+"""
+function noise_between_wavelengths(λ_min, λ_max, x)
+    @assert λ_min < λ_max "λ_min < λ_max"
+    octaves = round(Int, log2(λ_max / λ_min), RoundUp)
+    noise( 2x / λ_max, detail = octaves, persistence = 0.7)
+end
+
+"""
+    noise_between_wavelengths(λ_min, λ_max, x, y)
+
+Generate one value of 2D OpenSimplex noise. Output has  rougly linear amplitude spectrum
+between wavelengths. There is also some noise at longer wavelengths.
+
+Wave lengths ´λ_min´, ´λ_max´ and positions ´x´, ´y´ are typically quantities of dimension length.
+
+Standard deviation for random (´x´, ´y´) is 0.103.
+"""
+function noise_between_wavelengths(λ_min, λ_max, x, y)
+    @assert λ_min < λ_max "λ_min < λ_max"
+    octaves = round(Int, log2(λ_max / λ_min), RoundUp)
+    noise( 2x / λ_max, 2y/ λ_max, detail = octaves, persistence = 0.7)
+end
+
+"""
+    noise_between_wavelengths(λ_min, λ_max, xs, normalize = true) -> Array{T,1} where T <: Number
+
+Generate a vector of 1D OpenSimplex noise. Output has  rougly linear amplitude spectrum
+between wavelengths. There is also some noise at longer wavelengths.
+
+Wave lengths ´λ_min´, ´λ_max´ and position 'xs´ are typically quantities of dimension length.
+Position xs is an iterator or vector.
+
+If ´normalize = true´, as is default, the standard deviation for a long ´xs´ is  0.1604.
+
+If ´normalize = false´, the standard deviation for random ´xs´ is 0.103.
+"""
+function noise_between_wavelengths(λ_min, λ_max, xs::T; normalize = true) where T <: Union{AbstractRange, Vector}
+    no = [ noise_between_wavelengths(λ_min, λ_max, x) for x in xs]
+    normalize ? normalize_datarange(no) : no
+end
+"""
+    noise_between_wavelengths(λ_min, λ_max, xs, ys; normalize = true) -> Array{T,2} where T <: Number
+
+Generate a matrix of 2D OpenSimplex noise. Output has  rougly linear amplitude spectrum
+between wavelengths. There is also some noise at longer wavelengths.
+
+Wave lengths ´λ_min´, ´λ_max´ and position iterators ´xs´, ´ys´ are typically quantities of dimension length.
+Positions ´xs´ and ´ys´ are iterators or vectors.
+
+If ´normalize = true´, as is default, the standard deviation for a large matrix is 0.1604.
+
+If ´normalize = false´, the standard deviation for random ´xs´ is 0.103.
+
+NOTE that the output matrix follows the image manipulation convention: xs correspond to output rows.
+"""
+function noise_between_wavelengths(λ_min, λ_max, xs::T, ys::T; normalize = true) where T <: Union{AbstractRange, Vector}
+    no = [ noise_between_wavelengths(λ_min, λ_max, x, y) for y in ys, x in xs]
+    normalize ? normalize_datarange(no) : no
 end
