@@ -3,14 +3,14 @@ import MechanicalSketch: empty_figure, PALETTE, O, HE, WI, EM, finish, ∙, Poin
 import MechanicalSketch: @import_expand, setscale_dist, SCALEDIST, settext
 import MechanicalSketch: noise, normalize_datarange, pngimage, placeimage, @layer
 import MechanicalSketch: poly, dimension_aligned, sethue, arrow, circle, prettypoly
-import MechanicalSketch: Length
+import MechanicalSketch: Length, noise_between_wavelengths
 import DSP.Periodograms: spectrogram, Spectrogram
 import DSP.Util:         nextfastfft
 import DSP.Windows:      tukey
 import MechanicalSketch: MechanicalUnits.dimension, NoDims, upreferred, ComplexQuantity, Quantity
 import Statistics:       mean
 
-#let
+let
 if !@isdefined m²
     @import_expand ~m # Will error if m² already is in the namespace
     @import_expand s
@@ -18,7 +18,7 @@ end
 empty_figure(joinpath(@__DIR__, "test_30.png"));
 
 
-curpoint = O + (-WI / 2 + EM, -HE / 2 + 3.5EM)
+global curpoint = O + (-WI / 2 + EM, -HE / 2 + 3.5EM)
 v_b = (0.05m/s, 0.5m/s)
 settext("
 From test 21 to 27, streamline velocity bounds are
@@ -27,11 +27,13 @@ From test 21 to 27, streamline velocity bounds are
 
 curpoint += (0, 4EM)
 Δt = 2.0s
-λ_b = Δt ∙ v_b
+wave_per_streamline = 2
+λ_b = Δt ∙ v_b  / wave_per_streamline
 λ_calibration = collect(range(λ_b[1], λ_b[2], length = 4))
+
 settext("
-Tracing a particle over Δt = $Δt forward <i>and</i> back we want to sample two harmonic noise waves with length λ.
-    <i>λ<sub>b</sub></i> = Δt ∙ v<sub>b</sub> = $λ_b
+Tracing a particle over Δt = $Δt forward ($(Δt / 2)) and back ($(Δt / 2)) we want to sample $wave_per_streamline harmonic noise waves with length λ.
+    <i>λ<sub>b</sub></i> = Δt ∙ v<sub>b</sub> / $wave_per_streamline = $λ_b
 Between bounds, we want a linearly increasing noise function amplitude.
 ", curpoint, markup = true)
 
@@ -43,7 +45,7 @@ setscale_dist(physwidth / n_pixels)
 length_one_pixel = physwidth / n_pixels
 include("test_functions_29.jl")
 include("test_functions_30.jl")
-no = normalize_datarange([noise_between_wavelengths_30(λ_b..., x) for x in (1:n_pixels) * length_one_pixel])
+no = normalize_datarange([noise_between_wavelengths(λ_b..., x) for x in (1:n_pixels) * length_one_pixel])
 @layer begin
     placeimage(pngimage(no) , curpoint; centered = false)
     placeimage(pngimage(no) , curpoint + (0,1); centered = false)
@@ -74,7 +76,7 @@ Spectrum from sampling the curve over $(100 * maximum(λ_b)):
 ", curpoint)
 
 curpoint += (0, 2EM)
-longnoise = normalize_datarange([noise_between_wavelengths_30(λ_b..., x) for x in (1:100n_pixels)*length_one_pixel])
+longnoise = normalize_datarange([noise_between_wavelengths(λ_b..., x) for x in (1:100n_pixels)*length_one_pixel])
 spectrum = sampledspectrum_29(longnoise, length_one_pixel, maximumwavelength = maximum(λ_b))
 draw_spectrum_29(curpoint, spectrum)
 
@@ -112,4 +114,4 @@ poly(curpoint .+ histogrampoints, :stroke)
 end
 
 finish()
-#end
+end
