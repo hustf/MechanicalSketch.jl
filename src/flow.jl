@@ -135,6 +135,7 @@ lenient_min_max(A::AbstractArray{<:RealQuantity}) = extrema(filter(x-> !isnan(x)
 lenient_min_max(A::AbstractArray{<:Real}) = extrema(filter(x-> !isnan(x) && !isinf(x), A))
 lenient_min_max(A) = lenient_min_max_complex(A)
 
+"Scale and move real values to fit in the closed interval 0.0 to 1.0, given minimum and maximum values in A"
 normalize_datarange_real(mi, ma, A) = map(A) do x
     if isnan(x) || isinf(x)
         1.0
@@ -142,12 +143,18 @@ normalize_datarange_real(mi, ma, A) = map(A) do x
         (x - mi) / (ma - mi)
     end
 end
-
+"""
+Scale and move the magnitude (modulus, absolute value) of complex values 
+to fit in the closed interval 0.0 to 1.0, without changing the argument (angle).
+The argument of the minimum value(s) is lost, since the angle is undefined for zero.
+"""
 normalize_datarange_complex(mi, ma, A) = map(A) do x
     if isnan(x) || isinf(x)
         1.0
     else
-        (hypot(x) - mi) / (ma - mi)
+        θ = angle(x)
+        r = (hypot(x) - mi) / (ma - mi)
+        r * complex(cos(θ), sin(θ))
     end
 end
 """
@@ -198,26 +205,26 @@ end
 
 
 """
-    color_matrix(qua::AbstractArray) -> RGBA
+    color_matrix(qua::AbstractArray; normalize_data_range = true) -> RGBA
 
 Map a collection of quantities to colors, transparent
 pixels for NaN and Inf values.
 """
-function color_matrix(qua::AbstractArray)
+function color_matrix(qua::AbstractArray; normalize_data_range = true)
     # Boolean collection, valid elements which should be opaque
     valid_element = map(x-> isnan(x) || isinf(x) ? false : true, qua)
 
      # Map value or magnitude to [0.0, 1.0], invalid elements are 1.0
-    norm_values = normalize_datarange(qua)
+    norm_real_values = hypot.(normalize_data_range ? normalize_datarange(qua) : qua)
 
     # Map [0.0, 1.0] to perceived luminosity color map
     color_values = if eltype(qua) <: RealQuantity || eltype(qua) <: Real
-        get(absolute_scale(), norm_values)
+        get(absolute_scale(), norm_real_values)
     else
         # Complex quanitity
-        get(complex_arg0_scale(), norm_values)
+        get(complex_arg0_scale(), norm_real_values)
     end
-    # If input is complex
+    # If input is complex, adjust the hue
     if !(eltype(qua) <: RealQuantity || eltype(qua) <: Real)
         # Set hue from complex argument (angle)
         # while not changing perceived luminance
@@ -232,12 +239,13 @@ end
 
 
 """
-    pngimage(quantities)
+    pngimage(quantities; normalize_data_range = true)
 Convert a matrix to a png image, one pixel per element
 """
-function pngimage(quantities)
+function pngimage(quantities; normalize_data_range = true)
     tempfilename = joinpath(@__DIR__, "tempsketch.png")
-    save(File(format"PNG", tempfilename), color_matrix(quantities))
+    save(File(format"PNG", tempfilename), color_matrix(quantities, 
+        normalize_data_range = normalize_data_range))
     img = readpng(tempfilename);
     rm(tempfilename)
     img
@@ -245,13 +253,13 @@ end
 
 
 """
-    draw_color_map(centerpoint::Point, quantities::Matrix)
+    draw_color_map(centerpoint::Point, quantities::Matrix, normalize_data_range = true)
     -> (upper left point, lower right point)
 
 The color map is centered on p, one pixel per value in the matrix
 """
-function draw_color_map(centerpoint::Point, quantities::Matrix)
-    img = pngimage(quantities)
+function draw_color_map(centerpoint::Point, quantities::Matrix; normalize_data_range = true)
+    img = pngimage(quantities, normalize_data_range = normalize_data_range)
     # Put the png format picture on screen
     gsave() # Possible bug in placeimage, guard against it.
     placeimage(img, centerpoint; centered = true)

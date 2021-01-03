@@ -242,7 +242,7 @@ polyrotate!(f, ang::Angle) = polyrotate!(f, - ustrip( ang |> rad))
     backgroundcolor = color_with_luminance(PALETTE[8], 0.1),
     hue = PALETTE[8] )
 
-Establish a drawing sized for A4 300 dpi figures,
+Establish a drawing sized for A4 300 dpi figures (WI, HE),
 black on white figure, line width 3 pt  default.
 """
 function empty_figure(filename = "HiThere.png";

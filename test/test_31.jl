@@ -23,7 +23,7 @@ v_calib = collect(range(0.05m/s, 0.5m/s, length = n_velocity))
 
 # Duration for a streamline
 Δt = 2.0s
-# Number of sample points per set (1 to 13 forward, 2 to 13 backward)
+# Number of sample points per set (1 to 9 from tracking backward, 10 (start) to including 20 forward)
 n = 20
 
 # Sampling frequency.
@@ -45,14 +45,14 @@ f_0 = wave_per_streamline / Δt
 sets_per_v = 10
 settext("
 For each velocity
-    <i>v<sub>calib</sub></i> = $v_calib, we pick $sets_per_v sets of <i>n</i> = $n streamline noise samples.
-Finally, $sets_per_v sample sets with periodic waves.
+    <i>v<sub>calib</sub></i> = $v_calib, we pick $sets_per_v sets of <i>n</i> = $n streamline noise samples over <i>Δt</i> = $(Δt). 
+    The noise spectrum is coloured between (λ<sub>min</sub>, λ<sub>max</sub>) = ($λ_min , $λ_max) for $wave_per_streamline periods over <i>Δt</i>.
+    The last sample sets vary harmonically with time.
 ", curpoint, markup = true)
 
 
-# Make a matrix with a streamline sample set per column,
-# plus one for periodic waves
-
+# Make a matrix with a streamline sample set per column.
+# We add more columns below.
 sample_matrix = zeros(n, n_velocity * sets_per_v)
 for i in 1:n_velocity
     for j in 1:sets_per_v
@@ -62,25 +62,25 @@ for i in 1:n_velocity
 end
 sample_matrix = normalize_datarange(sample_matrix)
 
-# Add set_per_v columns. These are periodic (with respect to time) sample sets
+# Add periodic (with respect to time) sample sets (add columns to sample_matrix)
 n_columns = (n_velocity + 1 ) * sets_per_v
 sample_matrix = hcat(sample_matrix, zeros(n, sets_per_v))
-linfractions = range(f_0 / f_s, step = ((1 - f_0 / f_s)) / 3,  length = sets_per_v)
+linfractions = range(0.0, step = 1 / 3,  length = sets_per_v)
 f_periodic = f_0 * linfractions.^2
 for (i, f) in enumerate(f_periodic)
     col = n_velocity * (sets_per_v ) + i
     ω = 2π∙f
     # Time range over the window with n samples
     trng = range(1 / (n - 1), 1, length = n) * Δt
-    ϕ = π ∙ rand()
+    ϕ = i > 1 ? 2π ∙ rand() : -π / 2
     sample_matrix[:, col] = [0.5 + 0.5sin(ω ∙ tim - ϕ) for tim in trng]
 end
 
 
-# Show the sample sets as individual plots
+# Show the sample sets as individual bar plots
 for i in 1:(n_velocity + 1)
     global curpoint += (0.0, 2.5EM)
-    # Text of this row
+    # Text for this velocity sample set or harmonic set
     if i <= n_velocity
         settext("$(v_calib[i])", curpoint)
     else
@@ -88,11 +88,11 @@ for i in 1:(n_velocity + 1)
          ϕ is random, f = ...",
             curpoint + (-EM, 0), markup = true, valign = "bottom")
     end
-    # Plot sample set for this row
+    # Plot  this velocity sample set or harmonic set
     for j in 1:sets_per_v
         col = (i - 1) * sets_per_v + j
         origo = curpoint + (8.5EM +EM * 3.25 * (j - 1), 0.0)
-        draw_sampleplot_31(origo, sample_matrix[:, col] * 2EM, 2.25EM)
+        draw_sampleplot_31(origo, sample_matrix[:, col] * 2EM, 2.25EM, firstsampleno = -9)
         if i > n_velocity
             str = round(s⁻¹, f_periodic[j], digits = 2)
             settext("$str", origo)
@@ -101,10 +101,11 @@ for i in 1:(n_velocity + 1)
 end
 
 
-curpoint += (0, 8EM)
+curpoint += (0, 9EM)
 
 settext("
-From each sample set above we are going to find the value for one pixel. Sampling frequency is
+We will z-transform each sample set to a complex number: Amplitude and phase for $wave_per_streamline wave per set.
+Sampling frequency is
     <i>f<sub>s</sub> = n  / Δt  = </i> $f_s
 We want to extract a value based on each sample set's component with frequency
     <i>f<sub>0</sub></i> = 2 / Δt = $f_0.
@@ -119,7 +120,7 @@ curpoint += (0, 3EM)
 explanationcolumn = ["Sampling frequency",
     "    ...unitless, normalized to radians per sample",
     "Nyquist frequency (highest detectable)",
-    "Frequency to keep after filtering",
+    "Frequency for which to find amplitude and phase",
     "     ...unitless, normalized",
     "     ...as a fraction of Nyquist"]
 mathcolumn = ["<i>ω<sub>s</sub> = 2πf<sub>s</sub></i> = $f_s",
@@ -136,10 +137,10 @@ for r in 1:size(ta)[1]
     end
 end
 
-curpoint += (0, 6 * 1.2EM + 2EM)
+curpoint += (0, 6 * 1.2EM + 1EM)
 settext("
-We will illustrate the extraction of magnitude at frequency <i>ω<sub>0n</sub></i> = $(ω_0n / π)∙π
-by use of the z-transform. The average magnitude is noted:
+We will show the extraction of magnitude and phase of frequency <i>ω<sub>0n</sub></i> = $(ω_0n / π)∙π
+by use of the z-transform. The average magnitude is noted, and the result is the white point:
 ", curpoint, markup = true)
 
 
@@ -148,13 +149,13 @@ for i in 1:(n_velocity + 1)
     # Plot z-transformed sample sets for this row
     global curpoint += (0.0, 2.5EM)
     @layer begin
-        ŝ_avg = complex(0.0,0.0)
+        magn_avg = 0.0
         for j in 1:sets_per_v
             col = (i - 1) * sets_per_v + j
             origo = curpoint + (8.5EM + EM * 3.25 * (j - 0.5), -0.5 * EM)
             vs =  sample_matrix[:, col]
-            vŝ = z_transform_contributions(vs, exp(-im * ω_0n))
-            # Plot contributions while circling
+            vŝ = z_transform_contributions(vs, exp(im * ω_0n))
+            # Plot contributions while circling and changing hue from start to finish.
             sethue(color_from_palette("red"))
             setline(1)
             trace_rotate_hue(origo, EM * real.(vŝ), EM * imag.(vŝ))
@@ -162,21 +163,22 @@ for i in 1:(n_velocity + 1)
             sethue(PALETTE[3])
             arrow(origo, origo + (0.0,  -EM))
             arrow(origo, origo + (EM, 0.0))
-            # Plot resultant
+            # Find resultant
             ŝ = sum(vŝ)
-            ŝ_avg += ŝ  / sets_per_v
+            magn_avg += hypot(ŝ)  / sets_per_v
+            # Plot transform result
             ŝ_pt = EM * Point(real(ŝ), imag(ŝ))
             setline(2)
-            line(origo, origo + ŝ_pt, :stroke)
             sethue("white")
-            circle(origo + ŝ_pt, 0.02m, :stroke)
+            line(origo, origo + ŝ_pt, :stroke)
+            circle(origo + ŝ_pt, 0.03m, :stroke)
         end
     end
     if i <= n_velocity
-        push!(vmagn1, hypot(ŝ_avg))
+        push!(vmagn1, magn_avg)
     end
     # text for this row of transformed sample sets
-    str_amp = round(hypot(ŝ_avg), digits = 2)
+    str_amp = round(magn_avg, digits = 2)
     if i <= n_velocity
         settext("$(v_calib[i]) magn ω<sub>0</sub> = $str_amp",
         curpoint, markup = true)
@@ -192,12 +194,13 @@ end
 ##############################################################################
 
 curpoint += (0, 6 * 1.2EM )
+correl1 = round(cor(v_calib * s / m , vmagn1), digits = 3)
 settext("
-The correlation is $(round(cor(v_calib * s / m , vmagn1), digits = 3)) between the four magnitudes and velocities.
+The correlation is $(correl1) between the four magnitudes and velocities.
 
-Let us subtract 0.5, apply a blackman window and add 0.5 to the same sample sets and look for an improvement:
+Let us apply a Hanning window, which improves phase detection, and check the impact on magnitude correlation:
 ", curpoint, markup = true)
-sample_matrix = [(sample_matrix[i, j] - 0.5) * blackman_20(i) + 0.5 for i = 1:n, j = 1:n_columns]
+sample_matrix = [sample_matrix[i, j] * (sin(π * i / n)^2) for i = 1:n, j = 1:n_columns]
 
 
 
@@ -215,7 +218,7 @@ for i in 1:(n_velocity + 1)
     for j in 1:sets_per_v
         col = (i - 1) * sets_per_v + j
         origo = curpoint + (8.5EM +EM * 3.25 * (j - 1), 0.0)
-        draw_sampleplot_31(origo, sample_matrix[:, col] * 2EM, 2.25EM)
+        draw_sampleplot_31(origo, sample_matrix[:, col] * 2EM, 2.25EM, firstsampleno = -9)
         if i > n_velocity
             str = round(s⁻¹, f_periodic[j], digits = 2)
             settext("$str", origo)
@@ -231,7 +234,7 @@ for i in 1:(n_velocity + 1)
     # Plot z-transformed sample sets for this row
     global curpoint += (0.0, 2.5EM)
     @layer begin
-        ŝ_avg = complex(0.0,0.0)
+        magn_avg = 0.0
         for j in 1:sets_per_v
             col = (i - 1) * sets_per_v + j
             origo = curpoint + (8.5EM + EM * 3.25 * (j - 0.5), -0.5 * EM)
@@ -247,19 +250,19 @@ for i in 1:(n_velocity + 1)
             arrow(origo, origo + (EM, 0.0))
             # Plot resultant
             ŝ = sum(vŝ)
-            ŝ_avg += ŝ  / sets_per_v
+            magn_avg += hypot(ŝ)  / sets_per_v
             ŝ_pt = EM * Point(real(ŝ), imag(ŝ))
             setline(2)
-            line(origo, origo + ŝ_pt, :stroke)
             sethue("white")
-            circle(origo + ŝ_pt, 0.02m, :stroke)
+            line(origo, origo + ŝ_pt, :stroke)
+            circle(origo + ŝ_pt, 0.03m, :stroke)
         end
     end
     if i <= n_velocity
-        push!(vmagn2, hypot(ŝ_avg))
+        push!(vmagn2, magn_avg)
     end
     # text for this row of transformed sample sets
-    str_amp = round(hypot(ŝ_avg), digits = 2)
+    str_amp = round(magn_avg, digits = 2)
     if i <= n_velocity
         settext("$(v_calib[i]) magn ω<sub>0</sub> = $str_amp",
         curpoint, markup = true)
@@ -275,14 +278,15 @@ end
 
 
 curpoint += (0, 4EM)
-
+correl2 = round(cor(v_calib * s / m , vmagn2), digits = 3)
 settext("
-The correlation is $(round(cor(v_calib * s / m , vmagn2), digits = 3)) between the four magnitudes and velocities.
-There's likely  no help in using windows to extract this single frequency.
+The correlation is $correl2 between the four magnitudes and velocities, which is <i>$(correl1 > correl2 ? "worse" : "better")</i> than $(correl1).
+In most cases, the correlation is worse.
 ", curpoint, markup = true)
 
 
 
 finish()
 set_figure_height(round(Int, 3777 / 2))
+correl1
 end

@@ -14,11 +14,11 @@ function samplepoints(streamlinelength, λ_min , λ_max, n)
     no = noise_between_wavelengths(λ_min, λ_max, xs, normalize = false)
 end
 
-function samplebars_31(samples, maxwidth)
+function samplebars_31(samples, maxwidth; firstsampleno = 1)
     pts = Vector{Point}()
     maxx = length(samples)
     for (i, a) in enumerate(samples)
-        x = maxwidth * i / maxx
+        x = maxwidth * (i + firstsampleno - 1) / maxx
         y = - a
         push!(pts,  Point(x, 0y))
         push!(pts,  Point(x, y))
@@ -26,9 +26,9 @@ function samplebars_31(samples, maxwidth)
     pts
 end
 
-function draw_samplebars_31(origo, samples, maxwidth; rotatehue_degrees_total = 0°)
+function draw_samplebars_31(origo, samples, maxwidth; rotatehue_degrees_total = 0°, firstsampleno = 1)
     startcolo = get_current_RGB()
-    samplepoints = samplebars_31(samples,  maxwidth)
+    samplepoints = samplebars_31(samples,  maxwidth, firstsampleno = firstsampleno)
     function foovertex(n)
         if mod(n, 3) == 2
             rotatedeg = (n - 1) * rotatehue_degrees_total / length(samplepoints)
@@ -44,13 +44,13 @@ function draw_samplebars_31(origo, samples, maxwidth; rotatehue_degrees_total = 
     end
 end
 
-function draw_sampleplot_31(origo, samples, maxwidth)
+function draw_sampleplot_31(origo, samples, maxwidth; firstsampleno = 1)
     @layer begin
         sethue(PALETTE[3])
         arrow(origo, origo + (0.0,  -2EM))
-        arrow(origo, origo + (maxwidth + 0.5EM, 0.0))
+        arrow(origo, origo + (maxwidth * (length(samples) + firstsampleno - 1) / length(samples) + 0.5EM, 0.0))
         sethue(color_from_palette("red"))
-        draw_samplebars_31(origo, samples, maxwidth, rotatehue_degrees_total = 270°)
+        draw_samplebars_31(origo, samples, maxwidth, rotatehue_degrees_total = 270°, firstsampleno = firstsampleno)
     end
 end
 
@@ -64,6 +64,7 @@ where
 
 """
 function z_transform_contributions(vs::T, z::Complex) where {T<:Union{AbstractRange, Vector}}
-    [s * z^-(i - 1) for (i, s) in enumerate(vs)]
+    halfn = div(length(vs), 2)
+    [s * z^-(i - halfn) for (i, s) in enumerate(vs)]
 end
 z_transform_contributions_points(vs, z) = [EM * Point(real(ŝ), imag(ŝ)) for ŝ in z_transform_contributions(vs, z)]

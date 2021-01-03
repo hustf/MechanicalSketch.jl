@@ -2,10 +2,10 @@ import MechanicalSketch
 import MechanicalSketch: empty_figure, background, sethue, O, WI, HE, EM, FS, finish,
        PALETTE, setfont, settext, setline
 import MechanicalSketch: dimension_aligned, move, do_action, noise
-import MechanicalSketch: ComplexQuantity, generate_complex_potential_source, generate_complex_potential_vortex
+import MechanicalSketch: generate_complex_potential_source, generate_complex_potential_vortex
 import MechanicalSketch: @import_expand, Quantity, @layer
-import MechanicalSketch: quantities_at_pixels, draw_color_map, draw_real_legend, draw_complex_legend, setscale_dist, lenient_min_max
-import MechanicalSketch: ∙, ∇_rectangle, SVector, trace_diminishing, convolute_pixel, rk4_steps!, normalize_datarange, draw_streamlines
+import MechanicalSketch: draw_color_map, draw_real_legend, setscale_dist, lenient_min_max
+import MechanicalSketch: ∙, ∇_rectangle, SVector, convolute_pixel, rk4_steps!, normalize_datarange, draw_streamlines
 import Interpolations: interpolate, Gridded, Linear, Flat, extrapolate
 let
 empty_figure(joinpath(@__DIR__, "test_27.png"));
