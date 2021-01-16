@@ -1,6 +1,6 @@
 import MechanicalSketch
 import MechanicalSketch: empty_figure, PALETTE, O, HE, WI, EM, finish, ∙, Point
-import MechanicalSketch: @import_expand, setscale_dist, SCALEDIST, settext
+import MechanicalSketch: @import_expand, set_scale_sketch, SCALEDIST, settext
 import MechanicalSketch: noise, normalize_datarange, pngimage, placeimage, @layer
 import MechanicalSketch: poly, dimension_aligned, sethue, arrow, circle, prettypoly
 import MechanicalSketch: Length, noise_between_wavelengths
@@ -41,7 +41,7 @@ Between bounds, we want a linearly increasing noise function amplitude.
 curpoint += (0, 3.5EM)
 n_pixels = round(Int, 0.9 * WI)
 physwidth = 3.0m
-setscale_dist(physwidth / n_pixels)
+set_scale_sketch(physwidth, n_pixels)
 length_one_pixel = physwidth / n_pixels
 include("test_functions_29.jl")
 include("test_functions_30.jl")

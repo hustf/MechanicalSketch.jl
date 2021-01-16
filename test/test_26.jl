@@ -1,12 +1,12 @@
 import MechanicalSketch
 import MechanicalSketch: empty_figure, sethue, O, WI, HE, EM, FS, finish,
        PALETTE, setfont, settext, setline
-import MechanicalSketch: dimension_aligned, noise
+import MechanicalSketch: dimension_aligned, noise, rk4_steps!
 import MechanicalSketch: ComplexQuantity, generate_complex_potential_source, generate_complex_potential_vortex
 import MechanicalSketch: @import_expand, Quantity, @layer
-import MechanicalSketch: draw_color_map, draw_real_legend, setscale_dist
+import MechanicalSketch: draw_color_map, draw_real_legend, set_scale_sketch
 import MechanicalSketch: lenient_min_max, normalize_datarange
-import MechanicalSketch: ∙, ∇_rectangle, SA, SVector, rk4_steps!, convolute_pixel, draw_streamlines
+import MechanicalSketch: ∙, ∇_rectangle, SA, SVector, draw_streamlines
 import Interpolations: interpolate, Gridded, Linear, Flat, extrapolate
 let
 empty_figure(joinpath(@__DIR__, "test_26.png"));
@@ -14,7 +14,7 @@ include("test_functions_24.jl")
 include("test_functions_26.jl")
 # Reuse the flow field from test_23.jl, a matrix of complex velocities with an element per pixel.
 A = flowfield_23();
-setscale_dist(PHYSWIDTH_23 / (SCREEN_WIDTH_FRAC_23 * WI))
+set_scale_sketch(PHYSWIDTH_23, round(Int, SCREEN_WIDTH_FRAC_23 * WI))
 
 
 setfont("DejaVu Sans", FS)
@@ -100,4 +100,5 @@ settext(str, O + (-WI/2 + EM, 2 * EM) , markup = true)
 setfont("Calibri", FS)
 
 finish()
+set_scale_sketch()
 end

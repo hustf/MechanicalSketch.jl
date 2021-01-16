@@ -1,211 +1,149 @@
 import MechanicalSketch
-import MechanicalSketch: empty_figure, background, sethue, O, WI, HE, EM, FS, finish,
-       PALETTE, setfont, settext, setline, color_with_luminance
-import MechanicalSketch: dimension_aligned, move, do_action, noise_between_wavelengths
+import MechanicalSketch: background, sethue, O, WI, HE, EM, FS
+import MechanicalSketch: PALETTE, setfont, settext, setline, fontsize, color_with_luminance
+import MechanicalSketch: dimension_aligned
 import MechanicalSketch: generate_complex_potential_source, generate_complex_potential_vortex
 import MechanicalSketch: @import_expand, Quantity, @layer
-import MechanicalSketch: draw_color_map, draw_real_legend, setscale_dist, lenient_min_max
-import MechanicalSketch: ∙, ∇_rectangle, SVector, convolute_pixel, rk4_steps!, normalize_datarange, draw_streamlines
-import Interpolations: interpolate, Gridded, Linear, Flat, extrapolate
-import MechanicalSketch: Movie, Scene, animate, circle, Point, arrow, poly, textextents
-using BenchmarkTools
-#let
+import MechanicalSketch: draw_color_map, set_scale_sketch, get_scale_sketch, lenient_min_max, ∙
+import MechanicalSketch: clamped_velocity_matrix, line_integral_convolution_complex, lic_matrix_current, LicSceneOpts
+import MechanicalSketch: normalize_datarange, matrix_to_function, noise_for_lic, function_to_interpolated_function
+import MechanicalSketch: Movie, Scene, animate, circle, line, Point, arrow, poly
+import MechanicalSketch: Time, get_scale_sketch, sawtooth
+import Interpolations:   Extrapolation
 
+using BenchmarkTools
+let
 
 
 if !@isdefined m²
     @import_expand m # Will error if m² already is in the namespace
     @import_expand s
 end
-# Reuse the velocityfield from here
-include("test_functions_24.jl")
+
 include("test_functions_32.jl")
 
-# Scaling
+# Scaling and placement
 physwidth = 10.0m
-height_relative_width = 0.4
-physheight = physwidth * height_relative_width
-screen_width_frac = 2 / 3
-setscale_dist(physwidth / (screen_width_frac * WI))
+physheight = 4.0m
+totheight = physheight * 1.1 * 3
+set_scale_sketch(totheight, HE)
+totwidth = totheight * WI / HE
+Δx = totwidth / 2 - 0.55 * physwidth
+Δy = physheight * 1.1
 
-# Reuse the flow field from test_23.jl, a matrix of complex velocities with an element per pixel.
-A = flowfield_23();
-# We are going to use the velocity vector field in a lot of calculations,
-# and interpolate between the calculated pixel values
-xs = range(-physwidth/2, stop = physwidth / 2, length = size(A)[2]);
-ys = range(-height_relative_width * physwidth/2, stop = height_relative_width * physwidth / 2, length = size(A)[1]);
-fxy_inter = interpolate((xs, ys), map( cmplx -> (real(cmplx), imag(cmplx)), transpose(A)[ : , end:-1:1]), Gridded(Linear()));
-fxy = extrapolate(fxy_inter, Flat());
-# TODO test whether the interpolation saves time.
-
-# Streamline convolution preparation
-
-# Length of a streamline in time, including forward and back
-Δt = 2.0s
-# Number of waves over one streamline
-wave_per_streamline = 2
-# Frequency of interest
-f_0 = wave_per_streamline / Δt
-# Number of sample points per set (1 to 9 from tracking backward, 10 (start) to including 20 forward)
-n = 20
-# Sampling frequency.
-f_s = n / Δt
-# Unitless, normalized circular frequency of interest
-ω_0n = 2π ∙ f_0 / f_s
-
-# Velocity scale from, to
-v_min, v_max = lenient_min_max(A)
-# Noise spectrum wavelengths
-λ_min, λ_max = Δt∙(v_min, v_max) / wave_per_streamline
-# Simplex noise matrix with linear spectrum - x in rows, y in columns
-no = noise_between_wavelengths(λ_min, λ_max, xs, ys);
-# Make a function that interpolates between noise pixels:
-nxy_inter = interpolate((xs, ys), transpose(no)[ : , end:-1:1], Gridded(Linear()));
-nxy = extrapolate(nxy_inter, Flat());
+# Reused velocity field from earlier tests
+velocity_matrix = clamped_velocity_matrix(ϕ_32; physwidth = physwidth, physheight = physheight, cutoff = 0.5m/s);
+# One complex matrix: Phase and amplitude for the visualization. This can generate cyclic movies
+complex_convolution_matrix = convolute_image_32(velocity_matrix);
+# The distribution of phase angles (complex argument) ought to be flat between -π and π. Let's check that:
+n_pixels = round(Int, get_scale_sketch(physwidth))
+phasetop, binwidth, relfreq = phase_histog(complex_convolution_matrix, n_pixels)
+histogrampoints = Point.(collect(phasetop * n_pixels / 2π), -EM .* relfreq);
 
 
-z_transform_32(fxy, nxy, 0.0m, 0.0m, f_s, f_0, wave_per_streamline)
+# We'll also prepare a uniform flow field, constant velocity 0.5 m/s.
+fxy_unif(x, y) = (0.5, 0.0)m∙s⁻¹
+# Phase and amplitude for the visualization. This can generate cyclic movies
+complex_convolution_matrix_uniform = convolute_image_32(fxy_unif, physwidth = physwidth, physheight = physheight)
+
+# We'll also plot a vertically uniform flow field, horizontally increasing velocity from 0 to 0.5 m/s.
+fxy_lin(x, y) = (0.5 * (x / physwidth + 0.5), 0.0)m∙s⁻¹
+# Phase and amplitude for the visualization. This can generate cyclic movies
+complex_convolution_matrix_linear = convolute_image_32(fxy_lin, physwidth = physwidth, physheight = physheight)
 
 
+# Define scene functions (parts of each image)
 
-@time M = convolute_image_32(xs, ys, fxy, nxy, f_s, f_0, 0.5m/s, wave_per_streamline); # 30 s 50M allocations
-                                                                # 26s 1.76M allocations
-                                                                # 27s 2 allocations
-                                                                # 28s 1.38 M all
+# Rectangular flow field plot including a visual frame counter
+function plot_flowfield(scene, framenumber)
+    @assert scene.opts isa LicSceneOpts string(typeof(scene.opts))
+    currentvals = lic_matrix_current(scene, framenumber)
+    draw_color_map(scene.opts.O, currentvals, normalize_data_range = false)
+end
 
-# The distribution of phase angles (complex arguments) ought to be flat between -π and π. Let's check that:
-n_pixels = round(Int, screen_width_frac * WI)
-curpoint = O
-
-phasetop, binwidth, relfreq = phase_histog(M, n_pixels)
-histogrampoints = Point.(collect(phasetop * n_pixels / 2π), -EM .* relfreq)
-
-framrat = 30/s
-
-frames = n / Δt
-
-
-function frame32(scene, framenumber)
-
-    θ = 2π ∙ framenumber / (n * wave_per_streamline)
-    u = exp(θ∙im)
-    mi, ma = lenient_min_max(M)
-    currentvals = map(M) do complexval
-        θ_pixel = sawtooth(angle(complexval) + θ, π / wave_per_streamline)
-        r = hypot(complexval)
-        (1.0 + r∙cos(θ_pixel)) * r / (2.0 * ma)
-    end
-    draw_color_map(O, currentvals, normalize_data_range = false)
-    circle(O + (3EM, -3EM), 1FS, :stroke)
-    settext(string(framenumber), O + (3EM, -3EM))
-    sethue("black")
-    settext("<span background='green'>Relative frequency of phase angle</span>", curpoint + (0.0,  -EM ), markup=true)
-    settext("<span background='green'>Angle values, min = -π, max = π</span>", O + (n_pixels * 0.2 / 2, EM), markup=true)
-    @layer begin
+# Histogram plot, overlay to the flow field
+function plot_histogram(scene, framenumber)
+    @assert scene.opts isa LicSceneOpts
+    histogrampoints = scene.opts.data
+    @assert histogrampoints isa Array{Point,1}
+    n_pixel_x = size(histogrampoints)[1]
+    @layer let
+        O = scene.opts.O
+        settext("<span background='green'>Relative frequency of phase angle</span>",
+            O + (-5EM,  -EM ), markup=true)
+        settext("<span background='green'>Angle values, min = -π, max = π</span>",
+            O + (n_pixel_x / 2, 1.5EM), markup=true, halign = "right")
         sethue(PALETTE[3])
         arrow(O, O + (0.0,  -EM))
-        arrow(O, O + (n_pixels * 1.1 / 2, 0.0))
+        arrow(O, O + (n_pixel_x * 1.1 / 2, 0.0))
         poly(O .+ histogrampoints, :stroke)
         settext("π / 2 ", O + (n_pixels / 4,  0.0), markup=true)
      end
 end
 
-function frame32a(scene, framenumber)
-    # TODO make a function generator, capturing n / Δt and adopting to frame rate 30/s
-    θ = 2π ∙ framenumber / (n * wave_per_streamline)
-    u = exp(θ∙im)
-    mi, ma = lenient_min_max(M)
-    currentvals = map(M) do complexval
-        θ_pixel = sawtooth(angle(complexval) + θ, π / wave_per_streamline)
-        r = hypot(complexval)
-        r∙cos(θ_pixel) / ma
+# Overlay to the flow field
+function plot_frame_indicator(scene, framenumber)
+    @assert scene.opts isa LicSceneOpts
+    @layer let
+        O = scene.opts.O
+        sethue(PALETTE[9])
+        setline(3)
+        circle(O + (3EM, -3EM), 1FS, :stroke)
+        frames_per_cycle = scene.opts.cycle_duration ∙ (scene.opts.framerate∙s⁻¹)
+        # Where we are in the repeating cycle, [0, 1 - frame_duration]
+        normalized_time = framenumber / frames_per_cycle
+        θ = 2π ∙ normalized_time
+        line(O + (3EM, -3EM), O + (3.0EM, -3.0EM) + (cos(θ), sin(θ)) .* FS, :stroke)
+        settext(string(framenumber), O + (4EM, -4EM))
     end
-    draw_color_map(O, currentvals, normalize_data_range = false)
-    circle(O + (3EM, -3EM), 1FS, :stroke)
-    settext(string(framenumber), O + (3EM, -3EM))
-    sethue("black")
-    settext("<span background='green'>Relative frequency of phase angle</span>", curpoint + (0.0,  -EM ), markup=true)
-    settext("<span background='green'>Angle values, min = -π, max = π</span>", O + (n_pixels * 0.2 / 2, EM), markup=true)
-    @layer begin
-        sethue(PALETTE[3])
-        arrow(O, O + (0.0,  -EM))
-        arrow(O, O + (n_pixels * 1.1 / 2, 0.0))
-        poly(O .+ histogrampoints, :stroke)
-        settext("π / 2 ", O + (n_pixels / 4,  0.0), markup=true)
-        end
 end
-begin
-    empty_figure(joinpath(@__DIR__, "test_32.png"));
-    frame32(1, 5)
-    finish()
-end
-backdrop(scene, framenumber) =  color_with_luminance(PALETTE[8], 0.1)
 
-demo = Movie(length(xs), length(ys), "test", 0:19)
-animate(demo, [
-    Scene(demo, backdrop, 0:19),
-    Scene(demo, frame32, 0:19)],
+function backdrop(scene, framenumber)
+    setfont("Calibri", FS)
+    fontsize(FS)
+    O = scene.opts.O
+    background(color_with_luminance(PALETTE[6], 0.3))
+    sethue(PALETTE[3])
+    Δt = scene.opts.cycle_duration
+    frames_per_cycle = Δt ∙ (scene.opts.framerate∙s⁻¹)
+    # Where we are in the repeating cycle, [0, 1 - frame_duration]
+    normalized_time = framenumber / frames_per_cycle
+    t = Δt ∙ normalized_time
+    settext("Uniform velocity 0.5 m/s:\nCheck that one pixel moves \n$(Δt * 0.5m/s) over $Δt",
+        O + (-WI / 2 + EM, 0.0), markup=true)
+    dimension_aligned(O + (-3.0m, physheight / 2), O + (-2.0m, physheight / 2),
+        fromextension = (0, EM), toextension = (0, EM), offset = -EM)
+    dimension_aligned(O + (-4.0m, physheight / 2), O + (-3.0m, physheight / 2),
+        fromextension = (0, EM), toextension = (0, EM), offset = -EM)
+    dimension_aligned(O + (-5.0m, physheight / 2), O + (-4.0m, physheight / 2),
+        fromextension = (0, EM), toextension = (0, EM), offset = -EM)
+
+    settext("t = $(round(s,t, digits=2))",
+        O + (-WI / 2 + EM, -4EM), markup=true)
+
+    for i = 0:9
+        x = t ∙ 0.5m/s + i ∙ 1.0m -5.0m
+        line(O + (x, 1.1 * physheight / 2), O + (x, physheight / 2), :stroke)
+    end
+end
+
+
+Δt = 2.0s
+endframe = Int(floor(Δt ∙ (30∙s⁻¹)) - 1)
+movie = Movie(WI, HE, "Three flow fields", 15:15)
+scenes = [
+    Scene(movie, backdrop, 0:endframe,             optarg = LicSceneOpts(NaN, Δt, 30, O)),
+    Scene(movie, plot_flowfield, 0:endframe,       optarg = LicSceneOpts(complex_convolution_matrix, Δt, 30, O + (Δx, -Δy))),
+    Scene(movie, plot_histogram, 0:endframe,       optarg = LicSceneOpts(histogrampoints, Δt, 30, O + (Δx, -Δy ))),
+    Scene(movie, plot_frame_indicator, 0:endframe, optarg = LicSceneOpts(NaN, Δt, 30, O + (Δx, -Δy ))),
+    Scene(movie, plot_flowfield, 0:endframe,       optarg = LicSceneOpts(complex_convolution_matrix_uniform, Δt, 30, O )),
+    Scene(movie, plot_flowfield, 0:endframe,       optarg = LicSceneOpts(complex_convolution_matrix_linear, Δt, 30, O + (Δx, Δy)))
+    ];
+
+
+animate(movie, scenes,
     creategif = true,
     pathname = joinpath(@__DIR__, "test_32.gif"),
-    framerate = n ∙ s / Δt)
+    framerate = 30)
 
-
-begin
-    empty_figure(joinpath(@__DIR__, "test_32a.png"));
-    frame32a(1, 5)
-    finish()
-end
-
-animate(demo, [
-    Scene(demo, backdrop, 0:19),
-    Scene(demo, frame32a, 0:19)],
-    creategif = true,
-    pathname = joinpath(@__DIR__, "test_32a.gif"),
-    framerate = n ∙ s / Δt)
-
-
-# Try with a uniform velocity field
-A = 0.0.*A
-A = map(A) do x
-    complex(0.5, 0.0)m/s
-end
-for (i, val) in enumerate(A)
-    A[i] = val * i / (length(xs) * length(ys))
-end
-fxy_inter = interpolate((xs, ys), map( cmplx -> (real(cmplx), imag(cmplx)), transpose(A)[ : , end:-1:1]), Gridded(Linear()));
-fxy = extrapolate(fxy_inter, Flat());
-
-@time MU = convolute_image_32(xs, ys, fxy, nxy, f_s, f_0, 0.5m/s, wave_per_streamline); # 30 s 50M allocations
-                                                                # 26s 1.76M allocations
-
-function frame32b(scene, framenumber)
-    θ = 2π ∙ wave_per_streamline ∙ framenumber / 20
-    u = exp(θ∙im)
-    mi, ma = lenient_min_max(MU)
-    currentvals = map(MU) do complexval
-        θ_pixel = sawtooth(angle(complexval) + θ, π / wave_per_streamline)
-        r = hypot(complexval)
-        r∙cos(θ_pixel) / ma
-    end
-    draw_color_map(O, currentvals, normalize_data_range = false)
-    sethue("black")
-    circle(O + (3EM, -3EM), 1FS, :stroke)
-    settext(string(framenumber), O + (3EM, -3EM))
-end
-
-demo = Movie(length(xs), length(ys), "test", 0:19)
-animate(demo, [
-    Scene(demo, backdrop, 0:19),
-    Scene(demo, frame32b, 0:19)],
-    creategif=true,
-    pathname= joinpath(@__DIR__, "test_32b.gif"),
-    framerate = n ∙ s / Δt)
-
-begin
-    empty_figure(joinpath(@__DIR__, "test_32b.png"));
-    frame32b(1, 5)
-    finish()
-end
-
-finish()
-#end
+end # let

@@ -1,136 +1,4 @@
 """
-    rk4_step!(f, vx, vy, h, n)
-
-Coordinates (vx[n + 1], vy[n + 1]) are updated with the estimated position,
-along function f.
-        f is a tuple-valued gradient in two dimensions
-        vx and vy are vectors representing coordinates like (vx[n], vy[n])
-        h is a step-size quantity. If the integration variable is time,
-        it defines the length of time betweeen points. It can be negative.
-"""
-function rk4_step!(f, vx, vy, h, n)
-    fx0, fy0 = f(vx[n], vy[n])
-    x1 = vx[n] + fx0 * h * 0.5
-    y1 = vy[n] + fy0 * h * 0.5
-    fx1, fy1 = f(x1, y1)
-    x2 = vx[n] + fx1 * h * 0.5
-    y2 = vy[n] + fy1 * h * 0.5
-    fx2, fy2  = f(x2, y2)
-    x3 = vx[n] + fx2 * h
-    y3 = vy[n] + fy2 * h
-    fx3, fy3 = f(x3, y3)
-    vx[n + 1] = vx[n] + 1/6 * h * ( fx0  + 2∙fx1 + 2∙fx2 + fx3 )
-    vy[n + 1] = vy[n] + 1/6 * h * ( fy0  + 2∙fy1 + 2∙fy2 + fy3 )
-end
-
-"""
-    rk4_steps!(f, vx, vy, h)
-
-Coordinates (vx[n > 1], vy[n > 1]) are updated with the estimated positions,
-along function f.
-     f(x,y) returns a tuple-valued gradient in two dimensions
-     vx and vy are vectors representing coordinates like (vx[n], vy[n])
-     h is a step-size quantity. If the integration variable is time,
-     it defines the length of time betweeen points. It can be negative
-"""
-function rk4_steps!(f, vx, vy, h)
-    @assert length(vx) == length(vy)
-    if !isnan(f(vx[1], vy[1])[1])
-        for n in 1:(length(vx) - 1)
-            rk4_step!(f, vx, vy, h, n)
-        end
-    else
-        fill!(vx, NaN * vx[1])
-        fill!(vy, NaN * vy[1])
-    end
-    nothing
-end
-
-function _convolve_contrib(prev, w, nxy, vx, vy, i)
-    @assert i > 1
-    x = vx[i]
-    y = vy[i]
-    x0 = vx[i - 1]
-    y0 = vy[i - 1]
-    if isnan(x0) || isnan(y0) || isnan(x) || isnan(y)
-        return prev
-    end
-    k = w[i]
-    ds =  hypot(x - x0, y - y0)
-    n = nxy(x, y)
-    n * k * ds
-end
-
-"""
-    convolute_pixel(wf, wb, vxf, vyf, vxb, vyb, nxy, h, cutoff))
-where
-    wf    Window forward: A vector defining a convolution (filter) window, or kernel, with the same length as buffers.
-          The second value is used for weighting the second coordinate.
-    wb    Window backward: Similar, but for the backwards direction. The second value is used for weighting the second coordinate.
-          Hence, it will be identical to wf in many cases.
-    vxf   Vector or buffer of x coordinates, forward direction
-    vyf   Vector y coordinates, forward.
-    vxb   Vector x, backward
-    vyb   Vector y, backwards direction
-    nxy   Function, noise field
-    h     Step length, duration
-    cutoff Velocity, substituted to calculate out-of bounds streamlines
-"""
-function convolute_pixel(wf, wb, vxf, vyf, vxb, vyb, nxy, h, cutoff)
-    @assert length(vxf) == length(vyf)
-    @assert length(vxb) == length(vyb)
-    x0 = vxf[1]
-    y0 = vyf[1]
-    prevcontrib = nxy(x0, y0) * cutoff * h
-    if isnan(x0) || isnan(y0)
-        return 0.0 * prevcontrib
-    end
-    pv = 0.0 * prevcontrib
-    for i = 2:length(vxf)
-        prevcontrib = _convolve_contrib(prevcontrib, wf, nxy, vxf, vyf, i)
-        pv += prevcontrib
-    end
-    x0 = vxb[1]
-    y0 = vyb[1]
-    prevcontrib = nxy(x0, y0) * cutoff * h
-    if isnan(x0) || isnan(y0)
-        return 0.0 * prevcontrib
-    end
-    for i = 2:length(vxb)
-        prevcontrib = _convolve_contrib(prevcontrib, wb, nxy, vxb, vyb, i)
-        pv += prevcontrib
-    end
-    pv
-end
-"""
-    convolute_pixel(w, vx,  vy, nxy, h, cutoff)
-where
-    w     Window : A vector defining a convolution (filter) window, or kernel, with the same length as buffers.
-    vx    Vector or buffer of x coordinates
-    vy    Vector y coordinates
-    nxy   Function, noise field
-    h     Step length, duration
-    cutoff Maximum magnitude
-"""
-function convolute_pixel(w, vx, vy, nxy, h, cutoff)
-    @assert length(vx) == length(vy)
-    @assert length(w) == length(vy)
-    x0 = vx[1]
-    y0 = vy[1]
-    prevcontrib = nxy(x0, y0) * cutoff * h
-    if isnan(x0) || isnan(y0)
-        return 0.0 * prevcontrib
-    end
-    pv = 0.0 * prevcontrib
-    for i = 2:length(vx)
-        prevcontrib = _convolve_contrib(prevcontrib, w, nxy, vx, vy, i)
-        pv += prevcontrib
-    end
-    pv
-end
-
-
-"""
     draw_streamlines(center, xs, ys, f_xy, h)
 where
     center is local origo, a Point, typically equal to global O.
@@ -175,6 +43,64 @@ function draw_streamlines(center, xs, ys, f_xy, h; nsteps = 10, probability = 0.
 end
 
 """
+    sawtooth(x, maxabs)
+
+Return x for x in the interval [-maxabs, maxabs]
+
+Repeating between these values.
+"""
+sawtooth(x, maxabs) = rem(x, 2maxabs, RoundNearest)
+
+"""
+    line_integral_convolution_complex(f_xy, n_xy, x_mid, y_mid, f_s, f_0)
+
+Find the phase and magnitude for one pixel by projecting noise on 20 points on the streamline passing through it.
+Combine Runge-Kutta 4th order and convolution.
+
+Arguments:
+f_xy    Function of x and y for visualization
+n_xy    Noise function of x and y. The spectrum should be adapted for f_xy.
+x_mid   Coordinate for which to evaluate. Streamlines forward and back are found for convolution.
+y_mid   Coordinate for which to evaluate
+f_s Sampling frequency
+f_0 Frequency of interest
+
+
+The resulting complex number ŝ yields:
+    phase = arg(ŝ)
+    magnitude = hypot(ŝ)
+"""
+function line_integral_convolution_complex(f_xy, n_xy, x_mid, y_mid, f_s, f_0)
+    x, y = x_mid, y_mid
+    # Unitless, normalized circular frequency of interest
+    ω_0n = 2π ∙ f_0 / f_s
+    # Frequency of interest position on the complex unit circle
+    z = exp(-im * ω_0n)
+    # z-transform aggregator, complex, start at mid point
+    ŝ = n_xy(x, y) * z^0
+    # Step length (time), negative for backwards.
+    h = -1 / f_s
+    for nn in -1:-1:-9
+        x, y = rk4_step(f_xy, h, x, y)
+        ŝ += (n_xy(x, y)) * z^-nn * (cos(π * nn / 20)^2)
+    end
+    # Jump back to start
+    x = x_mid
+    y = y_mid
+    # Switch to walking forwards
+    for nn in 1:10
+        x, y = rk4_step(f_xy, -h, x, y)
+        ŝ += n_xy(x, y) * z^-nn * (cos(π * nn / 20)^2)
+    end
+    ŝ
+end
+
+
+
+
+
+
+"""
     noise_between_wavelengths(λ_min, λ_max, x)
 
 Generate one value of 1D OpenSimplex noise. Output has  rougly linear amplitude spectrum
@@ -201,8 +127,12 @@ Wave lengths ´λ_min´, ´λ_max´ and positions ´x´, ´y´ are typically qua
 Standard deviation for random (´x´, ´y´) is 0.103.
 """
 function noise_between_wavelengths(λ_min, λ_max, x, y)
-    @assert λ_min < λ_max "λ_min < λ_max"
-    octaves = round(Int, log2(λ_max / λ_min), RoundUp)
+    @assert λ_min <= λ_max "λ_min < λ_max"
+    octaves = if λ_min != 0 * λ_min
+        min(6, max(1, round(Int, log2(λ_max / λ_min), RoundUp)))
+    else
+        6
+    end
     noise( 2x / λ_max, 2y/ λ_max, detail = octaves, persistence = 0.7)
 end
 
@@ -241,4 +171,73 @@ NOTE that the output matrix follows the image manipulation convention: xs corres
 function noise_between_wavelengths(λ_min, λ_max, xs::T, ys::T; normalize = true) where T <: Union{AbstractRange, Vector}
     no = [ noise_between_wavelengths(λ_min, λ_max, x, y) for y in ys, x in xs]
     normalize ? normalize_datarange(no) : no
+end
+
+"""
+    noise_for_lic(f_xy, xs, ys)
+
+Create a simplex-based noise function to be used for visualizing f_xy.
+
+
+Input: f_xy: (Q, Q)  → (Q, Q) or CQ: Function taking a tuple of quantities, outputs quantities
+    xs and ys are iterators of Q, i.e. pixel cooridinates
+
+Output: f: (Q, Q)  → R Function taking a tuple of quantities, outputs a real number
+
+The range is [0.0, 1.0]
+
+The spectrum amplitudes are adapted to f_xy in order to produce larger noise amplitude for longer wavelength.
+This corresponds to larger velocities.
+"""
+function noise_for_lic(f_xy, xs, ys)
+    # Velocity scale from, to
+    v_min, v_max = lenient_min_max(f_xy, xs, ys)
+    # Number of waves over one streamline
+    wave_per_streamline = 2
+    # One streamline is traced over a duration of
+    Δt = 2.0s
+    # Noise spectrum wavelengths
+    λ_min, λ_max = Δt∙(v_min, v_max) / wave_per_streamline
+    # Simplex noise matrix with linear spectrum - x in rows, y in columns
+    mat_no = noise_between_wavelengths(λ_min, λ_max, xs, ys);
+    # Make a function that interpolates between noise pixels:
+    matrix_to_function(mat_no)
+end
+
+
+"Extract one instance in time from the phase + amplitude info in the complex input matrix"
+function lic_matrix_current(scene, framenumber)
+    @assert scene.opts isa LicSceneOpts
+    @assert scene.opts.data isa Array{Complex{Float64},2} string(scene.opts)
+    frames_per_cycle = scene.opts.cycle_duration ∙ (scene.opts.framerate∙s⁻¹)
+    # Where we are in the repeating cycle, [0, 1 - frame_duration]
+    normalized_time = framenumber / frames_per_cycle
+    # Number of waves over one streamline in the noise image
+    wave_per_streamline = 2
+    θ = 2π ∙ wave_per_streamline ∙ normalized_time
+    mi, ma = lenient_min_max(scene.opts.data)
+
+    map(scene.opts.data) do pixel_complex
+        θ_pixel = sawtooth(θ + angle(pixel_complex), π )
+        hypot(pixel_complex)∙cos(θ_pixel) / ma
+    end
+end
+
+
+"""
+struct LicSceneOpts
+    data
+    cycle_duration::Time{Float64}
+    framerate::Int
+    O::Point
+end
+This info may be passed through function calls to frame drawing functions.
+It contains the information needed to process frames based on
+line-integral-convolution, ref. lic_matrix_current
+"""
+struct LicSceneOpts
+    data
+    cycle_duration::Time{Float64}
+    framerate::Int
+    O::Point
 end

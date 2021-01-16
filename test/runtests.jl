@@ -95,3 +95,6 @@ end end
 @testset "31" begin let
     include("test_31.jl")
 end end
+@testset "32" begin let
+    include("test_32.jl")
+end end

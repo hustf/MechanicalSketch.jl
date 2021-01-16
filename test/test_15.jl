@@ -1,6 +1,6 @@
 using MechanicalSketch
 import MechanicalSketch: sethue, background, O, HE, m, s, color_with_luminance,
-    finish, setscale_velocity, arrow, °
+    finish, set_scale_sketch, arrow, °
 
 let
 empty_figure(joinpath(@__DIR__, "test_15.png"))
@@ -15,13 +15,13 @@ end
 
 for i = 1:10
     sethue(PALETTE[i])
-    setscale_velocity(70m/s / HE / i)
+    set_scale_sketch(70m/s, HE * i)
     scaleindicator_velocity(36° * (i - 1))
 end
 
 finish()
 
 # Reset default:
-setscale_velocity()
+set_scale_sketch()
 nothing
 end

@@ -6,14 +6,14 @@
 action can be :nothing, :fill, :stroke, :fillstroke, :fillpreserve, :strokepreserve, :clip.
     The default is :nothing.
 """
-circle(p::Point, r::Length, action) = circle(p, scale_sketch(r), action)
+circle(p::Point, r::Length, action) = circle(p, get_scale_sketch(r), action)
 
 function ellipse(p::Point, w::Q, h::Q, action=:none)  where {Q<:Length}
-    ellipse(p, scale_sketch(w), scale_sketch(h), action)
+    ellipse(p, get_scale_sketch(w), get_scale_sketch(h), action)
 end
 function squircle(center::Point, hradius::Q, vradius::Q, action=:none;
     kwargs...) where {Q<:Length}
-    squircle(center, scale_sketch(hradius), scale_sketch(vradius),
+    squircle(center, get_scale_sketch(hradius), get_scale_sketch(vradius),
     action;
     kwargs...)
 end

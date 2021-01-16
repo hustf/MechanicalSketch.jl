@@ -4,7 +4,7 @@ import MechanicalSketch: color_with_luminance, O, WI, HE, EM, FS, finish,
 import MechanicalSketch: dimension_aligned, noise, line
 import MechanicalSketch: ComplexQuantity, generate_complex_potential_source, generate_complex_potential_vortex
 import MechanicalSketch: @import_expand, Quantity
-import MechanicalSketch: draw_color_map, draw_real_legend, setscale_dist
+import MechanicalSketch: draw_color_map, draw_real_legend, set_scale_sketch
 import MechanicalSketch: ∙, ∇_rectangle, SVector, normalize_datarange
 import Interpolations: interpolate, Gridded, Linear, Flat, extrapolate
 #using BenchmarkTools
@@ -18,7 +18,7 @@ include("test_functions_24.jl")
 
 # Reuse the flow field from test_23.jl, a matrix of complex velocities with an element per pixel.
 A = flowfield_23();
-setscale_dist(PHYSWIDTH_23 / (SCREEN_WIDTH_FRAC_23 * WI))
+set_scale_sketch(PHYSWIDTH_23, round(Int, SCREEN_WIDTH_FRAC_23 * WI))
 
 setfont("DejaVu Sans", FS)
 str = "This noise image has three different spectra.\nA noise frequency along a line is 1 / (wavelength [m])."
@@ -33,7 +33,7 @@ fxy_inter = interpolate((xs, ys), map( cmplx -> (real(cmplx), imag(cmplx)), tran
 fxy = extrapolate(fxy_inter, Flat());
 fxy(0.0m, 0.0m)
 fxy(0.0m, 0.0001m)
-fxy(100.0m, 0.0001m) 
+fxy(100.0m, 0.0001m)
 
 
 

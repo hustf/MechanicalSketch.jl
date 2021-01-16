@@ -83,30 +83,30 @@ end
 
 
 """
-quantities_at_pixels(function_complex_argument;
-    physwidth = 20m,
-    width_relative_screen = 2 / 3,
-    height_relative_width = 1 / 3)
-
-Return a matrix where each element contains
-   pixel position |> physical position |> complex valued position |> complex value
+quantities_at_pixels(CQ_to_Q;
+    physwidth = 10.0m,
+    physheight = 4.0m)
+    → Q    A matrix of output quantitities, evaluated at each pixel
+where
+    CQ_to_Q: CQ  → Q     - a function
+    other parameters define the points for which to evaluate CQ_to_Q
+where
+    CQ is a complex valued Quantity (a coordinate in a vector field, or a vector at a point)
+    Q is a real valued Quantity
 """
-function quantities_at_pixels(function_complex_argument;
-    physwidth = 20.0,
-    width_relative_screen = 2.0 / 3,
-    height_relative_width = 1.0 / 3)
-
-    physheight = physwidth * height_relative_width
+function quantities_at_pixels(CQ_to_Q;
+    physwidth = 10.0m,
+    physheight = 4.0m)
 
     # Discretize per pixel
-    nx = round(Int64, WI * width_relative_screen)
-    ny = round(Int64, nx * height_relative_width)
+    nx = round(Int64, get_scale_sketch(physwidth))
+    ny = round(Int64, get_scale_sketch(physheight))
     # Iterators for each pixel relative to the center, O
     pixiterx = (1 - div(nx + 1, 2):(nx - div(nx, 2)))
     pixitery = (1 - div(ny + 1, 2):(ny - div(ny, 2)))
 
     # # Matrix of plot quantity, one per pixel
-    [function_complex_argument(complex(ix * SCALEDIST, -iy * SCALEDIST)) for iy = pixitery, ix = pixiterx]
+    [CQ_to_Q(complex(ix * SCALEDIST, -iy * SCALEDIST)) for iy = pixitery, ix = pixiterx]
 end
 
 absolute_scale() = ColorSchemes.linear_grey_10_95_c0_n256
@@ -114,43 +114,66 @@ complex_arg0_scale() = ColorSchemes.linear_ternary_red_0_50_c52_n256
 
 
 """
-Returns (min, max) of hypot(A), which often is the relevant
-magnitude for complex numbers. But would hide information for
-real-valued A.
+    lenient_min_max_complex(A::AbstractArray)
+
+Returns (min, max) of hypot.(A)
 """
 function lenient_min_max_complex(A::AbstractArray)
     magnitude = hypot.(A)
-    extrema(filter(!isnan, magnitude))
+    extrema(filter(x -> !isnan(x) && !isinf(x), magnitude))
 end
 
 """
     lenient_min_max(A)
 
 Neglecting NaN and Inf values, return
-- Minimum and maximum value out of real arrays.
-- Minimum and maximum magnitude out of complex valued arrays.
-
+- Minimum and maximum value out of real element arrays.
+- Minimum and maximum magnitude out of complex element arrays.
+- Minimum and maximum magnitude out of tuple element arrays.
 """
 lenient_min_max(A::AbstractArray{<:RealQuantity}) = extrema(filter(x-> !isnan(x) && !isinf(x), A))
 lenient_min_max(A::AbstractArray{<:Real}) = extrema(filter(x-> !isnan(x) && !isinf(x), A))
 lenient_min_max(A) = lenient_min_max_complex(A)
 
+""""
+    lenient_min_max(f_xy, xs, ys)
+
+    f_xy is a function with domain defined by iterators (xs, ys)
+    Neglecting NaN and Inf values, return
+- Minimum and maximum value out of real valued function f_xy
+- Minimum and maximum magnitude out of complex valued function f_xy
+- Minimum and maximum magnitude out of tuple valued functions
+"""
+function lenient_min_max(f_xy, xs, ys)
+    bigiterator = product(xs, ys)
+    default = hypot(f_xy(first(bigiterator)...)) * 0.0
+    function g(x, y)
+        valu = hypot(f_xy(x, y))
+        !isnan(valu) && !isinf(valu) ? valu : default
+    end
+    extrema(tu -> g(tu...), bigiterator)
+end
+
+
+
 "Scale and move real values to fit in the closed interval 0.0 to 1.0, given minimum and maximum values in A"
 normalize_datarange_real(mi, ma, A) = map(A) do x
+    @assert ma != mi
     if isnan(x) || isinf(x)
-        1.0
+        mi
     else
         (x - mi) / (ma - mi)
     end
 end
 """
-Scale and move the magnitude (modulus, absolute value) of complex values 
+Scale and move the magnitude (modulus, absolute value) of complex values
 to fit in the closed interval 0.0 to 1.0, without changing the argument (angle).
 The argument of the minimum value(s) is lost, since the angle is undefined for zero.
 """
 normalize_datarange_complex(mi, ma, A) = map(A) do x
+    @assert ma != mi
     if isnan(x) || isinf(x)
-        1.0
+        mi
     else
         θ = angle(x)
         r = (hypot(x) - mi) / (ma - mi)
@@ -244,7 +267,7 @@ Convert a matrix to a png image, one pixel per element
 """
 function pngimage(quantities; normalize_data_range = true)
     tempfilename = joinpath(@__DIR__, "tempsketch.png")
-    save(File(format"PNG", tempfilename), color_matrix(quantities, 
+    save(File(format"PNG", tempfilename), color_matrix(quantities,
         normalize_data_range = normalize_data_range))
     img = readpng(tempfilename);
     rm(tempfilename)

@@ -4,7 +4,7 @@ import MechanicalSketch: color_with_luminance, sethue, O, WI, EM, FS, HE, finish
 import MechanicalSketch: dimension_aligned,line, circle, move, do_action
 import MechanicalSketch: ComplexQuantity, generate_complex_potential_source, generate_complex_potential_vortex
 import MechanicalSketch: @import_expand
-import MechanicalSketch: draw_color_map, draw_complex_legend, setscale_dist, lenient_min_max
+import MechanicalSketch: draw_color_map, draw_complex_legend, set_scale_sketch, lenient_min_max
 import MechanicalSketch: ∙, ∇_rectangle, empty_figure
 import Interpolations: interpolate, Gridded, Linear, Flat, extrapolate
 # using BenchmarkTools
@@ -18,7 +18,7 @@ restart(BACKCOLOR)
 
 # Plot the top figure, flow field from test_23.jl visualized with color for direction.
 A = flowfield_23();
-setscale_dist(PHYSWIDTH_23 / (SCREEN_WIDTH_FRAC_23 * WI))
+set_scale_sketch(PHYSWIDTH_23, round(Int, SCREEN_WIDTH_FRAC_23 * WI))
 upleftpoint, lowrightpoint = draw_color_map(O + (0.0, -0.25HE + EM), A)
 legendpos = lowrightpoint + (EM, 0) + (0.0m, PHYSHEIGHT_23)
 mi, ma = lenient_min_max(A)
@@ -156,3 +156,4 @@ setfont("Calibri", FS)
 
 end # Let
 finish()
+set_scale_sketch()

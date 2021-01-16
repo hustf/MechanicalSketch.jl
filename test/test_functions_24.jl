@@ -232,19 +232,17 @@ HEIGHT_RELATIVE_WIDTH_23 = 0.4
 PHYSHEIGHT_23 = PHYSWIDTH_23 * HEIGHT_RELATIVE_WIDTH_23
 SCREEN_WIDTH_FRAC_23 = 2 / 3
 CUTOFF_23 = 0.5m/s
-setscale_dist(PHYSWIDTH_23 / (SCREEN_WIDTH_FRAC_23 * WI))
+set_scale_sketch(PHYSWIDTH_23, round(Int, SCREEN_WIDTH_FRAC_23 * WI))
 
 """
 The test flow field from test_23 as a matrix of complex velocities with one element per pixel.
 We're filling the above-cutoff values with the cutoff value instead of with NaN.
 """
 function flowfield_23()
-    begin
-        unclamped = ∇_rectangle(ϕ_23,
-            physwidth = PHYSWIDTH_23,
-            height_relative_width = HEIGHT_RELATIVE_WIDTH_23);
-        map(unclamped) do u
-            hypot(u) > CUTOFF_23 ? CUTOFF_23∙u / hypot(u) : u
-        end
-    end;
+    unclamped = ∇_rectangle(ϕ_23,
+        physwidth = PHYSWIDTH_23,
+        physheight  = PHYSWIDTH_23 * HEIGHT_RELATIVE_WIDTH_23);
+    map(unclamped) do u
+        hypot(u) > CUTOFF_23 ? CUTOFF_23∙u / hypot(u) : u
+    end
 end

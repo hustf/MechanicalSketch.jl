@@ -31,11 +31,10 @@ K = 1.0m²/s
 
 
 physwidth = 20m
-height_relative_width = 1 / 3
-physheight = physwidth * height_relative_width
+physheight = physwidth /3
 A = quantities_at_pixels(ϕ_vortex,
     physwidth = physwidth,
-    height_relative_width = height_relative_width);
+    physheight = physheight);
 upleftpoint, lowrightpoint = draw_color_map(O, A)
 
 # Add some decoration to the plot

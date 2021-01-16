@@ -1,11 +1,11 @@
 import MechanicalSketch
 import MechanicalSketch: empty_figure, background, sethue, O, WI, HE, EM, FS, finish,
        PALETTE, setfont, settext, setline
-import MechanicalSketch: dimension_aligned, move, do_action, noise
+import MechanicalSketch: dimension_aligned, move, do_action, noise, rk4_steps!
 import MechanicalSketch: generate_complex_potential_source, generate_complex_potential_vortex
 import MechanicalSketch: @import_expand, Quantity, @layer
-import MechanicalSketch: draw_color_map, draw_real_legend, setscale_dist, lenient_min_max
-import MechanicalSketch: ∙, ∇_rectangle, SVector, convolute_pixel, rk4_steps!, normalize_datarange, draw_streamlines
+import MechanicalSketch: draw_color_map, draw_real_legend, set_scale_sketch, lenient_min_max
+import MechanicalSketch: ∙, ∇_rectangle, SVector, normalize_datarange, draw_streamlines
 import Interpolations: interpolate, Gridded, Linear, Flat, extrapolate
 let
 empty_figure(joinpath(@__DIR__, "test_27.png"));
@@ -31,7 +31,7 @@ physwidth = 10.0m
 height_relative_width = 0.4
 physheight = physwidth * height_relative_width
 screen_width_frac = 2 / 3
-setscale_dist(physwidth / (screen_width_frac * WI))
+set_scale_sketch(physwidth, round(Int, screen_width_frac * WI))
 
 setfont("DejaVu Sans", FS)
 str = "Noise has maximum wavelength $CUTOFF_23 · $DU_2 = $(CUTOFF_23 * DU_2). Experiments with noise spectrum."
@@ -108,4 +108,5 @@ settext(str, O + (-WI/2 + EM, 2 * EM) , markup = true)
 setfont("Calibri", FS)
 
 finish()
+set_scale_sketch()
 end

@@ -1,5 +1,5 @@
 import MechanicalSketch
-import MechanicalSketch: mm, kg, m, setscale_dist, HE, WI, EM, PT, circle, text, N, kN, PALETTE,
+import MechanicalSketch: mm, kg, m, set_scale_sketch, HE, WI, EM, PT, circle, text, N, kN, PALETTE,
     color_with_luminance, empty_figure, background, sethue, O, °, finish,
     line, setline, setopacity
 let
@@ -21,7 +21,7 @@ function restart()
     empty_figure(joinpath(@__DIR__, "test_17.png"))
     background(BACKCOLOR)
     sethue(PALETTE[5])
-    setscale_dist(sum(ROPE_D) * 1.3/ HE)
+    set_scale_sketch(sum(ROPE_D) * 1.3, HE)
 end
 restart()
 
@@ -118,7 +118,7 @@ setopacity(1.0)
 
 finish()
 # Reset default
-setscale_dist()
+set_scale_sketch()
 
 nothing
 end

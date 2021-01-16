@@ -126,12 +126,13 @@ import REPL.TerminalMenus ## Where used?
 import ColorSchemes
 import ColorSchemes: getinverse, get
 import ColorSchemes: HSL, HSLA, RGB, RGBA, HSV, LCHuv, LCHuvA
-import Base: -, +, *, /, hypot
+import Base: -, +, *, /, hypot, product
 import Colors: @colorant_str
 import FileIO: @format_str, File, save
 import ForwardDiff
 import StaticArrays
 import StaticArrays: SA, SVector
+import Interpolations:   interpolate, Linear, Flat, extrapolate, Extrapolation, Gridded
 export Drawing, empty_figure,
     color_from_palette,
     color_with_luminance,
@@ -181,15 +182,15 @@ We want to make quality figures for A4 with 5 cm total margin. Width and height 
 const WI = 1889
 "HE is the pixel height of the figure. See WI and orgo, O"
 global HE = 1259
-"Used for scaling quantities to pixels. Use setscale_dist to change"
+"Used for scaling quantities to pixels. Use set_scale_sketch to change"
 global SCALEDIST = 20m / HE
-"Used for scaling quantities to pixels. Use setscale_velocity to change"
+"Used for scaling quantities to pixels. Use set_scale_sketch to change"
 global SCALEVELOCITY = 70m/s / HE
-"Used for scaling quantities to pixels. Use setscale_force to change"
+"Used for scaling quantities to pixels. Use set_scale_sketch to change"
 global SCALEFORCE = 20kN / HE
 
 
-# CONSIDER generalize to quantity, let scale_sketch(x) do the transformation?
+# CONSIDER generalize to quantity, let get_scale_sketch(x) do the transformation?
 Point(x::T, y::T) where T<:Length = Point(x / SCALEDIST, y / scaledisty())
 Point(x::T, y::T) where T<:Velocity = Point(x / SCALEVELOCITY , y / scalevelocityy())
 Point(x::T, y::T) where T<:Force = Point(x / SCALEFORCE , y / scaleforcey())
@@ -285,6 +286,8 @@ include("power.jl")
 include("table.jl")
 include("curves.jl")
 include("flow.jl")
+include("runge_kutta.jl")
 include("autodiff_unitfu.jl")
+include("matrix_interpolation.jl")
 include("streamline_convolution.jl")
 end # module

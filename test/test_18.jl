@@ -2,7 +2,7 @@ import MechanicalSketch
 import MechanicalSketch: color_with_luminance, empty_figure, background, sethue, O, WI, HE, finish,
     PALETTE,
     m, mm, km, kg, rope_breaking_strength, rope_weight,
-    text_table, area_filled, setscale_dist, circle, °, text, g
+    text_table, area_filled, set_scale_sketch, circle, °, text, g
 let
 BACKCOLOR = color_with_luminance(PALETTE[8], 0.8);
 function restart()
@@ -28,7 +28,7 @@ text_table(pos, diameters = diameters,
 # Draw the rope cross sections
 #
 
-setscale_dist(sum(diameters) * 1.3/ HE)
+set_scale_sketch(sum(diameters) * 1.3, HE)
 # Horizontal positions per rope
 pts = let
     posx = [0.0]mm
@@ -59,7 +59,7 @@ let
 end
 
 finish()
-setscale_dist(20m / HE)
+set_scale_sketch()
 
 nothing
 end

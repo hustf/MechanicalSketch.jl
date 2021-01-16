@@ -1,9 +1,9 @@
 import MechanicalSketch
 import MechanicalSketch: color_with_luminance, empty_figure, background, sethue, O, EM, WI, HE, FS, finish,
        PALETTE
-import MechanicalSketch: dimension_aligned, settext, setfont
+import MechanicalSketch: dimension_aligned, settext, setfont, set_scale_sketch
 import MechanicalSketch: @import_expand
-import MechanicalSketch: quantities_at_pixels, draw_color_map, draw_complex_legend, setscale_dist, lenient_min_max
+import MechanicalSketch: quantities_at_pixels, draw_color_map, draw_complex_legend, lenient_min_max
 
 let
 if !@isdefined m²
@@ -26,12 +26,11 @@ restart()
  foo(z)= hypot(z) <= 1.0m ? z : NaN*m
 
 physwidth = 2.2m
-height_relative_width = 1 / 1
-physheight = physwidth * height_relative_width
-setscale_dist(1.1physwidth / HE)
+physheight = physwidth
+set_scale_sketch(1.1physwidth, HE)
 A = quantities_at_pixels(foo,
     physwidth = physwidth,
-    height_relative_width = height_relative_width);
+    physheight = physheight);
 upleftpoint, lowrightpoint = draw_color_map(O, A)
 
 
@@ -52,5 +51,6 @@ draw_complex_legend(legendpos, mi, ma, legendvalues)
 dimension_aligned(O + (-1.0m, 0.0m ),  O +  (-1.0m, 1.0m ))
 
 finish()
-setscale_dist(20m / HE)
+set_scale_sketch(m)
+
 end # let

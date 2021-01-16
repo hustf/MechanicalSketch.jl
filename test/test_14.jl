@@ -1,5 +1,6 @@
 using MechanicalSketch
-import MechanicalSketch: sethue, background, O, EM, HE, m, color_with_luminance, finish, setscale_dist, dimension_aligned
+import MechanicalSketch: sethue, background, O, EM, HE, m, color_with_luminance, finish, set_scale_sketch
+import MechanicalSketch: dimension_aligned
 
 let
 empty_figure(joinpath(@__DIR__, "test_14.png"))
@@ -32,13 +33,13 @@ end
 
 for i = 1:10
     sethue(PALETTE[i])
-    setscale_dist(20m / HE / i)
+    set_scale_sketch(20m, round(Int, HE * i))
     scaleindicators(i * EM)
 end
 
 finish()
 
 # Reset to default:
-setscale_dist()
+set_scale_sketch()
 nothing
 end

@@ -1,6 +1,6 @@
 import MechanicalSketch
 import MechanicalSketch: empty_figure, PALETTE, O, HE, WI, EM, finish, ∙, Point
-import MechanicalSketch: @import_expand, setscale_dist, SCALEDIST, settext
+import MechanicalSketch: @import_expand, set_scale_sketch, SCALEDIST, settext
 import MechanicalSketch: noise, normalize_datarange, pngimage, placeimage, @layer
 import MechanicalSketch: poly, dimension_aligned, sethue, arrow, circle, prettypoly
 import DSP.Periodograms: spectrogram, Spectrogram
@@ -31,9 +31,9 @@ For reference, let's first illustrate two equal amplitude wavelengths, <i>λ</i>
 
 
 curpoint += (0, 3EM)
-n_pixels = 0.9WI
+n_pixels = round(Int, 0.9WI)
 physwidth = 2.0m
-setscale_dist(physwidth / n_pixels)
+set_scale_sketch(physwidth, n_pixels)
 length_one_pixel = physwidth / n_pixels
 twowave(x) = cos(2π∙x / 0.5m) + 0.5cos(2π∙x / 0.05m)
 no = [twowave(x) for x in (1:n_pixels)*length_one_pixel]
@@ -97,4 +97,5 @@ settext("
     curpoint, markup=true)
 
 finish()
+set_scale_sketch()
 end

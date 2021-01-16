@@ -55,3 +55,87 @@ function convolute_image_2(xs, ys, f_xy, n_xy, h, cutoff)
     end
     normalize_datarange(M)
 end
+
+
+
+"""
+    convolute_pixel(wf, wb, vxf, vyf, vxb, vyb, nxy, h, cutoff))
+where
+    wf    Window forward: A vector defining a convolution (filter) window, or kernel, with the same length as buffers.
+          The second value is used for weighting the second coordinate.
+    wb    Window backward: Similar, but for the backwards direction. The second value is used for weighting the second coordinate.
+          Hence, it will be identical to wf in many cases.
+    vxf   Vector or buffer of x coordinates, forward direction
+    vyf   Vector y coordinates, forward.
+    vxb   Vector x, backward
+    vyb   Vector y, backwards direction
+    nxy   Function, noise field
+    h     Step length, duration
+    cutoff Velocity, substituted to calculate out-of bounds streamlines
+"""
+function convolute_pixel(wf, wb, vxf, vyf, vxb, vyb, nxy, h, cutoff)
+    @assert length(vxf) == length(vyf)
+    @assert length(vxb) == length(vyb)
+    x0 = vxf[1]
+    y0 = vyf[1]
+    prevcontrib = nxy(x0, y0) * cutoff * h
+    if isnan(x0) || isnan(y0)
+        return 0.0 * prevcontrib
+    end
+    pv = 0.0 * prevcontrib
+    for i = 2:length(vxf)
+        prevcontrib = _convolve_contrib(prevcontrib, wf, nxy, vxf, vyf, i)
+        pv += prevcontrib
+    end
+    x0 = vxb[1]
+    y0 = vyb[1]
+    prevcontrib = nxy(x0, y0) * cutoff * h
+    if isnan(x0) || isnan(y0)
+        return 0.0 * prevcontrib
+    end
+    for i = 2:length(vxb)
+        prevcontrib = _convolve_contrib(prevcontrib, wb, nxy, vxb, vyb, i)
+        pv += prevcontrib
+    end
+    pv
+end
+"""
+    convolute_pixel(w, vx,  vy, nxy, h, cutoff)
+where
+    w     Window : A vector defining a convolution (filter) window, or kernel, with the same length as buffers.
+    vx    Vector or buffer of x coordinates
+    vy    Vector y coordinates
+    nxy   Function, noise field
+    h     Step length, duration
+    cutoff Maximum magnitude
+"""
+function convolute_pixel(w, vx, vy, nxy, h, cutoff)
+    @assert length(vx) == length(vy)
+    @assert length(w) == length(vy)
+    x0 = vx[1]
+    y0 = vy[1]
+    prevcontrib = nxy(x0, y0) * cutoff * h
+    if isnan(x0) || isnan(y0)
+        return 0.0 * prevcontrib
+    end
+    pv = 0.0 * prevcontrib
+    for i = 2:length(vx)
+        prevcontrib = _convolve_contrib(prevcontrib, w, nxy, vx, vy, i)
+        pv += prevcontrib
+    end
+    pv
+end
+function _convolve_contrib(prev, w, nxy, vx, vy, i)
+    @assert i > 1
+    x = vx[i]
+    y = vy[i]
+    x0 = vx[i - 1]
+    y0 = vy[i - 1]
+    if isnan(x0) || isnan(y0) || isnan(x) || isnan(y)
+        return prev
+    end
+    k = w[i]
+    ds =  hypot(x - x0, y - y0)
+    n = nxy(x, y)
+    n * k * ds
+end

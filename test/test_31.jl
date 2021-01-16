@@ -45,7 +45,7 @@ f_0 = wave_per_streamline / Δt
 sets_per_v = 10
 settext("
 For each velocity
-    <i>v<sub>calib</sub></i> = $v_calib, we pick $sets_per_v sets of <i>n</i> = $n streamline noise samples over <i>Δt</i> = $(Δt). 
+    <i>v<sub>calib</sub></i> = $v_calib, we pick $sets_per_v sets of <i>n</i> = $n streamline noise samples over <i>Δt</i> = $(Δt).
     The noise spectrum is coloured between (λ<sub>min</sub>, λ<sub>max</sub>) = ($λ_min , $λ_max) for $wave_per_streamline periods over <i>Δt</i>.
     The last sample sets vary harmonically with time.
 ", curpoint, markup = true)

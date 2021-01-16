@@ -4,7 +4,7 @@ import MechanicalSketch: color_with_luminance, background, O, WI, HE, EM, FS, fi
 import MechanicalSketch: dimension_aligned
 import MechanicalSketch: ComplexQuantity, generate_complex_potential_source, generate_complex_potential_vortex
 import MechanicalSketch: @import_expand
-import MechanicalSketch: quantities_at_pixels, draw_color_map, draw_real_legend, draw_complex_legend, setscale_dist, lenient_min_max
+import MechanicalSketch: quantities_at_pixels, draw_color_map, draw_real_legend, draw_complex_legend, set_scale_sketch, lenient_min_max
 import MechanicalSketch: ∙, ∇_rectangle
 
 let
@@ -47,13 +47,11 @@ K = 1.0m²/s / 2π
 
 # Plot the real-valued function
 physwidth = 10.0m
-height_relative_width = 0.4
-physheight = physwidth * height_relative_width
-screen_width_frac = 2 / 3
-setscale_dist(physwidth / (screen_width_frac * WI))
+physheight = 0.4 * physwidth
+set_scale_sketch(physwidth, round(Int, WI * 2 / 3))
 A = quantities_at_pixels(ϕ,
     physwidth = physwidth,
-    height_relative_width = height_relative_width);
+    physheight = physheight);
 OT = O + (0.0, -0.25HE + EM)
 upleftpoint, lowrightpoint = draw_color_map(OT, A)
 legendpos = lowrightpoint + (EM, 0) + (0.0m, physheight)
@@ -79,7 +77,7 @@ setfont("Calibri", FS)
 B = begin
         unclamped = ∇_rectangle(ϕ,
             physwidth = physwidth,
-            height_relative_width = height_relative_width);
+            physheight = physheight);
         map(unclamped) do u
             hypot(u) > 0.5m/s ? NaN∙u : u
         end

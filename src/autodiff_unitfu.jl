@@ -1,4 +1,5 @@
 """
+    generate_Q²_to_Q_from_CQ_to_Q(CQ_to_Q)
 Input:
     f: CQ  → Q
 Output:
@@ -15,6 +16,7 @@ function generate_Q²_to_Q_from_CQ_to_Q(CQ_to_Q)
 end
 
 """
+    generate_R²_to_Q_from_Q²_to_Q(Q²_to_Q, one_q_in::Quantity)
 Input:
     f: Q²  → Q, one_q_in::Quantity
 Output:
@@ -31,6 +33,7 @@ function generate_R²_to_Q_from_Q²_to_Q(Q²_to_Q, one_q_in::Quantity)
 end
 
 """
+    generate_R²_to_R_from_R²_to_Q(R²_to_Q)
 Input:
     f: R²  → Q
 Output:
@@ -48,6 +51,7 @@ function generate_R²_to_R_from_R²_to_Q(R²_to_Q)
 end
 
 """
+    ∇_R²_in_CQ_out(R²_to_R, ulxy, one_q_out::Quantity{T}) where {T}
 Input:
     f: R² → R, one_q_in
     ulxy:: R², all unitless coordinates for which we want the gradient
@@ -100,9 +104,8 @@ end
 """
     ∇_rectangle(CQ_to_Q;
         cutoff = NaN,
-        physwidth = 20.0,
-        width_relative_screen = 2.0 / 3,
-        height_relative_width = 1.0 / 3)
+        physwidth = 10.0m,
+        physheight = 4.0m)
     → CQ²    A matrix of complex output quantitities, i.e. gradients with units.
 where
     CQ_to_Q: CQ  → Q
@@ -115,18 +118,17 @@ Calculates the gradient given the extents of a rectangle and how they relate to 
 
 Optional argument cutoff: In case given, the magnitude (vector length) is limited to that
 value without changing vector direction.
+
 """
 function ∇_rectangle(CQ_to_Q;
-    cutoff = NaN,
-    physwidth = 20.0,
-    width_relative_screen = 2.0 / 3,
-    height_relative_width = 1.0 / 3)
-
-    physheight = physwidth * height_relative_width
+    physwidth = 10.0m,
+    physheight = 4.0m,
+    cutoff = NaN)
 
     # Discretize per pixel
-    nx = round(Int64, WI * width_relative_screen)
-    ny = round(Int64, nx * height_relative_width)
+    nx = round(Int64, get_scale_sketch(physwidth))
+    ny = round(Int64, get_scale_sketch(physheight))
+
     # Iterators for each pixel relative to the center, O
     pixiterx = (1 - div(nx + 1, 2):(nx - div(nx, 2)))
     pixitery = (1 - div(ny + 1, 2):(ny - div(ny, 2)))
@@ -140,5 +142,33 @@ function ∇_rectangle(CQ_to_Q;
         map(unclamped) do u
             hypot(u) > cutoff ? cutoff * u / hypot(u) : u
         end
+    end
+end
+
+"""
+    clamped_velocity_matrix(CQ_to_Q; physwidth = 1.0m, physheight = 1.0m, cutoff = 0.5m/s)
+
+Input:
+    CQ_to_Q: CQ  → Q   Function taking coordinates as a complex quantity, outputs a quantity
+    physwidth
+    physheight
+    cutoff
+
+Output:
+    CQ²
+where
+    Q = Quantity
+    CQ = ComplexQuantity, coordinates as a complex quantity
+    CQ² = Matrix of complex quantitites, typically velocity vectors
+
+Differentiates the complex potential function CQ_to_Q. Evaluates at pixels in a matrix corresponding to
+physical dimensions and current sketch scale. Limits values to cutoff.
+"""
+function clamped_velocity_matrix(CQ_to_Q; physwidth = 1.0m, physheight = 1.0m, cutoff = 0.5m/s)
+    unclamped = ∇_rectangle(CQ_to_Q,
+        physwidth = physwidth,
+        physheight = physheight);
+    map(unclamped) do u
+        hypot(u) > cutoff ? cutoff∙u / hypot(u) : u
     end
 end

@@ -29,11 +29,10 @@ q_source = 1.0m²/s
 ϕ_source = generate_complex_potential_source(; pos = p_source, massflowout = q_source)
 
 physwidth = 20m
-height_relative_width = 1 / 3
-physheight = physwidth * height_relative_width
+physheight = physwidth / 3
 A = quantities_at_pixels(ϕ_source,
     physwidth = physwidth,
-    height_relative_width = height_relative_width);
+    physheight = physheight);
 upleftpoint, lowrightpoint = draw_color_map(O, A)
 
 # Add some decoration to the plot
