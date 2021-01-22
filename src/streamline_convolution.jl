@@ -2,7 +2,7 @@
     draw_streamlines(center, xs, ys, f_xy, h)
 where
     center is local origo, a Point, typically equal to global O.
-    xs, ys are iterables of quantities, e.g. (-5.0:0.007942811755361398:5.0)m
+    xs, ys are quantity iterators, e.g. (-5.0:0.007942811755361398:5.0)m
     f_xy is a function of quantities x and y where the range is also a quantity
     h is a step-size quantity. If the integration variable is time,
         it defines the length of time betweeen points. It can be negative.
@@ -71,7 +71,8 @@ The resulting complex number ŝ yields:
     magnitude = hypot(ŝ)
 """
 function line_integral_convolution_complex(f_xy, n_xy, x_mid, y_mid, f_s, f_0)
-    x, y = x_mid, y_mid
+    x = x_mid
+    y = y_mid
     # Unitless, normalized circular frequency of interest
     ω_0n = 2π ∙ f_0 / f_s
     # Frequency of interest position on the complex unit circle
@@ -81,22 +82,21 @@ function line_integral_convolution_complex(f_xy, n_xy, x_mid, y_mid, f_s, f_0)
     # Step length (time), negative for backwards.
     h = -1 / f_s
     for nn in -1:-1:-9
-        x, y = rk4_step(f_xy, h, x, y)
-        ŝ += (n_xy(x, y)) * z^-nn * (cos(π * nn / 20)^2)
+        x, y = rk4_step(f_xy, h, x, y)                         # This takes 0.37 of total time in the function
+                                                               # 1.130 μs (1 allocation: 32 bytes)
+        ŝ += (n_xy(x, y)) * z^-nn * (cos(π * nn / 20)^2)       # This takes 144/1539 = 0.09 of total time in the function
+                                                               #  449.239 ns (7 allocations: 144 bytes)
     end
     # Jump back to start
     x = x_mid
     y = y_mid
     # Switch to walking forwards
     for nn in 1:10
-        x, y = rk4_step(f_xy, -h, x, y)
-        ŝ += n_xy(x, y) * z^-nn * (cos(π * nn / 20)^2)
+        x, y = rk4_step(f_xy, -h, x, y)                       # This takes 637 / 1539 = 0.41 of total time in the function
+        ŝ += n_xy(x, y) * z^-nn * (cos(π * nn / 20)^2)        # This take 163 / 1539 = 0.11 of total time in the function
     end
     ŝ
 end
-
-
-
 
 
 
@@ -204,22 +204,78 @@ function noise_for_lic(f_xy, xs, ys)
     matrix_to_function(mat_no)
 end
 
+"""
+    noise_for_lic(f_xy, matrix::BitMatrix; centered = true)
 
-"Extract one instance in time from the phase + amplitude info in the complex input matrix"
-function lic_matrix_current(scene, framenumber)
+Create a simplex-based noise function to be used for visualizing f_xy.
+
+
+Input:  f_xy: (Q, Q)  → (Q, Q) or CQ: Function taking a tuple of quantities, outputs quantities
+        matrix:    Used for finding the size of output. The relation between pixel indices and spatial
+            positions is implicitly given by ´get_scale_sketch(m)´
+        centered   keyword argument. If true, values at the centre of the matrix corresponds to (x,y) = (0, 0)m
+
+Output: f: (Q, Q)  → R Function taking a tuple of quantities, outputs a real number
+
+The range is [0.0, 1.0]
+
+The spectrum amplitudes are adapted to f_xy in order to produce larger noise amplitude for longer wavelength.
+This corresponds to larger velocities.
+"""
+function noise_for_lic(f_xy, matrix::BitMatrix; centered = true)
+    ny, nx = size(matrix)
+    physwidth = 1.0m * nx / get_scale_sketch(m)
+    physheight = 1.0m * ny / get_scale_sketch(m)
+    xmin = -centered * physwidth / 2
+    xmax = (1 - centered / 2) * physwidth
+    ymin = -centered * physheight / 2
+    ymax = (1 - centered / 2) * physheight
+    xs = range(xmin, xmax, length = nx)
+    ys = range(ymin, ymax, length = ny)
+    noise_for_lic(f_xy, xs, ys)
+end
+
+"""
+    lic_matrix_current(scene, framenumber; wave_per_streamline = 2)
+
+When called in the context of a scene, the complex convolution matrix is input via
+the scene definition, see SceneOpts, Scene and Movie.
+
+Extract one instance in time from the phase + amplitude info in the complex input matrix.
+
+Output: R² Matrix of floating point numbers, representing the animation at this frame
+    in this scene context, intended to be displayed as an image.
+"""
+function lic_matrix_current(scene, framenumber; wave_per_streamline = 2)
     @assert scene.opts isa LicSceneOpts
     @assert scene.opts.data isa Array{Complex{Float64},2} string(scene.opts)
     frames_per_cycle = scene.opts.cycle_duration ∙ (scene.opts.framerate∙s⁻¹)
     # Where we are in the repeating cycle, [0, 1 - frame_duration]
     normalized_time = framenumber / frames_per_cycle
     # Number of waves over one streamline in the noise image
-    wave_per_streamline = 2
-    θ = 2π ∙ wave_per_streamline ∙ normalized_time
-    mi, ma = lenient_min_max(scene.opts.data)
+    CR² = scene.opts.data
+    lic_matrix_current(CR², normalized_time, wave_per_streamline = wave_per_streamline)
+end
 
-    map(scene.opts.data) do pixel_complex
+"""
+    lic_matrix_current(CR²:Matrix{Complex{Float64}}, normalized_time; wave_per_streamline = 2)
+
+Input: CR²    Matrix of complex floating point numbers
+                  phase and amplitude information. Used for rendering line-integral-convolution
+                  showing a static vector field.
+       normalized_time - a number in the range [0, 1], where 0 and 1 gives the same result, so pick one when looping frames.
+       wave_per_streamline Keyword argument, depending on the assumptions made when calculating CR².
+
+Output: R² Matrix of floating point numbers, representing the animation at this normalized time, intended to be displayed as an image.
+"""
+function lic_matrix_current(CR²::Matrix{Complex{Float64}}, normalized_time; wave_per_streamline = 2, zeroval = 0.0)
+    @assert 0 <= normalized_time <= 1
+    θ = 2π ∙ wave_per_streamline ∙ normalized_time
+    mi, ma = lenient_min_max(CR²)
+    map(CR²) do pixel_complex
         θ_pixel = sawtooth(θ + angle(pixel_complex), π )
-        hypot(pixel_complex)∙cos(θ_pixel) / ma
+        magn = hypot(pixel_complex) / ma
+        magn > 0 ? magn∙cos(θ_pixel) : zeroval
     end
 end
 

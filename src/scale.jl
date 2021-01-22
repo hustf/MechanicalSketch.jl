@@ -74,10 +74,10 @@ Return the number of pixels (or points, this may be ambiguous) corresponding to 
     set_scale_sketch()
     70 m/s
 """
-get_scale_sketch(q::Length) = upreferred(q / SCALEDIST)
-get_scale_sketch(q::Velocity) = upreferred(q / SCALVELOCITY)
-get_scale_sketch(q::Force) = upreferred(q / SCALEFORCE)
-get_scale_sketch(u::FreeUnits) = get_scale_sketch(1∙u)
+get_scale_sketch(q::Length) = upreferred(q / SCALEDIST)::Float64
+get_scale_sketch(q::Velocity) = upreferred(q / SCALEVELOCITY)::Float64
+get_scale_sketch(q::Force) = upreferred(q / SCALEFORCE)::Float64
+get_scale_sketch(u::FreeUnits) = get_scale_sketch(1∙u)::Float64
 
 """
     set_figure_height(h::Int)

@@ -67,3 +67,21 @@ function rotate_hue(col::RGB, ang::Angle)
         col
     end
 end
+
+"""
+    color_with_lumin(col::RGB, lumin)
+
+0.0 <= lumin <= 100.0
+
+Use the LCHuv colorspace to convert luminance to lumin.
+"""
+function color_with_lumin(col::RGB, lumin)
+    @assert 0.0 <= lumin <= 100.0
+    if col != RGB(0.0, 0.0, 0.0)
+        lchuv = convert(Colors.LCHuv, col)
+        lchuvmod = Colors.LCHuv(lumin, lchuv.c, lchuv.h)
+        convert(Colors.RGB, lchuvmod)
+    else
+        col
+    end
+end

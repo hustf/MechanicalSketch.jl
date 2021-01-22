@@ -86,7 +86,7 @@ end
 quantities_at_pixels(CQ_to_Q;
     physwidth = 10.0m,
     physheight = 4.0m)
-    → Q    A matrix of output quantitities, evaluated at each pixel
+    → Q    A matrix of output quantitities
 where
     CQ_to_Q: CQ  → Q     - a function
     other parameters define the points for which to evaluate CQ_to_Q
@@ -263,7 +263,9 @@ end
 
 """
     pngimage(quantities; normalize_data_range = true)
-Convert a matrix to a png image, one pixel per element
+
+Convert a matrix to a png image suitable for ´placeimage´.
+    One pixel per element.
 """
 function pngimage(quantities; normalize_data_range = true)
     tempfilename = joinpath(@__DIR__, "tempsketch.png")
@@ -274,21 +276,41 @@ function pngimage(quantities; normalize_data_range = true)
     img
 end
 
+"""
+    pngimage(colmat::Matrix{RGB{Float64}})
+
+Convert a matrix to a png image suitable for ´placeimage´.
+One pixel per element.
+"""
+function pngimage(colmat::Matrix{RGB{Float64}}; normalize_data_range = false)
+    if normalize_data_range
+        @warn "Can't normalize values of type $(eltype(colmat)), use keyword argument normalize_data_range = false"
+    end
+    tempfilename = joinpath(@__DIR__, "tempsketch.png")
+    save(File(format"PNG", tempfilename), colmat)
+    img = readpng(tempfilename);
+    rm(tempfilename)
+    img
+end
+
 
 """
-    draw_color_map(centerpoint::Point, quantities::Matrix, normalize_data_range = true)
+    draw_color_map(p::Point, data::Matrix;
+                        normalize_data_range = true, centered = true)
     -> (upper left point, lower right point)
 
 The color map is centered on p, one pixel per value in the matrix
 """
-function draw_color_map(centerpoint::Point, quantities::Matrix; normalize_data_range = true)
-    img = pngimage(quantities, normalize_data_range = normalize_data_range)
+function draw_color_map(p::Point, data::Matrix;
+                        normalize_data_range = true, centered = true)
+    img = pngimage(data, normalize_data_range = normalize_data_range)
     # Put the png format picture on screen
     gsave() # Possible bug in placeimage, guard against it.
-    placeimage(img, centerpoint; centered = true)
+    placeimage(img, p; centered = centered)
     grestore()
-    pixheight, pixwidth = size(quantities)
-    (centerpoint - (pixwidth / 2, pixheight / 2), centerpoint + (pixwidth / 2, pixheight / 2))
+    ny, nx = size(data)
+    Δp = centered * Point(nx / 2, ny / 2)
+    (p - Δp, p - Δp + (nx, ny))
 end
 """
     draw_real_legend(p::Point, min_quantity, max_quantity, legendvalues)

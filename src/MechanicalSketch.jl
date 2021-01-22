@@ -290,4 +290,5 @@ include("runge_kutta.jl")
 include("autodiff_unitfu.jl")
 include("matrix_interpolation.jl")
 include("streamline_convolution.jl")
+include("matrix_drawing.jl")
 end # module

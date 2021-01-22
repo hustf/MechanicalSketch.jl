@@ -12,7 +12,7 @@ import MechanicalSketch: Time, get_scale_sketch, sawtooth
 import Interpolations:   Extrapolation
 
 using BenchmarkTools
-let
+#let
 
 
 if !@isdefined m²
@@ -34,7 +34,7 @@ totwidth = totheight * WI / HE
 # Reused velocity field from earlier tests
 velocity_matrix = clamped_velocity_matrix(ϕ_32; physwidth = physwidth, physheight = physheight, cutoff = 0.5m/s);
 # One complex matrix: Phase and amplitude for the visualization. This can generate cyclic movies
-complex_convolution_matrix = convolute_image_32(velocity_matrix);
+complex_convolution_matrix = convolute_image_32(velocity_matrix) # 15.071 s (364518 allocations: 61.17 MiB)
 # The distribution of phase angles (complex argument) ought to be flat between -π and π. Let's check that:
 n_pixels = round(Int, get_scale_sketch(physwidth))
 phasetop, binwidth, relfreq = phase_histog(complex_convolution_matrix, n_pixels)

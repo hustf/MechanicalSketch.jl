@@ -46,10 +46,9 @@ end
     convolute_image_32(f_xy::Extrapolation, n_xy::Extrapolation, xs, ys)
 
 Input:
-    f_xy: (Q, Q)  → Q   Function taking two coordinates, outputs a quantity
-    physwidth
-    physheight
-    cutoff
+    f_xy: (Q, Q)  → (Q, Q)   Function taking two coordinates, outputs a tuple of quantities
+    xs    Iterator{Q}        Arguments for f_xy, to be combined with ys
+    ys    Iterator{Q}        Arguments for f_xy, to be combined with xs
 
 Output:
     Array{Complex{Float64},2}
@@ -86,6 +85,20 @@ end
 
 """
     convolute_image_32(f_xy, xs, ys)
+
+Input:
+    f_xy: (Q, Q)  → (Q, Q)   Function taking two coordinates, outputs a tuple of quantities
+    xs    Iterator{Q}        Arguments for f_xy, to be combined with ys
+    ys    Iterator{Q}        Arguments for f_xy, to be combined with xs
+
+Output:
+    Array{Complex{Float64},2}
+
+Where: Q is a quantity
+
+Outputs phase and amplitude information for every pixel in a line-integral-convolution rendering.
+
+The input f_xy typically represents velocities, the output all frames in a visualization.
 """
 function convolute_image_32(f_xy, xs, ys)
     # Prepare a noise function:
@@ -111,6 +124,8 @@ function convolute_image_32(matrix::Array{Quantity{Complex{Float64}, D, U}, 2}) 
     # Iterators for position - linear integration between points.
     xs = range(-physwidth / 2, stop = physwidth / 2, length = nx)
     ys = range(-physheight / 2, stop = physheight / 2, length = ny)
+    # Find an appropriate constant step length for Runge-Kutta
+
     convolute_image_32(fxy, xs, ys)
 end
 

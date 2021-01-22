@@ -1,0 +1,5 @@
+[deps]
+Luxor = "ae8d54c2-7ccd-5906-9d76-62fc9837b5bc"
+Revise = "295af30f-e4ad-537b-8983-00126c2a3abe"
+SnoopCompile = "aa65fe97-06da-5843-b5b1-d5d13cad87d2"
+SnoopCompileCore = "e2b509da-e806-4183-be48-004708413034"
