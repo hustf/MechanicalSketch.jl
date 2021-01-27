@@ -72,7 +72,10 @@ column_widths(;kwargs...) = map(pixelwidth, header_strings(;kwargs...) .* "   ")
 
 """
     row_height()
-    --> 'Pixel' height of one row
+    --> 'Pixel' height of one table row.
+
+This depends on the current 'Toy API' text size, and can be changed with
+fontsize(FS). Please also change FS in that case, take care!
 """
 row_height() = textextents("|")[4]
 

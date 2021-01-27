@@ -16,12 +16,20 @@ function lumin2(colo)
     0.2126 * r^γ + 0.7152 * g^γ + 0.0722 * b^γ
 end
 
+
+"The L in LCHuv"
+function lumin(colo)
+    convert(Colors.LCHuv, colo).l
+end
+
+
 "The L in HSL."
 luminance(colo) = HSL(colo).l
 
 get_current_RGB() = RGB(get_current_redvalue(), get_current_greenvalue(), get_current_bluevalue())
 get_current_lumin2() = lumin2(get_current_RGB())
 get_current_luminance() = luminance(get_current_RGB())
+get_current_lumin() = lumin(get_current_RGB())
 
 
 """
@@ -76,7 +84,7 @@ end
 Use the LCHuv colorspace to convert luminance to lumin.
 """
 function color_with_lumin(col::RGB, lumin)
-    @assert 0.0 <= lumin <= 100.0
+    @assert 0.0 <= lumin <= 100.0 "0.0 <= lumin <= 100.0 failed. lumin = $lumin"
     if col != RGB(0.0, 0.0, 0.0)
         lchuv = convert(Colors.LCHuv, col)
         lchuvmod = Colors.LCHuv(lumin, lchuv.c, lchuv.h)

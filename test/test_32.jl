@@ -11,8 +11,7 @@ import MechanicalSketch: Movie, Scene, animate, circle, line, Point, arrow, poly
 import MechanicalSketch: Time, get_scale_sketch, sawtooth
 import Interpolations:   Extrapolation
 
-using BenchmarkTools
-#let
+let
 
 
 if !@isdefined m²
@@ -89,7 +88,7 @@ function plot_frame_indicator(scene, framenumber)
         sethue(PALETTE[9])
         setline(3)
         circle(O + (3EM, -3EM), 1FS, :stroke)
-        frames_per_cycle = scene.opts.cycle_duration ∙ (scene.opts.framerate∙s⁻¹)
+        frames_per_cycle = scene.opts.cycle_duration ∙ scene.opts.framerate
         # Where we are in the repeating cycle, [0, 1 - frame_duration]
         normalized_time = framenumber / frames_per_cycle
         θ = 2π ∙ normalized_time
@@ -105,7 +104,7 @@ function backdrop(scene, framenumber)
     background(color_with_luminance(PALETTE[6], 0.3))
     sethue(PALETTE[3])
     Δt = scene.opts.cycle_duration
-    frames_per_cycle = Δt ∙ (scene.opts.framerate∙s⁻¹)
+    frames_per_cycle = Δt ∙ scene.opts.framerate
     # Where we are in the repeating cycle, [0, 1 - frame_duration]
     normalized_time = framenumber / frames_per_cycle
     t = Δt ∙ normalized_time
@@ -131,15 +130,15 @@ end
 Δt = 2.0s
 endframe = Int(floor(Δt ∙ (30∙s⁻¹)) - 1)
 movie = Movie(WI, HE, "Three flow fields", 15:15)
-scenes = [
-    Scene(movie, backdrop, 0:endframe,             optarg = LicSceneOpts(NaN, Δt, 30, O)),
-    Scene(movie, plot_flowfield, 0:endframe,       optarg = LicSceneOpts(complex_convolution_matrix, Δt, 30, O + (Δx, -Δy))),
-    Scene(movie, plot_histogram, 0:endframe,       optarg = LicSceneOpts(histogrampoints, Δt, 30, O + (Δx, -Δy ))),
-    Scene(movie, plot_frame_indicator, 0:endframe, optarg = LicSceneOpts(NaN, Δt, 30, O + (Δx, -Δy ))),
-    Scene(movie, plot_flowfield, 0:endframe,       optarg = LicSceneOpts(complex_convolution_matrix_uniform, Δt, 30, O )),
-    Scene(movie, plot_flowfield, 0:endframe,       optarg = LicSceneOpts(complex_convolution_matrix_linear, Δt, 30, O + (Δx, Δy)))
-    ];
 
+scenes = [
+    Scene(movie, backdrop, 0:endframe,             optarg = LicSceneOpts(Δt, O)),
+    Scene(movie, plot_flowfield, 0:endframe,       optarg = LicSceneOpts(Δt,  O + (Δx, -Δy); phase_magnitude_matrix = complex_convolution_matrix)),
+    Scene(movie, plot_histogram, 0:endframe,       optarg = LicSceneOpts(Δt, O + (Δx, -Δy ), data = histogrampoints)),
+    Scene(movie, plot_frame_indicator, 0:endframe, optarg = LicSceneOpts(Δt, O + (Δx, -Δy ))),
+    Scene(movie, plot_flowfield, 0:endframe,       optarg = LicSceneOpts(Δt,  O;  phase_magnitude_matrix = complex_convolution_matrix_uniform)),
+    Scene(movie, plot_flowfield, 0:endframe,       optarg = LicSceneOpts(Δt, O + (Δx, Δy); phase_magnitude_matrix = complex_convolution_matrix_linear))
+    ];
 
 animate(movie, scenes,
     creategif = true,

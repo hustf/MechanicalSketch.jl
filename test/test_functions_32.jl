@@ -124,8 +124,6 @@ function convolute_image_32(matrix::Array{Quantity{Complex{Float64}, D, U}, 2}) 
     # Iterators for position - linear integration between points.
     xs = range(-physwidth / 2, stop = physwidth / 2, length = nx)
     ys = range(-physheight / 2, stop = physheight / 2, length = ny)
-    # Find an appropriate constant step length for Runge-Kutta
-
     convolute_image_32(fxy, xs, ys)
 end
 

@@ -125,8 +125,8 @@ import MechanicalUnits.Unitfu: Power, oneunit, numtype
 import REPL.TerminalMenus ## Where used?
 import ColorSchemes
 import ColorSchemes: getinverse, get
-import ColorSchemes: HSL, HSLA, RGB, RGBA, HSV, LCHuv, LCHuvA
-import Base: -, +, *, /, hypot, product
+import ColorSchemes: HSL, HSLA, RGB, RGBA, HSV, LCHuv, LCHuvA, isoluminant_cgo_70_c39_n256
+import Base: -, +, *, /, hypot, product, show
 import Colors: @colorant_str
 import FileIO: @format_str, File, save
 import ForwardDiff
@@ -139,7 +139,7 @@ export Drawing, empty_figure,
     PALETTE,
     dimension_aligned,
     SCALEDIST,
-    Point
+    Point, upreferred
 const CHORD_ZERO = 0.25
 const FOIL_CHORD_POS = [0, 0.0125, 0.025, 0.05, 0.075, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 0.95, 1]
 const FOIL_HALF_T = [0, 0.117, 0.1575, 0.2179, 0.2649, 0.3042, 0.4146, 0.4764, 0.5, 0.4816, 0.4149, 0.3159, 0.1989, 0.0811, 0.0306, 0]
@@ -291,4 +291,5 @@ include("autodiff_unitfu.jl")
 include("matrix_interpolation.jl")
 include("streamline_convolution.jl")
 include("matrix_drawing.jl")
+include("colorlegends.jl")
 end # module
