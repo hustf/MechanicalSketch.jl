@@ -5,7 +5,7 @@ import MechanicalSketch: dimension_aligned, noise, rk4_steps!
 import MechanicalSketch: ComplexQuantity, generate_complex_potential_source, generate_complex_potential_vortex
 import MechanicalSketch: @import_expand, Quantity, @layer
 import MechanicalSketch: draw_color_map, draw_real_legend, set_scale_sketch
-import MechanicalSketch: lenient_min_max, normalize_datarange
+import MechanicalSketch: lenient_min_max, normalize_datarange, x_y_iterators_at_pixels
 import MechanicalSketch: ∙, ∇_rectangle, SA, SVector, draw_streamlines
 import Interpolations: interpolate, Gridded, Linear, Flat, extrapolate
 let
@@ -25,9 +25,8 @@ setfont("Calibri", FS)
 
 # We are going to use the velocity vector field in a lot of calculations,
 # and interpolate between the calculated pixel values
-xs = range(-PHYSWIDTH_23  /2, stop = PHYSWIDTH_23  / 2, length = size(A)[2]);
-ys = range(-HEIGHT_RELATIVE_WIDTH_23 * PHYSWIDTH_23 /2, stop = HEIGHT_RELATIVE_WIDTH_23 * PHYSWIDTH_23  / 2, length = size(A)[1]);
-fxy_inter = interpolate((xs, ys), map( cmplx -> (real(cmplx), imag(cmplx)), transpose(A)[ : , end:-1:1]), Gridded(Linear()));
+xs, ys = x_y_iterators_at_pixels(;physwidth = PHYSWIDTH_23, physheight = PHYSHEIGHT_23)
+fxy_inter = interpolate((xs, reverse(ys)), map( cmplx -> (real(cmplx), imag(cmplx)), transpose(A)[ : , end:-1:1]), Gridded(Linear()));
 fxy = extrapolate(fxy_inter, Flat());
 
 # Duration to trace the streamlines forward and back
@@ -49,7 +48,7 @@ legendpos = lowrightpoint + (EM, 0) + (0.0m, PHYSHEIGHT_23)
 draw_real_legend(legendpos, mi, ma, legendvalues)
 
 # And make a function that interpolates between pixels:
-nxy_inter = interpolate((xs, ys), transpose(NO_2)[ : , end:-1:1], Gridded(Linear()));
+nxy_inter = interpolate((xs, reverse(ys)), transpose(NO_2)[ : , end:-1:1], Gridded(Linear()));
 nxy = extrapolate(nxy_inter, Flat());
 nxy(0.1m, 0.02m)
 
@@ -66,7 +65,7 @@ global const NS_2 = 10
 h = DU_26 / (NS_2 -1 )
 
 
-@time M = convolute_image_2(xs, ys, fxy, nxy, h, CUTOFF_23) # 36.019 s (10 allocations: 4.85 MiB)
+@time M = convolute_image_2(xs, reverse(ys), fxy, nxy, h, CUTOFF_23) # 36.019 s (10 allocations: 4.85 MiB)
                                                   # 27.331 s (50803210 allocations: 2.64 GiB)
                                                   # 29.189352 seconds (30.08 M allocations: 642.345 MiB, 0.39% gc time)
                                                   # 30.222620 seconds (24.06 M allocations: 389.484 MiB, 0.19% gc time)

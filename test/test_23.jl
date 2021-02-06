@@ -4,8 +4,8 @@ import MechanicalSketch: color_with_luminance, background, O, WI, HE, EM, FS, fi
 import MechanicalSketch: dimension_aligned
 import MechanicalSketch: ComplexQuantity, generate_complex_potential_source, generate_complex_potential_vortex
 import MechanicalSketch: @import_expand
-import MechanicalSketch: quantities_at_pixels, draw_color_map, draw_real_legend, draw_complex_legend, set_scale_sketch, lenient_min_max
-import MechanicalSketch: ∙, ∇_rectangle
+import MechanicalSketch: draw_color_map, draw_real_legend, draw_complex_legend, set_scale_sketch, lenient_min_max
+import MechanicalSketch: ∙, ∇_rectangle, x_y_iterators_at_pixels
 
 let
 BACKCOLOR = color_with_luminance(PALETTE[8], 0.1)
@@ -49,9 +49,11 @@ K = 1.0m²/s / 2π
 physwidth = 10.0m
 physheight = 0.4 * physwidth
 set_scale_sketch(physwidth, round(Int, WI * 2 / 3))
-A = quantities_at_pixels(ϕ,
-    physwidth = physwidth,
-    physheight = physheight);
+
+
+xs, ys = x_y_iterators_at_pixels(;physwidth, physheight)
+A = [ϕ(complex(x, y)) for y in ys, x in xs]
+
 OT = O + (0.0, -0.25HE + EM)
 upleftpoint, lowrightpoint = draw_color_map(OT, A)
 legendpos = lowrightpoint + (EM, 0) + (0.0m, physheight)

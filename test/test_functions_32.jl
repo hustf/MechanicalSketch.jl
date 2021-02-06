@@ -26,12 +26,7 @@ Outputs phase and amplitude information for every pixel in a line-integral-convo
 The input typically represents velocities.
 """
 function convolute_image_32(f_xy; physwidth = 10.0m, physheight = 4.0m)
-    # Resolution
-    nx = round(Int64, get_scale_sketch(physwidth))
-    ny = round(Int64, get_scale_sketch(physheight))
-    # Iterators for position - linear integration between points.
-    xs = range(-physwidth / 2, stop = physwidth / 2, length = nx)
-    ys = range(-physheight / 2, stop = physheight / 2, length = ny)
+    xs, ys = x_y_iterators_at_pixels(;physwidth, physheight)
     # Make a continuous function, interpolated between pixels. This is supposed to
     # be faster than the original function (which it may not be)
     fxy = if f_xy isa Extrapolation

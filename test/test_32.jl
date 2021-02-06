@@ -8,7 +8,7 @@ import MechanicalSketch: draw_color_map, set_scale_sketch, get_scale_sketch, len
 import MechanicalSketch: clamped_velocity_matrix, line_integral_convolution_complex, lic_matrix_current, LicSceneOpts
 import MechanicalSketch: normalize_datarange, matrix_to_function, noise_for_lic, function_to_interpolated_function
 import MechanicalSketch: Movie, Scene, animate, circle, line, Point, arrow, poly
-import MechanicalSketch: Time, get_scale_sketch, sawtooth
+import MechanicalSketch: Time, get_scale_sketch, sawtooth, x_y_iterators_at_pixels
 import Interpolations:   Extrapolation
 
 let

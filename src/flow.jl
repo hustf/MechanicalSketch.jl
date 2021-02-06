@@ -2,6 +2,7 @@
 Complex quantities represent position, velocity etc in a plane.
 They are a subset of quantities, although some function methods may
 need extending outside T<:Real
+
 """
 const ComplexQuantity = Quantity{<:Complex}
 const RealQuantity = Quantity{<:Real}
@@ -55,7 +56,7 @@ end
     generate_complex_potential_vortex(; pos = ComplexQuantity((0.0, 0.0)m)::ComplexQuantity, vorticity= 1.0m²/s)
     -> f::Z->R
 
-We find the velocity potential function of a vortex by realizing that
+We find the velocity potential function of a vortex by realizing that velocity
 ´´´
     u_θ = K / r
        where u_θ is tangential velocity, i.e. length per time in the tangential direction.
@@ -64,12 +65,7 @@ We find the velocity potential function of a vortex by realizing that
 ´´´
 The velocity potential, ϕ, is the scalar valued function found by integrating
 velocity along the velocity gradient. The sign and endpoint of the integration
-can be defined as we want. With the limitation above:
-´´´
-XXX    u_θ  = ∇ϕ = δu_θ / δr
-XXX TODO    ⇑
-XXX    ϕ = ∫ K / r dr = K  · ∫ 1 / r dr = q / (2πr) · ln(r)
-´´´
+can be defined as we want. 
 """
 function generate_complex_potential_vortex(; pos = complex(0.0, 0.0)m, vorticity = 1.0m²/s)
     # Would call this ϕ_v(p)
@@ -93,20 +89,16 @@ where
 where
     CQ is a complex valued Quantity (a coordinate in a vector field, or a vector at a point)
     Q is a real valued Quantity
+# TODO - is this practically the same as function_to_matrix, defined elsewhere?
+# Consider using traits for complex arguments
 """
 function quantities_at_pixels(CQ_to_Q;
     physwidth = 10.0m,
-    physheight = 4.0m)
-
-    # Discretize per pixel
-    nx = round(Int64, get_scale_sketch(physwidth))
-    ny = round(Int64, get_scale_sketch(physheight))
-    # Iterators for each pixel relative to the center, O
-    pixiterx = (1 - div(nx + 1, 2):(nx - div(nx, 2)))
-    pixitery = (1 - div(ny + 1, 2):(ny - div(ny, 2)))
-
-    # # Matrix of plot quantity, one per pixel
-    [CQ_to_Q(complex(ix * SCALEDIST, -iy * SCALEDIST)) for iy = pixitery, ix = pixiterx]
+    physheight = 4.0m,
+    centered = true)
+    @error "quantities_at_pixels to be replaced by function_to matrix."
+    xs, ys = x_y_iterators_at_pixels(;physwidth, physheight, centered)
+    [CQ_to_Q(complex(x, y)) for y in ys, x in xs]
 end
 
 absolute_scale() = ColorSchemes.linear_grey_10_95_c0_n256
@@ -232,8 +224,11 @@ end
 
 Map a collection of quantities to colors, transparent
 pixels for NaN and Inf values.
+
+# TODO adapt ColorLegend for this functionality?
 """
 function color_matrix(qua::AbstractArray; normalize_data_range = true)
+    @warn "color_matrix to be replaced"
     # Boolean collection, valid elements which should be opaque
     valid_element = map(x-> isnan(x) || isinf(x) ? false : true, qua)
 
@@ -261,55 +256,5 @@ function color_matrix(qua::AbstractArray; normalize_data_range = true)
 end
 
 
-"""
-    pngimage(quantities; normalize_data_range = true)
 
-Convert a matrix to a png image suitable for ´placeimage´.
-    One pixel per element.
-"""
-function pngimage(quantities; normalize_data_range = true)
-    tempfilename = joinpath(@__DIR__, "tempsketch.png")
-    save(File(format"PNG", tempfilename), color_matrix(quantities,
-        normalize_data_range = normalize_data_range))
-    img = readpng(tempfilename);
-    rm(tempfilename)
-    img
-end
-
-"""
-    pngimage(colmat::Matrix{RGB{Float64}})
-
-Convert a matrix to a png image suitable for ´placeimage´.
-One pixel per element.
-"""
-function pngimage(colmat::Matrix{RGB{Float64}}; normalize_data_range = false)
-    if normalize_data_range
-        @warn "Can't normalize values of type $(eltype(colmat)), use keyword argument normalize_data_range = false"
-    end
-    tempfilename = joinpath(@__DIR__, "tempsketch.png")
-    save(File(format"PNG", tempfilename), colmat)
-    img = readpng(tempfilename);
-    rm(tempfilename)
-    img
-end
-
-
-"""
-    draw_color_map(p::Point, data::Matrix;
-                        normalize_data_range = true, centered = true)
-    -> (upper left point, lower right point)
-
-The color map is centered on p, one pixel per value in the matrix
-"""
-function draw_color_map(p::Point, data::Matrix;
-                        normalize_data_range = true, centered = true)
-    img = pngimage(data, normalize_data_range = normalize_data_range)
-    # Put the png format picture on screen
-    gsave() # Possible bug in placeimage, guard against it.
-    placeimage(img, p; centered = centered)
-    grestore()
-    ny, nx = size(data)
-    Δp = centered * Point(nx / 2, ny / 2)
-    (p - Δp, p - Δp + (nx, ny))
-end
 

@@ -2,8 +2,9 @@ import MechanicalSketch
 import MechanicalSketch: color_with_luminance, empty_figure, background, sethue, O, EM, WI, HE, FS, finish,
        PALETTE
 import MechanicalSketch: dimension_aligned, settext, setfont, set_scale_sketch
-import MechanicalSketch: @import_expand
-import MechanicalSketch: quantities_at_pixels, draw_color_map, draw_complex_legend, lenient_min_max
+import MechanicalSketch: @import_expand, x_y_iterators_at_pixels
+import MechanicalSketch: draw_color_map, draw_complex_legend, lenient_min_max
+import MechanicalSketch: LegendVectorLike
 
 let
 if !@isdefined m²
@@ -14,7 +15,7 @@ end
 
 BACKCOLOR = color_with_luminance(PALETTE[8], 0.8)
 function restart()
-    empty_figure(joinpath(@__DIR__, "test_22.png"))
+    empty_figure(joinpath(@__DIR__, "test_22aa.png"))
     background(BACKCOLOR)
     sethue(PALETTE[5])
 end
@@ -23,14 +24,22 @@ restart()
 
 
 "A complex domain function defined in the unit circle"
- foo(z)= hypot(z) <= 1.0m ? z : NaN*m
+foo(z)= hypot(z) <= 1.0m ? z : NaN * z
 
 physwidth = 2.2m
 physheight = physwidth
 set_scale_sketch(1.1physwidth, HE)
-A = quantities_at_pixels(foo,
-    physwidth = physwidth,
-    physheight = physheight);
+
+xs, ys = x_y_iterators_at_pixels(;physwidth, physheight)
+A = [foo(complex(x, y)) for y in ys, x in xs]
+mi, ma = lenient_min_max(A)
+mea = (mi + ma) / 2
+
+legend = LegendVectorLike(ma)
+legend((1.0m, 1.0m))
+legend(A[1,1])
+colmat = map(legend, A)
+
 upleftpoint, lowrightpoint = draw_color_map(O, A)
 
 
@@ -41,8 +50,7 @@ setfont("Calibri", FS)
 
 legendpos = lowrightpoint + (0.0m, physheight)
 
-mi, ma = lenient_min_max(A)
-mea = (mi + ma) / 2
+
 
 legendvalues = reverse(sort([ma, mi, mea]))
 

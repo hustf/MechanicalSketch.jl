@@ -725,7 +725,7 @@ function LicSceneOpts(cycle_duration, O;
 end
 
 """
-    color_matrix_current(scene, framenumber; luminosity_variation = 1.0)
+    color_matrix_current(scene, framenumber)
 
 Input: scene     Defines options. See Movie, Scene, SceneOpts.
 
@@ -736,11 +736,22 @@ function color_matrix_current(scene, framenumber)
     @assert scene.opts isa LicSceneOpts
     curmat = lic_matrix_current(scene, framenumber)
     speedmat = scene.opts.data
-    color_matrix_current(curmat, speedmat, scene.opts.legend, scene.opts.luminosity_variation)
+    color_matrix_mix(curmat, speedmat, scene.opts.legend, scene.opts.luminosity_variation)
 end
 
-function color_matrix_current(curmat, speedmat, legend, luminosity_variation)
-    map(legend.(speedmat), curmat) do col, lu
+"""
+    color_matrix_mix(lumin_mat, quant_scalar_mat, legend, luminosity_variation)
+
+Input: 
+    lumin_mat                 Matrix{Float64} - determines luminosity at a pixel. Values in the range -1.0 to 1.0.
+    quant_scalar_mat               Matrix of quantities, which are converted to colors using 'legend'
+    legend                 <: ColorLegend
+    luminosity_variation   Possible range is [0,1], recommended is 0.67. 1.0:full luminosity variation with convolution.
+
+Output: Color² Matrix of colors representing the animation at this frame.
+"""
+function color_matrix_mix(lumin_mat, quant_scalar_mat, legend, luminosity_variation)
+    map(legend.(quant_scalar_mat), lumin_mat) do col, lu
         # lu will be in the range -1.0 to 1.0
         lum = 50 * (lu * luminosity_variation + 1.0)
         # lum will be in the range 0 to 100.

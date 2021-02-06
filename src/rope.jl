@@ -23,7 +23,7 @@ function rope_pos_tension(Ls, Ns, diameter_rope, Cs, ρ_air, v, α_w_rel, Fk, α
     # Most parameters are constant, make a short form function
     dFthis(β) = dF(ds, diameter_rope, Cs, ρ_air, v, α_w_rel, β)
     # Rope node positions, origo at start
-    ps = Vector{PositionTuple{typeof(0.0m)}}()
+    ps = Vector{typeof((0.0m, 0.0m))}()
 
     # Rope tension at nodes
     Ts = Vector{typeof(0.0N)}()

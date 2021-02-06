@@ -73,6 +73,7 @@ function convolute_image_3(xs, ys, f_xy, n_xy, h, cutoff)
     @assert eltype(xs) <: Quantity{Float64}
     @assert eltype(ys) <: Quantity{Float64}
     @assert n_xy(xs[1], ys[1]) isa Float64
+    @assert first(ys) < last(ys)
     # prepare a mutable but fast working buffer forward, and another backward.
     vxf = similar(SVector{NS_3}(fill(xs[1], NS_3)))
     vyf = similar(vxf)

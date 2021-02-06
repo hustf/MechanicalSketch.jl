@@ -3,7 +3,7 @@ import MechanicalSketch: color_with_luminance, empty_figure, background, sethue,
        PALETTE
 import MechanicalSketch: dimension_aligned, settext, arrow, placeimage, readpng, setfont, gsave, grestore
 import MechanicalSketch: ComplexQuantity, generate_complex_potential_vortex, @import_expand, string_polar_form
-import MechanicalSketch: quantities_at_pixels, draw_color_map, draw_real_legend
+import MechanicalSketch: draw_color_map, draw_real_legend, x_y_iterators_at_pixels
 
 let
 if !@isdefined m²
@@ -31,10 +31,10 @@ K = 1.0m²/s
 
 
 physwidth = 20m
-physheight = physwidth /3
-A = quantities_at_pixels(ϕ_vortex,
-    physwidth = physwidth,
-    physheight = physheight);
+physheight = physwidth / 3
+xs, ys = x_y_iterators_at_pixels(;physwidth, physheight)
+A = [ϕ_vortex(complex(x, y)) for y in ys, x in xs] 
+
 upleftpoint, lowrightpoint = draw_color_map(O, A)
 
 # Add some decoration to the plot

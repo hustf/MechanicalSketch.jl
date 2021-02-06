@@ -1,5 +1,9 @@
 [deps]
+DSP = "717857b8-e6f2-59f4-9121-6e50c889abd2"
+LaTeXStrings = "b964fa9f-0449-5b57-a5c2-d3ea65f4040f"
 Luxor = "ae8d54c2-7ccd-5906-9d76-62fc9837b5bc"
+Primes = "27ebfcd6-29c5-5fa9-bf4b-fb8fc14df3ae"
 Revise = "295af30f-e4ad-537b-8983-00126c2a3abe"
 SnoopCompile = "aa65fe97-06da-5843-b5b1-d5d13cad87d2"
 SnoopCompileCore = "e2b509da-e806-4183-be48-004708413034"
+UnicodeFun = "1cfade01-22cf-5700-b092-accc4b62d6e1"

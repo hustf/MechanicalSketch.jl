@@ -152,6 +152,7 @@ function convolute_image_1(xs, ys, f_xy, n_xy, h, cutoff)
     @assert cx isa Quantity{Float64}
     @assert cy isa Quantity{Float64}
     @assert n_xy(cx, cy) isa Float64
+    @assert first(ys) < last(ys)
     # prepare a mutable but fast working buffer forward, and another backward.
     vxf = similar(SVector{NS_1}(fill(cx, NS_1)))
     vyf = similar(vxf)

@@ -95,3 +95,32 @@ Updates global constant WI. Take care if functions are defined with closures (ca
 function set_figure_width(w::Int)
     global WI = w
 end
+
+"""
+    x_y_iterators_at_pixels( physwidth = 10.0m, physheight = 4.0m, centered = true)
+    ->(xs, ys)
+
+Create position iterators with units corresponding to screen pixels.
+    if centered = false:  (xs, ys)  >= 0m
+    default: centered == true,  centered on (0.0m, 0.0m)
+
+Use this to evaluate functions for visualization.
+When looping over combinations, use ys as the inner loop for faster matrix lookup.
+For image matrices, x vary over rows, y vary over columns.
+"""
+function x_y_iterators_at_pixels(;physwidth = 10.0m, physheight = 4.0m, centered = true)
+    # Resolution for interpolation nodes
+    nx = round(Int64, get_scale_sketch(physwidth))
+    ny = round(Int64, get_scale_sketch(physheight))
+    # Bounding box
+    xmin = -centered * physwidth / 2
+    xmax = (1 - centered / 2) * physwidth
+    ymin = -centered * physheight / 2
+    ymax = (1 - centered / 2) * physheight
+    # Position iterators
+    xs = range(xmin, xmax, length = nx)
+    ys = range(ymax, ymin, length = ny) # Reversed order for faster matrix indexing.
+    xs, ys
+end
+
+

@@ -8,7 +8,7 @@ rescale,
 finish, preview,
 origin, rulers, background,
 
-@png, @pdf, @svg, @eps, @draw,
+@png, @pdf, @svg, @eps, @draw, @imagematrix,
 
 newpath, closepath, newsubpath,
 
@@ -84,7 +84,7 @@ GridHex, GridRect, nextgridpoint,
 
 Table, highlightcells,
 
-readpng, placeimage,
+readpng, placeimage, readsvg,
 
 julialogo, juliacircles,
 
@@ -122,7 +122,7 @@ import MechanicalUnits.Unitfu: Power, oneunit, numtype
 @import_expand kW # Don't use ~ since that would also import WI, which we use elsewhere.
 
 # TODO: Cleanup
-import REPL.TerminalMenus ## Where used?
+#import REPL.TerminalMenus ## Where used?
 import ColorSchemes
 import ColorSchemes: getinverse, get
 import ColorSchemes: HSL, HSLA, RGB, RGBA, HSV, LCHuv, LCHuvA, isoluminant_cgo_70_c39_n256
@@ -195,10 +195,11 @@ Point(x::T, y::T) where T<:Length = Point(x / SCALEDIST, y / scaledisty())
 Point(x::T, y::T) where T<:Velocity = Point(x / SCALEVELOCITY , y / scalevelocityy())
 Point(x::T, y::T) where T<:Force = Point(x / SCALEFORCE , y / scaleforcey())
 
-const QuantityTuple = NTuple{2, <:Quantity}
-const VelocityTuple = NTuple{2, <:Velocity}
-const PositionTuple = NTuple{2, <: Length}
-const ForceTuple = NTuple{2, <: Force}
+const QuantityTuple = Tuple{Quantity, Quantity}
+const VelocityTuple = Tuple{Velocity, Velocity}
+const PositionTuple = Tuple{Length, Length}
+const ForceTuple = Tuple{Force, Force}
+
 
 # Vector subtraction and division using QuantityTuples
 +(tup1::QuantityTuple, tup2::QuantityTuple) = .+(tup1, tup2)
@@ -213,20 +214,11 @@ const ForceTuple = NTuple{2, <: Force}
 -(tup::QuantityTuple) = .-(tup)
 
 # extending points with quantity tuples - will work for e.g. 3.0m/mm = 3000.0
-+(p1::Point, shift::NTuple{2, Quantity}) = p1 + Point(shift[1], shift[2])
--(p1::Point, shift::NTuple{2, Quantity}) = p1 - Point(shift[1], shift[2])
-*(p1::Point, shift::NTuple{2, Quantity}) = p1 * Point(shift[1], shift[2])
-/(p1::Point, shift::NTuple{2, Quantity}) = p1 / Point(shift[1], shift[2])
-# extending points with mixed tuples
-+(p1::Point, shift::Tuple{Quantity, Real}) = p1 + Point(shift[1], shift[2])
--(p1::Point, shift::Tuple{Quantity, Real}) = p1 - Point(shift[1], shift[2])
-*(p1::Point, shift::Tuple{Quantity, Real}) = p1 * Point(shift[1], shift[2])
-/(p1::Point, shift::Tuple{Quantity, Real}) = p1 / Point(shift[1], shift[2])
-# opposite order
-+(p1::Point, shift::Tuple{Real, Quantity}) = p1 + Point(shift[1], shift[2])
--(p1::Point, shift::Tuple{Real, Quantity}) = p1 - Point(shift[1], shift[2])
-*(p1::Point, shift::Tuple{Real, Quantity}) = p1 * Point(shift[1], shift[2])
-/(p1::Point, shift::Tuple{Real, Quantity}) = p1 / Point(shift[1], shift[2])
++(p1::Point, shift::QuantityTuple) = p1 + Point(shift[1], shift[2])
+-(p1::Point, shift::QuantityTuple) = p1 - Point(shift[1], shift[2])
+*(p1::Point, shift::QuantityTuple) = p1 * Point(shift[1], shift[2])
+/(p1::Point, shift::QuantityTuple) = p1 / Point(shift[1], shift[2])
+
 # extend function in base with Point
 hypot(p::Point) = hypot(p.x, p.y)
 hypot(p::QuantityTuple) = hypot(p[1], p[2])
@@ -292,4 +284,5 @@ include("matrix_interpolation.jl")
 include("streamline_convolution.jl")
 include("matrix_drawing.jl")
 include("colorlegends.jl")
+include("placeimage.jl")
 end # module

@@ -3,7 +3,7 @@ import MechanicalSketch: color_with_luminance, sethue, O, WI, EM, FS, HE, finish
        PALETTE, setfont, settext
 import MechanicalSketch: dimension_aligned,line, circle, move, do_action
 import MechanicalSketch: ComplexQuantity, generate_complex_potential_source, generate_complex_potential_vortex
-import MechanicalSketch: @import_expand
+import MechanicalSketch: @import_expand, x_y_iterators_at_pixels
 import MechanicalSketch: draw_color_map, draw_complex_legend, set_scale_sketch, lenient_min_max
 import MechanicalSketch: ∙, ∇_rectangle, empty_figure
 import Interpolations: interpolate, Gridded, Linear, Flat, extrapolate
@@ -35,10 +35,11 @@ OB = O + (0.0, + 0.25HE + 0.5EM )
 
 # We are going to use the velocity vector field in a lot of calculations,
 # and interpolate between the calculated pixel values.
-# We start by defining increasing iterators for coordinates
-xs = range(-PHYSWIDTH_23 / 2, stop = PHYSWIDTH_23 / 2, length = size(A)[2])
-ys = range(-HEIGHT_RELATIVE_WIDTH_23 * PHYSWIDTH_23 / 2, stop = HEIGHT_RELATIVE_WIDTH_23 * PHYSWIDTH_23 / 2, length = size(A)[1])
+# We start by defining iterators for coordinates
+
+xs, ys = x_y_iterators_at_pixels(;physwidth = PHYSWIDTH_23, physheight = PHYSHEIGHT_23)
 # Note that the image matrix has maximum y in the first index, minimum in the last first index.
+ys = reverse(ys)
 # Example image, small scale:
 # (x, y ) ∈ ({-2, 0.1, 2}, { -1, 1})
 # ... the coordinates would be stored as
@@ -90,9 +91,6 @@ setfont("DejaVu Sans", FS)
 str = "RK4: 10.4μs vs Euler: 2.7μs"
 settext(str, OB + (-WI/3 + EM, + 4EM), markup = true)
 setfont("Calibri", FS)
-
-
-# println("\nStarting point:")
 
 sethue(PALETTE[1])
 vx = collect(range(-0.0m, 0.0m, length = 10))

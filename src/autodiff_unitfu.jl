@@ -124,7 +124,7 @@ function ∇_rectangle(CQ_to_Q;
     physwidth = 10.0m,
     physheight = 4.0m,
     cutoff = NaN)
-
+#=
     # Discretize per pixel
     nx = round(Int64, get_scale_sketch(physwidth))
     ny = round(Int64, get_scale_sketch(physheight))
@@ -132,9 +132,11 @@ function ∇_rectangle(CQ_to_Q;
     # Iterators for each pixel relative to the center, O
     pixiterx = (1 - div(nx + 1, 2):(nx - div(nx, 2)))
     pixitery = (1 - div(ny + 1, 2):(ny - div(ny, 2)))
+=#  
+    xs, ys = x_y_iterators_at_pixels(;physwidth, physheight)
 
     # Matrix of 2-element static vectors, one per pixel
-    xyq = [SA[ix * SCALEDIST, -iy * SCALEDIST] for iy = pixitery, ix = pixiterx]
+    xyq = [SA[x, y] for y in ys, x in xs]
     if isnan(cutoff)
         ∇_matrix(CQ_to_Q, xyq)
     else

@@ -1,9 +1,9 @@
 import MechanicalSketch
-import MechanicalSketch: color_with_luminance, empty_figure, background, sethue, O, WI, HE, EM, FS, finish,
-       PALETTE
+import MechanicalSketch: color_with_luminance, empty_figure, background, sethue
+import MechanicalSketch: PALETTE, O, WI, HE, EM, FS, finish, x_y_iterators_at_pixels
 import MechanicalSketch: dimension_aligned, settext, arrow, placeimage, readpng, setfont, gsave, grestore
 import MechanicalSketch: ComplexQuantity, generate_complex_potential_source, @import_expand, string_polar_form
-import MechanicalSketch: quantities_at_pixels, draw_color_map, draw_real_legend
+import MechanicalSketch: draw_color_map, draw_real_legend
 
 let
 if !@isdefined m²
@@ -30,10 +30,11 @@ q_source = 1.0m²/s
 
 physwidth = 20m
 physheight = physwidth / 3
-A = quantities_at_pixels(ϕ_source,
-    physwidth = physwidth,
-    physheight = physheight);
+xs, ys = x_y_iterators_at_pixels(;physwidth, physheight)
+A = [ϕ_source(complex(x, y)) for y in ys, x in xs] # 0.189560 seconds (1.17 M allocations: 34.138 MiB, 64.04% compilation time)
+
 upleftpoint, lowrightpoint = draw_color_map(O, A)
+
 
 # Add some decoration to the plot
 sethue(color_with_luminance(PALETTE[5], 0.3))

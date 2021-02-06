@@ -3,7 +3,7 @@ import MechanicalSketch: empty_figure, background, sethue, O, WI, HE, EM, FS, fi
        PALETTE, setfont, settext, setline
 import MechanicalSketch: dimension_aligned, move, do_action, noise, rk4_steps!
 import MechanicalSketch: generate_complex_potential_source, generate_complex_potential_vortex
-import MechanicalSketch: @import_expand, Quantity, @layer
+import MechanicalSketch: @import_expand, Quantity, @layer, x_y_iterators_at_pixels
 import MechanicalSketch: draw_color_map, draw_real_legend, set_scale_sketch, lenient_min_max
 import MechanicalSketch: ∙, ∇_rectangle, SVector, normalize_datarange, draw_streamlines
 import Interpolations: interpolate, Gridded, Linear, Flat, extrapolate
@@ -41,9 +41,8 @@ setfont("Calibri", FS)
 
 # We are going to use the velocity vector field in a lot of calculations,
 # and interpolate between the calculated pixel values
-xs = range(-physwidth/2, stop = physwidth / 2, length = size(A)[2]);
-ys = range(-height_relative_width * physwidth/2, stop = height_relative_width * physwidth / 2, length = size(A)[1]);
-fxy_inter = interpolate((xs, ys), map( cmplx -> (real(cmplx), imag(cmplx)), transpose(A)[ : , end:-1:1]), Gridded(Linear()));
+xs, ys = x_y_iterators_at_pixels(;physwidth, physheight)
+fxy_inter = interpolate((xs, reverse(ys)), map( cmplx -> (real(cmplx), imag(cmplx)), transpose(A)[ : , end:-1:1]), Gridded(Linear()));
 fxy = extrapolate(fxy_inter, Flat());
 
 
@@ -63,7 +62,7 @@ legendpos = lowrightpoint + (EM, 0) + (0.0m, physheight)
 draw_real_legend(legendpos, mi, ma, legendvalues)
 
 # And make a function that interpolates between pixels:
-nxy_inter = interpolate((xs, ys), transpose(NO_3)[ : , end:-1:1], Gridded(Linear()));
+nxy_inter = interpolate((xs, reverse(ys)), transpose(NO_3)[ : , end:-1:1], Gridded(Linear()));
 nxy = extrapolate(nxy_inter, Flat());
 nxy(0.1m, 0.02m)
 
@@ -78,7 +77,7 @@ global const NS_3 = 20
 h = DU_2 / (NS_3 -1 )
 
 
-@time M = convolute_image_3(xs, ys, fxy, nxy, h, CUTOFF_23) # 36.019 s (10 allocations: 4.85 MiB)
+@time M = convolute_image_3(xs, reverse(ys), fxy, nxy, h, CUTOFF_23) # 36.019 s (10 allocations: 4.85 MiB)
                                                   # 58.803552 seconds (62.34 M allocations: 2.247 GiB, 0.56% gc time)
                                                   # 57.021068 seconds (62.33 M allocations: 2.247 GiB, 0.59% gc time)
                                                   # 59.596110 seconds (59.04 M allocations: 2.002 GiB, 0.58% gc time)

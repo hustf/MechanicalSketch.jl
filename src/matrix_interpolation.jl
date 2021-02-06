@@ -12,15 +12,11 @@ between pixels, based on the currently defined sketch scale.
 
 The output of the function can be otherwise; this is just the originally intended use.
 """
-function function_to_interpolated_function(f_xy; physwidth = 10.0m, physheight = 4.0m)
-    # Resolution for interpolation nodes
-    nx = round(Int64, get_scale_sketch(physwidth))
-    ny = round(Int64, get_scale_sketch(physheight))
+function function_to_interpolated_function(f_xy; physwidth = 10.0m, physheight = 4.0m, centered = true)
     # Position iterators
-    xs = range(-physwidth / 2, stop = physwidth / 2, length = nx)
-    ys = range(-physheight / 2, stop = physheight / 2, length = ny)
-    tuplemat = [f_xy(x, y) for x in xs, y in ys]
-    fxy_inter = interpolate((xs, ys),
+    xs, ys = x_y_iterators_at_pixels(;physwidth, physheight, centered)
+    tuplemat = [f_xy(x, y) for x in xs, y in reverse(ys)]
+    fxy_inter = interpolate((xs, reverse(ys)),
         tuplemat,
         Gridded(Linear()));
     # Extend the domain, using the same values as on the domain border. Don't know how the closest point
@@ -50,13 +46,11 @@ function matrix_to_function(matrix::Array{Quantity{Complex{Float64}, D, U}, 2}) 
     # We assume every element correspond to a position, unit of length
     physwidth = nx * 1m / get_scale_sketch(m)
     physheight = ny * 1m / get_scale_sketch(m)
-    # Position iterators
-    xs = range(-physwidth / 2, stop = physwidth / 2, length = nx)
-    ys = range(-physheight / 2, stop = physheight / 2, length = ny)
+    xs, ys = x_y_iterators_at_pixels(;physwidth, physheight)
     # Adapt to Interpolations
     tuplemat = map( cmplx -> (real(cmplx), imag(cmplx)), transpose(matrix)[ : , end:-1:1])
     # Function that can interpolate between nodes.
-    fxy_inter = interpolate((xs, ys),
+    fxy_inter = interpolate((xs, reverse(ys)),
         tuplemat,
         Gridded(Linear()));
     # Extend the domain, using the same values as on the domain border. Don't know how the closest point
@@ -88,13 +82,12 @@ function matrix_to_function(matrix::Array{Float64,2})
     # We assume every element correspond to a position, unit of length
     physwidth = nx * 1m / get_scale_sketch(m)
     physheight = ny * 1m / get_scale_sketch(m)
-    # Position iterators
-    xs = range(-physwidth / 2, stop = physwidth / 2, length = nx)
-    ys = range(-physheight / 2, stop = physheight / 2, length = ny)
+    
+    xs, ys = x_y_iterators_at_pixels(;physwidth, physheight)
     # Adapt to Interpolations
     transposed_matrix = transpose(matrix)[ : , end:-1:1]
     # Function that can interpolate between nodes.
-    fxy_inter = interpolate((xs, ys),
+    fxy_inter = interpolate((xs, reverse(ys)),
         transposed_matrix,
         Gridded(Linear()));
     # Extend the domain, using the same values as on the domain border. Don't know how the closest point

@@ -76,6 +76,12 @@ function rotate_hue(col::RGB, ang::Angle)
     end
 end
 
+function rotate_hue(col::RGBA, ang)
+    modco = rotate_hue(RGB(col), ang)
+    RGBA(modco.r, modco.g, modco.b, col.alpha)
+end
+
+
 """
     color_with_lumin(col::RGB, lumin)
 
@@ -92,4 +98,8 @@ function color_with_lumin(col::RGB, lumin)
     else
         col
     end
+end
+function color_with_lumin(col::RGBA, lumin)
+    modco = color_with_lumin(RGB(col), lumin)
+    RGBA(modco.r, modco.g, modco.b, col.alpha)
 end
