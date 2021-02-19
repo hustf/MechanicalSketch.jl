@@ -10,3 +10,9 @@ The package is developed progressively by writing scripts in the test folder, an
 There's no intention to make this very general, rather to add functionality as the need arise.
 
 Sketches should look good and be in a consistent pallette, though. The test images are in .png format, but .svg is better for zooming. For post-editing figures, not all svg editors handle fonts. 'Inkscape' seems to work well. You might need to install additional fonts for some test images.
+
+# Installation
+pkg> registry add github.com/hustf/M8
+pgk> add MechanicalSketch
+
+You probably want to install the direct dependency MechanicalUnits for REPL calculations. It uses a variant of Unitful for more covenient parsing of units.
