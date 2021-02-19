@@ -57,17 +57,17 @@ function arrow(p::Point, Fx::F, Fy::F;
     ΔF = ΔFx + ΔFy
 
     # Prepare color selection
-    luminback = luminance(backgroundcolor)
-    luminfront = get_current_luminance()
+    luminback = lumin(backgroundcolor)
+    luminfront = get_current_lumin()
     avglumin = (luminback + luminfront) / 2
     curcol = get_current_RGB()
-    avgcol = color_with_luminance(curcol, avglumin)
+    avgcol = color_with_lumin(curcol, avglumin)
     # Draw the components, but only if the resultant is not coincident with one of them.
     if hypot(ΔFx) > 0 && hypot(ΔFy) > 0
         gsave()
         setdash("longdashed")
         deltalumin = luminback - luminfront
-        lesscontrast = color_with_luminance(get_current_RGB(), luminfront + deltalumin)
+        lesscontrast = color_with_lumin(get_current_RGB(), luminfront + deltalumin)
         sethue(lesscontrast)
         shaftlength = hypot(ΔFx)
         arrowheadlength = shaftlength > 3 * EM ? EM :  shaftlength / 3
@@ -152,11 +152,11 @@ function arrow(p::Point, vx::V, vy::V;
     Δvy = Point(-vy * sin(α), vy *cos(α))
     Δv = Δvx + Δvy
     endpoint = p + Δv
-    luminback = luminance(backgroundcolor)
-    luminfront = get_current_luminance()
+    luminback = lumin(backgroundcolor)
+    luminfront = get_current_lumin()
     avglumin = (luminback + luminfront) / 2
     curcol = get_current_RGB()
-    avgcol = color_with_luminance(backgroundcolor, avglumin)
+    avgcol = color_with_lumin(backgroundcolor, avglumin)
     gsave()
     setline(linewidth * 2)
     sethue(avgcol)
@@ -183,7 +183,7 @@ function setlabel(endpoint, vx, vy, α)
     Δvy = (-vy * sin(α), vy *cos(α))
     Δv = Δvx + Δvy
     l = hypot(Δv)
-    rounded = round(typeof(l), l, digits = 1)
+    rounded = round(unit(l), l, digits = 1)
     direction = atan(Δv[2], Δv[1]) |> °
     labdir = direction + 90°
     labpos = if -90° <= labdir < -70°

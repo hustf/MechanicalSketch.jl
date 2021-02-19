@@ -1,21 +1,4 @@
-"""
-Complex quantities represent position, velocity etc in a plane.
-They are a subset of quantities, although some function methods may
-need extending outside T<:Real
 
-"""
-const ComplexQuantity = Quantity{<:Complex}
-const RealQuantity = Quantity{<:Real}
-
-QuantityTuple(z::ComplexQuantity) =  reim(z)
-ComplexQuantity(p::QuantityTuple) = complex(p[1] , p[2])
-+(p1::Point, shift::ComplexQuantity) = p1 + QuantityTuple(shift)
-
-function string_polar_form(z::ComplexQuantity)
-    strarg_r = string(round(typeof(hypot(z)), hypot(z), digits = 3))
-    strarg_θ = string(round(angle(z), digits = 3))
-    strargument = strarg_r * "∙exp(" * strarg_θ * "im)"
-end
 
 """
     generate_complex_potential_source(; pos = ComplexQuantity((0.0, 0.0)m)::ComplexQuantity, massflowout = 1.0m²/s)
@@ -105,46 +88,6 @@ absolute_scale() = ColorSchemes.linear_grey_10_95_c0_n256
 complex_arg0_scale() = ColorSchemes.linear_ternary_red_0_50_c52_n256
 
 
-"""
-    lenient_min_max_complex(A::AbstractArray)
-
-Returns (min, max) of hypot.(A)
-"""
-function lenient_min_max_complex(A::AbstractArray)
-    magnitude = hypot.(A)
-    extrema(filter(x -> !isnan(x) && !isinf(x), magnitude))
-end
-
-"""
-    lenient_min_max(A)
-
-Neglecting NaN and Inf values, return
-- Minimum and maximum value out of real element arrays.
-- Minimum and maximum magnitude out of complex element arrays.
-- Minimum and maximum magnitude out of tuple element arrays.
-"""
-lenient_min_max(A::AbstractArray{<:RealQuantity}) = extrema(filter(x-> !isnan(x) && !isinf(x), A))
-lenient_min_max(A::AbstractArray{<:Real}) = extrema(filter(x-> !isnan(x) && !isinf(x), A))
-lenient_min_max(A) = lenient_min_max_complex(A)
-
-""""
-    lenient_min_max(f_xy, xs, ys)
-
-    f_xy is a function with domain defined by iterators (xs, ys)
-    Neglecting NaN and Inf values, return
-- Minimum and maximum value out of real valued function f_xy
-- Minimum and maximum magnitude out of complex valued function f_xy
-- Minimum and maximum magnitude out of tuple valued functions
-"""
-function lenient_min_max(f_xy, xs, ys)
-    bigiterator = product(xs, ys)
-    default = hypot(f_xy(first(bigiterator)...)) * 0.0
-    function g(x, y)
-        valu = hypot(f_xy(x, y))
-        !isnan(valu) && !isinf(valu) ? valu : default
-    end
-    extrema(tu -> g(tu...), bigiterator)
-end
 
 
 

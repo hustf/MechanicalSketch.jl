@@ -1,14 +1,14 @@
 using MechanicalSketch
 import MechanicalSketch: °, background, sethue, O, PT, EM, finish,
-      color_from_palette, color_with_luminance,
+      color_from_palette, color_with_lumin,
       m, °, kN, mm,
       m, m², m³, s, N, kN, kPa, g, kg,
       arrow, drawcart, circle, foil_draw,
       line, showpower
-import MechanicalSketch: rope_pos_tension, SCALEDIST, setline, kW
+import MechanicalSketch: rope_pos_tension, setline, kW
 
 let
-BACKCOLOR = color_with_luminance(PALETTE[8], 0.7);
+BACKCOLOR = color_with_lumin(PALETTE[8], 70);
 function restart()
     empty_figure(joinpath(@__DIR__, "test_13.png"))
     background(BACKCOLOR)
@@ -158,7 +158,7 @@ circle(O + p, 0.1m, :stroke)
 drawcart(p = O +p)
 
 #"Generated wind speed vector, same for kite and cart since the model is quasi static"
-sethue(color_with_luminance(color_from_palette("green"), 0.7))
+sethue(color_with_lumin(color_from_palette("green"), 85))
 arrow(O + p + 0.5w_generated + 2w,
     w_generated,
     backgroundcolor = BACKCOLOR,
@@ -166,7 +166,7 @@ arrow(O + p + 0.5w_generated + 2w,
 
 
 #"Relative wind velocity"
-sethue(color_with_luminance(color_from_palette("blue"), 0.7))
+sethue(color_with_lumin(color_from_palette("blue"), 70))
 arrow(O + p + 0.5w_rel , w_rel,
     backgroundcolor = BACKCOLOR,
     labellength = true)
@@ -183,13 +183,13 @@ arrow(O + p_foil, Fk, α = α_chord,
     labellength = true)
 
 # Draw the relative wind in front of the kite
-sethue(color_with_luminance(color_from_palette("blue"), 0.7))
+sethue(color_with_lumin(color_from_palette("blue"), 70))
 arrow(O + p_foil - 1.5w_rel , w_rel,
     backgroundcolor = BACKCOLOR,
     labellength = false)
 
 #"Rope positions, global axes"
-setline(diameter_rope / SCALEDIST)
+setline(diameter_rope)
 for i = 1:Ns
     line(O + ps[i], O + ps[i+1], :stroke)
 end
@@ -223,7 +223,7 @@ showpower(O + p_foil + (10EM, 0), power_kite; backgroundcolor = BACKCOLOR)
 
 
 #"Horizontal force, rope"
-sethue(color_with_luminance(PALETTE[6], 0.1))
+sethue(color_with_lumin(PALETTE[6], 10))
 arrow(O + 0.5p_foil + 0.5p, Fs,
     backgroundcolor = BACKCOLOR,
     labellength = true)

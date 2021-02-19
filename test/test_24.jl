@@ -1,37 +1,36 @@
 import MechanicalSketch
-import MechanicalSketch: color_with_luminance, sethue, O, WI, EM, FS, HE, finish, background,
-       PALETTE, setfont, settext
+import MechanicalSketch: color_with_lumin, sethue, O, WI, EM, FS, HE, finish, background
+import MechanicalSketch: PALETTE, setfont, settext
 import MechanicalSketch: dimension_aligned,line, circle, move, do_action
 import MechanicalSketch: ComplexQuantity, generate_complex_potential_source, generate_complex_potential_vortex
 import MechanicalSketch: @import_expand, x_y_iterators_at_pixels
-import MechanicalSketch: draw_color_map, draw_complex_legend, set_scale_sketch, lenient_min_max
-import MechanicalSketch: ∙, ∇_rectangle, empty_figure
+import MechanicalSketch: place_image, set_scale_sketch, lenient_min_max
+import MechanicalSketch: ∙, ∇_rectangle, empty_figure, BinLegendVector, draw_legend
 import Interpolations: interpolate, Gridded, Linear, Flat, extrapolate
 # using BenchmarkTools
 
 let
 # This file is tested line by line using BenchmarkTools. Tests are commented out.
 
-BACKCOLOR = color_with_luminance(PALETTE[8], 0.1);
+BACKCOLOR = color_with_lumin(PALETTE[8], 10);
 include("test_functions_24.jl")
 restart(BACKCOLOR)
 
 # Plot the top figure, flow field from test_23.jl visualized with color for direction.
 A = flowfield_23();
 set_scale_sketch(PHYSWIDTH_23, round(Int, SCREEN_WIDTH_FRAC_23 * WI))
-upleftpoint, lowrightpoint = draw_color_map(O + (0.0, -0.25HE + EM), A)
-legendpos = lowrightpoint + (EM, 0) + (0.0m, PHYSHEIGHT_23)
 mi, ma = lenient_min_max(A)
-ze = zero(typeof(ma))
-legendvalues = reverse(sort([ma, (ma + mi) / 2, ze]))
-draw_complex_legend(legendpos, mi, ma, legendvalues)
-    setfont("DejaVu Sans", FS)
-    str = "Streamlines - 10 steps of 1.5 s with RK4 method, compared with Euler"
-    settext(str, O + (-WI/2 + EM, -0.5HE + 2EM), markup = true)
-setfont("Calibri", FS)
+toplegend = BinLegendVector(;operand_example = first(A),
+        max_magn_legend = ma, noof_magn_bins = 30, noof_ang_bins = 36,
+        name = :Velocity)
+colmat = toplegend.(A)
+upleftpoint, lowrightpoint = place_image(O + (-2EM, -0.25HE + EM), colmat)
+legendpos = lowrightpoint + (EM, 0) + (0.0m, PHYSHEIGHT_23)
+draw_legend(legendpos, toplegend)
+
 
 # Centre of the bottom figure
-OB = O + (0.0, + 0.25HE + 0.5EM )
+OB = O + (-2EM, + 0.25HE + 0.5EM )
 
 # We are going to use the velocity vector field in a lot of calculations,
 # and interpolate between the calculated pixel values.
@@ -78,8 +77,6 @@ fxy = extrapolate(fxy_inter, Flat());
 fxy(0.0m, 0.0m)
 fxy(0.0m, 0.0001m)
 fxy(100.0m, 0.0001m)
-
-
 
 circle(OB, 0.999m, :stroke) # origo
 dimension_aligned(OB + (-PHYSWIDTH_23 / 2, PHYSHEIGHT_23 / 2), OB + (PHYSWIDTH_23 / 2, PHYSHEIGHT_23 / 2))
@@ -149,8 +146,6 @@ str = """
     However, the Euler streamlines\n are visually inaccurate here.
     """
 settext(str, O + (1.5m, -3.5m), markup = true)
-setfont("Calibri", FS)
-
 
 end # Let
 finish()

@@ -1,14 +1,14 @@
 import MechanicalSketch
-import MechanicalSketch: color_with_luminance, background, O, WI, HE, EM, FS, finish,
+import MechanicalSketch: color_with_lumin, background, O, WI, HE, EM, FS, finish,
        PALETTE, color_from_palette, setfont, settext, empty_figure, sethue, @layer
 import MechanicalSketch: dimension_aligned
 import MechanicalSketch: ComplexQuantity, generate_complex_potential_source, generate_complex_potential_vortex
-import MechanicalSketch: @import_expand
-import MechanicalSketch: draw_color_map, draw_real_legend, draw_complex_legend, set_scale_sketch, lenient_min_max
+import MechanicalSketch: @import_expand, BinLegend, BinLegendVector, draw_legend
+import MechanicalSketch: place_image, set_scale_sketch, lenient_min_max
 import MechanicalSketch: ∙, ∇_rectangle, x_y_iterators_at_pixels
 
 let
-BACKCOLOR = color_with_luminance(PALETTE[8], 0.1)
+BACKCOLOR = color_with_lumin(PALETTE[8], 10)
 function restart()
     empty_figure(joinpath(@__DIR__, "test_23.png"))
     background(BACKCOLOR)
@@ -46,33 +46,31 @@ K = 1.0m²/s / 2π
 ϕ(p_vortex + p_source)
 
 # Plot the real-valued function
+OT = O + (-EM, -0.25HE + EM)
 physwidth = 10.0m
 physheight = 0.4 * physwidth
 set_scale_sketch(physwidth, round(Int, WI * 2 / 3))
-
-
 xs, ys = x_y_iterators_at_pixels(;physwidth, physheight)
 A = [ϕ(complex(x, y)) for y in ys, x in xs]
-
-OT = O + (0.0, -0.25HE + EM)
-upleftpoint, lowrightpoint = draw_color_map(OT, A)
+toplegend = BinLegend(;maxlegend = maximum(A), minlegend = -maximum(A),
+                      noofbins = 256, name = :Potential)
+colormat = toplegend.(A);
+upleftpoint, lowrightpoint = place_image(OT, colormat)
 legendpos = lowrightpoint + (EM, 0) + (0.0m, physheight)
-ma = maximum(A)
-mi = minimum(A)
-ze = zero(typeof(ma))
-legendvalues = reverse(sort([ma, (ma + mi) / 2, ze]))
-draw_real_legend(legendpos, mi, ma, legendvalues)
+draw_legend(legendpos, toplegend)
+
+# Text
 setfont("DejaVu Sans", FS)
 str = "ϕ: Z ↣ R  is the flow potenial"
 settext(str, O + (-WI/2 + EM, -0.5HE + 2EM), markup = true)
-
 settext("Source", OT + (real(p_source), imag(p_source)))
 settext("Vortex", OT + (real(p_vortex), imag(p_vortex)))
 @layer begin
     sethue(BACKCOLOR)
     settext("Sink", OT - (real(p_source), imag(p_source)))
 end
-setfont("Calibri", FS)
+str = "∇ϕ: Z ↣ Z  is the flow gradient, aka velocity vectors"
+settext(str, O + (-WI/2 + EM, 1.5EM), markup = true)
 
 
 # Plot the complex-valued function, aka velocity vectors.
@@ -85,24 +83,21 @@ B = begin
         end
     end
 
-OB = O + (0.0, + 0.25HE + 0.5EM )
-upleftpoint, lowrightpoint = draw_color_map(OB, B)
-setfont("DejaVu Sans", FS)
-str = "∇ϕ: Z ↣ Z  is the flow gradient, aka velocity vectors"
-settext(str, O + (-WI/2 + EM, 1.5EM), markup = true)
-setfont("Calibri", FS)
-
-legendpos = lowrightpoint + (0.0m, physheight)
-
+OB = O + (-EM, + 0.25HE + 0.5EM )
 mi, ma = lenient_min_max(B)
-mea = (mi + ma) / 2
-legendvalues = reverse(sort([ma, mi, mea]))
-draw_complex_legend(legendpos, mi, ma, legendvalues)
+botlegend = BinLegendVector(;operand_example = first(B),
+        max_magn_legend = ma, noof_magn_bins = 30, noof_ang_bins = 36,
+        name = :Velocity) 
+colormat = botlegend.(B)
+ulp, lrp = place_image(OB, colormat)
+legendpos = lrp + (EM, 0) + (0.0m, physheight)
+draw_legend(legendpos, botlegend)
 
+
+# Position indicator
 dimension_aligned(OB + (-physwidth / 2, physheight / 2), OB + (physwidth / 2, physheight / 2))
 dimension_aligned(OB + p_vortex, OB)
 dimension_aligned(OB + (-physwidth / 2, - physheight / 2 ),  OB +  (-physwidth / 2, physheight / 2 ))
-
 
 finish()
 end #let

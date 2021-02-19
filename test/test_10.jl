@@ -1,11 +1,11 @@
 using MechanicalSketch
 import MechanicalSketch: background, background, sethue, O, EM, finish,
-    luminance, get_current_luminance, get_current_RGB, color_with_luminance,
+    lumin, get_current_lumin, get_current_RGB, color_with_lumin,
     sethue, fontface, textpath, textextents, PT, fontsize, gsave, grestore,
     newpath, translate, m, text, fillpreserve, clip, rect, clipreset,
     setline
 let
-BACKCOLOR = color_with_luminance(PALETTE[2], 0.7);
+BACKCOLOR = color_with_lumin(PALETTE[2], 70);
 function restart()
     empty_figure(joinpath(@__DIR__, "test_10.png"))
     background(BACKCOLOR)
@@ -30,13 +30,13 @@ restart()
 
 begin
     # Prepare color selection
-    luminback = luminance(BACKCOLOR)
-    luminfront = get_current_luminance()
+    luminback = lumin(BACKCOLOR)
+    luminfront = get_current_lumin()
     deltalumin = luminback - luminfront
     avglumin = luminfront + 0.5deltalumin
     curcol = get_current_RGB()
-    avgcol = color_with_luminance(curcol, luminfront + 0.5 * deltalumin)
-    contrastcol = color_with_luminance(curcol, luminfront + 2 * deltalumin);
+    avgcol = color_with_lumin(curcol, luminfront + 0.5 * deltalumin)
+    contrastcol = color_with_lumin(curcol, luminfront + 2 * deltalumin);
 end;
 
 gsave()
@@ -56,7 +56,7 @@ begin
     fontsize(fs)
     text(string(rounded), p + (1.5WI, 0) - fs.*(0.03, -0.04))
     # Inside symbol
-    sethue(color_with_luminance(color_from_palette("red"), luminback))
+    sethue(color_with_lumin(color_from_palette("red"), luminback))
     fontsize(symbsize)
     text(str, p)
     # Front text

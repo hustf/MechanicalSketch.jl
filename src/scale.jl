@@ -78,7 +78,7 @@ get_scale_sketch(q::Length) = upreferred(q / SCALEDIST)::Float64
 get_scale_sketch(q::Velocity) = upreferred(q / SCALEVELOCITY)::Float64
 get_scale_sketch(q::Force) = upreferred(q / SCALEFORCE)::Float64
 get_scale_sketch(u::FreeUnits) = get_scale_sketch(1∙u)::Float64
-
+get_scale_sketch(x) = x
 """
     set_figure_height(h::Int)
 

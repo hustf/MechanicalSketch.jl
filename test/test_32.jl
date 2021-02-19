@@ -1,14 +1,14 @@
 import MechanicalSketch
 import MechanicalSketch: background, sethue, O, WI, HE, EM, FS
-import MechanicalSketch: PALETTE, setfont, settext, setline, fontsize, color_with_luminance
+import MechanicalSketch: PALETTE, setfont, settext, setline, fontsize, color_with_lumin, color_with_lumin
 import MechanicalSketch: dimension_aligned
 import MechanicalSketch: generate_complex_potential_source, generate_complex_potential_vortex
 import MechanicalSketch: @import_expand, Quantity, @layer
-import MechanicalSketch: draw_color_map, set_scale_sketch, get_scale_sketch, lenient_min_max, ∙
+import MechanicalSketch: place_image, set_scale_sketch, get_scale_sketch, lenient_min_max, ∙
 import MechanicalSketch: clamped_velocity_matrix, line_integral_convolution_complex, lic_matrix_current, LicSceneOpts
 import MechanicalSketch: normalize_datarange, matrix_to_function, noise_for_lic, function_to_interpolated_function
-import MechanicalSketch: Movie, Scene, animate, circle, line, Point, arrow, poly
-import MechanicalSketch: Time, get_scale_sketch, sawtooth, x_y_iterators_at_pixels
+import MechanicalSketch: Movie, Scene, animate, circle, line, Point, arrow, poly, draw_legend
+import MechanicalSketch: Time, get_scale_sketch, sawtooth, x_y_iterators_at_pixels, Greys_9, BinLegend
 import Interpolations:   Extrapolation
 
 let
@@ -50,14 +50,16 @@ fxy_lin(x, y) = (0.5 * (x / physwidth + 0.5), 0.0)m∙s⁻¹
 # Phase and amplitude for the visualization. This can generate cyclic movies
 complex_convolution_matrix_linear = convolute_image_32(fxy_lin, physwidth = physwidth, physheight = physheight)
 
-
+legend = BinLegend(;maxlegend = 0.2, minlegend = -1.0, noofbins = 256, 
+                       colorscheme = reverse(Greys_9), 
+                       nan_color = color_with_lumin(PALETTE[1], 80), name = Symbol("Value{Float64}"))
 # Define scene functions (parts of each image)
 
 # Rectangular flow field plot including a visual frame counter
 function plot_flowfield(scene, framenumber)
     @assert scene.opts isa LicSceneOpts string(typeof(scene.opts))
     currentvals = lic_matrix_current(scene, framenumber)
-    draw_color_map(scene.opts.O, currentvals, normalize_data_range = false)
+    place_image(scene.opts.O, scene.opts.legend.(currentvals))
 end
 
 # Histogram plot, overlay to the flow field
@@ -101,7 +103,7 @@ function backdrop(scene, framenumber)
     setfont("Calibri", FS)
     fontsize(FS)
     O = scene.opts.O
-    background(color_with_luminance(PALETTE[6], 0.3))
+    background(color_with_lumin(PALETTE[6], 30))
     sethue(PALETTE[3])
     Δt = scene.opts.cycle_duration
     frames_per_cycle = Δt ∙ scene.opts.framerate
@@ -110,11 +112,11 @@ function backdrop(scene, framenumber)
     t = Δt ∙ normalized_time
     settext("Uniform velocity 0.5 m/s:\nCheck that one pixel moves \n$(Δt * 0.5m/s) over $Δt",
         O + (-WI / 2 + EM, 0.0), markup=true)
-    dimension_aligned(O + (-3.0m, physheight / 2), O + (-2.0m, physheight / 2),
+    dimension_aligned(O + (-3.0m, 2.0m), O + (-2.0m, 2.0m),
         fromextension = (0, EM), toextension = (0, EM), offset = -EM)
-    dimension_aligned(O + (-4.0m, physheight / 2), O + (-3.0m, physheight / 2),
+    dimension_aligned(O + (-4.0m, 2.0m), O + (-3.0m, 2.0m),
         fromextension = (0, EM), toextension = (0, EM), offset = -EM)
-    dimension_aligned(O + (-5.0m, physheight / 2), O + (-4.0m, physheight / 2),
+    dimension_aligned(O + (-5.0m, 2.0m), O + (-4.0m, 2.0m),
         fromextension = (0, EM), toextension = (0, EM), offset = -EM)
 
     settext("t = $(round(s,t, digits=2))",
@@ -122,8 +124,9 @@ function backdrop(scene, framenumber)
 
     for i = 0:9
         x = t ∙ 0.5m/s + i ∙ 1.0m -5.0m
-        line(O + (x, 1.1 * physheight / 2), O + (x, physheight / 2), :stroke)
+        line(O + (x, 1.1 * 2.0m), O + (x, 2.0m), :stroke)
     end
+    draw_legend(O + (5.0m, 2.0m) + (EM, 0), scene.opts.legend, max_vert_height = 4.0m)
 end
 
 
@@ -132,17 +135,17 @@ endframe = Int(floor(Δt ∙ (30∙s⁻¹)) - 1)
 movie = Movie(WI, HE, "Three flow fields", 15:15)
 
 scenes = [
-    Scene(movie, backdrop, 0:endframe,             optarg = LicSceneOpts(Δt, O)),
-    Scene(movie, plot_flowfield, 0:endframe,       optarg = LicSceneOpts(Δt,  O + (Δx, -Δy); phase_magnitude_matrix = complex_convolution_matrix)),
+    Scene(movie, backdrop, 0:endframe,             optarg = LicSceneOpts(Δt, O; legend)),
+    Scene(movie, plot_flowfield, 0:endframe,       optarg = LicSceneOpts(Δt,  O + (Δx, -Δy); phase_magnitude_matrix = complex_convolution_matrix, legend)),
     Scene(movie, plot_histogram, 0:endframe,       optarg = LicSceneOpts(Δt, O + (Δx, -Δy ), data = histogrampoints)),
     Scene(movie, plot_frame_indicator, 0:endframe, optarg = LicSceneOpts(Δt, O + (Δx, -Δy ))),
-    Scene(movie, plot_flowfield, 0:endframe,       optarg = LicSceneOpts(Δt,  O;  phase_magnitude_matrix = complex_convolution_matrix_uniform)),
-    Scene(movie, plot_flowfield, 0:endframe,       optarg = LicSceneOpts(Δt, O + (Δx, Δy); phase_magnitude_matrix = complex_convolution_matrix_linear))
+    Scene(movie, plot_flowfield, 0:endframe,       optarg = LicSceneOpts(Δt,  O;  phase_magnitude_matrix = complex_convolution_matrix_uniform, legend)),
+    Scene(movie, plot_flowfield, 0:endframe,       optarg = LicSceneOpts(Δt, O + (Δx, Δy); phase_magnitude_matrix = complex_convolution_matrix_linear, legend))
     ];
 
 animate(movie, scenes,
     creategif = true,
     pathname = joinpath(@__DIR__, "test_32.gif"),
     framerate = 30)
-
+set_scale_sketch(m)
 end # let

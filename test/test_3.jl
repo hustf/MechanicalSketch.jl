@@ -1,8 +1,8 @@
 using MechanicalSketch
 import MechanicalSketch: Point, rect, arrow, line,
     EM, TXTOFFV, O, PT, Point, WI, HE,
-    RGB, HSL, color_with_lumin2, background, sethue, text, fontsize,
-    settext, setfont, setopacity, FS
+    RGB, HSL, color_with_lumin, background, sethue, text, fontsize,
+    settext, setfont, setopacity, FS, color_with_lumin, color_with_lumin2
 
 let
     this_fig = empty_figure(joinpath(@__DIR__, "test_3.png"))
@@ -37,12 +37,12 @@ let
         fontsize(FS/2)
         setfont("Calibri", FS / 2)
 
-        text("Luminance", Point(xs, 0))
-        text("Lumin2", Point(xs + dw /2, 0))
+        text("lumin", Point(xs, 0))
+        text("lumin2", Point(xs + dw /2, 0))
         for (j, lum) in enumerate(2:-0.1:0)
             curcol = PALETTE[i]
             # Left rectancle, simple luminance
-            sethue(color_with_luminance(curcol, lum))
+            sethue(color_with_lumin(curcol, lum * 100))
             posy = j * 0.5 * EM
             ps = Point(xs, posy)
             rect( ps , dw / 2 , EM / 2 , :fill)

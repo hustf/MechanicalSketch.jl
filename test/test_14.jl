@@ -1,10 +1,10 @@
 using MechanicalSketch
-import MechanicalSketch: sethue, background, O, EM, HE, m, color_with_luminance, finish, set_scale_sketch
+import MechanicalSketch: sethue, background, O, EM, HE, m, color_with_lumin, finish, set_scale_sketch
 import MechanicalSketch: dimension_aligned
 
 let
 empty_figure(joinpath(@__DIR__, "test_14.png"))
-background(color_with_luminance(PALETTE[6], 0.9))
+background(color_with_lumin(PALETTE[6], 90))
 sethue(PALETTE[4])
 
 

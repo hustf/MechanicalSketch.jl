@@ -1,13 +1,18 @@
 """
     circle(p::Point, r::Length, action)
+    circle(p::Point; r = missing, d = missing, action = :stroke)
 
     where
 
 action can be :nothing, :fill, :stroke, :fillstroke, :fillpreserve, :strokepreserve, :clip.
-    The default is :nothing.
+    The default without keyword arguments is :nothing.
 """
 circle(p::Point, r::Length, action) = circle(p, get_scale_sketch(r), action)
-
+function circle(p::Point; r = missing, d = missing, action = :stroke)
+    @assert ismissing(r) + ismissing(d) == 1
+    r = ismissing(d) ? r : d / 2
+    circle(p, r, action)
+end
 function ellipse(p::Point, w::Q, h::Q, action=:none)  where {Q<:Length}
     ellipse(p, get_scale_sketch(w), get_scale_sketch(h), action)
 end
@@ -87,3 +92,24 @@ function trace_rotate_hue(center, vx, vy; rotatehue_degrees_total = 270°)
     end
     grestore()
 end
+"""
+    box_fill_outline(pt_topleft, colfill; 
+                     height = row_height(), width = EM, luminfac = 2)
+
+Draw a filled box.
+Default height adapts to the current 'Top API' font, which is used for text tables.
+Outline color luminosity is 200% the luminosity of fill color, if possible.
+For dark backgrounds, consider luminfac = 0.5
+"""
+function box_fill_outline(pt_topleft, colfill; 
+                          height = row_height(), width = EM, luminfac = 2)
+    gsave()
+    sethue(colfill)
+    box(pt_topleft, pt_topleft + (width, height), :fill)
+    # outline
+    lu = get_current_lumin()
+    sethue(color_with_lumin(colfill, min(100, luminfac * lu)))
+    box(pt_topleft, pt_topleft + (width, height), :stroke)
+    grestore()
+end
+setline(x::Length) = setline(get_scale_sketch(x))

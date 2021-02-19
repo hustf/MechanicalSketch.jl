@@ -114,18 +114,27 @@ layoutgraph, image_as_matrix,
 
 # internals and etc.
 
-get_current_redvalue, get_current_greenvalue, get_current_bluevalue, weighted_color_mean,
-Colors, parse
+get_current_redvalue, get_current_greenvalue, get_current_bluevalue, get_current_alpha,
+weighted_color_mean, Colors, parse, comp1, comp2, comp3, comp4
 
 using MechanicalUnits
-import MechanicalUnits.Unitfu: Power, oneunit, numtype
+#import MechanicalUnits: Power, oneunit, numtype, AbstractQuantity # TODO import these to MechanicalUnits!
+import MechanicalUnits.Unitfu: Power, oneunit, numtype, AbstractQuantity
 @import_expand kW # Don't use ~ since that would also import WI, which we use elsewhere.
+"""
+Rotations given with units occur around the positive z axis, when y is up and x is to the right.
+We don't dispatch on the dimension of angles, because the dimension is NonDims (for good reason).
+In the context of this package, defining Angle is considered harmless:
+"""
+const Angle = Union{typeof(1.0°), typeof(1°), typeof(1.0f0°), typeof(1.0rad), typeof(1rad), typeof(1.0f0*rad)}
 
 # TODO: Cleanup
 #import REPL.TerminalMenus ## Where used?
 import ColorSchemes
 import ColorSchemes: getinverse, get
-import ColorSchemes: HSL, HSLA, RGB, RGBA, HSV, LCHuv, LCHuvA, isoluminant_cgo_70_c39_n256
+import ColorSchemes: RGB, RGBA
+import ColorSchemes: HSV, HSVA, HSL, HSLA, LCHab, LCHabA, LCHuv, LCHuvA # Cylindrical hue colorspaces
+import ColorSchemes: isoluminant_cgo_70_c39_n256, leonardo, PuOr_8, Greys_9 # We also define ColSchemeNoMiddle in 'colors.jl'
 import Base: -, +, *, /, hypot, product, show
 import Colors: @colorant_str
 import FileIO: @format_str, File, save
@@ -135,7 +144,7 @@ import StaticArrays: SA, SVector
 import Interpolations:   interpolate, Linear, Flat, extrapolate, Extrapolation, Gridded
 export Drawing, empty_figure,
     color_from_palette,
-    color_with_luminance,
+    color_with_lumin,
     PALETTE,
     dimension_aligned,
     SCALEDIST,
@@ -194,11 +203,7 @@ global SCALEFORCE = 20kN / HE
 Point(x::T, y::T) where T<:Length = Point(x / SCALEDIST, y / scaledisty())
 Point(x::T, y::T) where T<:Velocity = Point(x / SCALEVELOCITY , y / scalevelocityy())
 Point(x::T, y::T) where T<:Force = Point(x / SCALEFORCE , y / scaleforcey())
-
-const QuantityTuple = Tuple{Quantity, Quantity}
-const VelocityTuple = Tuple{Velocity, Velocity}
-const PositionTuple = Tuple{Length, Length}
-const ForceTuple = Tuple{Force, Force}
+include("numeric_types.jl")
 
 
 # Vector subtraction and division using QuantityTuples
@@ -219,27 +224,25 @@ const ForceTuple = Tuple{Force, Force}
 *(p1::Point, shift::QuantityTuple) = p1 * Point(shift[1], shift[2])
 /(p1::Point, shift::QuantityTuple) = p1 / Point(shift[1], shift[2])
 
+# extending points with complex quantities
++(p1::Point, shift::ComplexQuantity) = p1 + QuantityTuple(shift)
+
 # extend function in base with Point
 hypot(p::Point) = hypot(p.x, p.y)
 hypot(p::QuantityTuple) = hypot(p[1], p[2])
-"""
-Rotations given with units occur around the positive z axis, when y is up and x is to the right.
-We don't dispatch on the dimension of angles, because the dimension is NonDims
-"""
-const Angle = Union{typeof(1.0°), typeof(1°), typeof(1.0rad), typeof(1rad)}
 polyrotate!(f, ang::Angle) = polyrotate!(f, - ustrip( ang |> rad))
 
 
 """
     empty_figure(filename = "HiThere.png";
-    backgroundcolor = color_with_luminance(PALETTE[8], 0.1),
+    backgroundcolor = color_with_lumin(PALETTE[8], 10),
     hue = PALETTE[8] )
 
 Establish a drawing sized for A4 300 dpi figures (WI, HE),
 black on white figure, line width 3 pt  default.
 """
 function empty_figure(filename = "HiThere.png";
-        backgroundcolor = color_with_luminance(PALETTE[8], 0.1),
+        backgroundcolor = color_with_lumin(PALETTE[8], 10),
         hue = PALETTE[8] )
     fig = Drawing(WI, HE, filename)
     # Font for the 'toy' text interface
@@ -267,6 +270,8 @@ For angles with unit, use rotation around z axis.
 """
 text(t, pt::Point, angle::T) where {T <: Angle} = text(t, pt; angle = - ustrip( angle |> rad))
 
+
+include("lenient_num_analogue.jl")
 include("scale.jl")
 include("colors.jl")
 include("dimension_aligned.jl")
@@ -284,5 +289,7 @@ include("matrix_interpolation.jl")
 include("streamline_convolution.jl")
 include("matrix_drawing.jl")
 include("colorlegends.jl")
-include("placeimage.jl")
+include("colorlegends_vector.jl")
+include("place_image.jl")
+include("chart.jl")
 end # module

@@ -1,10 +1,10 @@
 using MechanicalSketch
-import MechanicalSketch: sethue, background, O, EM, m, color_with_luminance, settext
+import MechanicalSketch: sethue, background, O, EM, m, color_with_lumin, settext
 import MechanicalSketch: mm, arrow, WI, HE, @layer, setdash, line, setopacity
 
 let
 empty_figure(joinpath(@__DIR__, "test_5.png"))
-background(color_with_luminance(PALETTE[6], 0.3))
+background(color_with_lumin(PALETTE[6], 30))
 @layer begin
   sethue("black")
   setopacity(0.5)

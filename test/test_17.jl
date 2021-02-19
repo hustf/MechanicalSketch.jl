@@ -1,7 +1,7 @@
 import MechanicalSketch
 import MechanicalSketch: mm, kg, m, set_scale_sketch, HE, WI, EM, PT, circle, text, N, kN, PALETTE,
-    color_with_luminance, empty_figure, background, sethue, O, °, finish,
-    line, setline, setopacity
+    color_with_lumin, empty_figure, background, sethue, O, °, finish,
+    line, setline, setopacity, SCALEDIST
 let
 # Rope data from https://www.hendrikvedergroup.com/_asset/_public/Hendrik-Veder-Group/Downloads/8896-03-Dyneema-folder-offset_LR-v4.pdf
 # Diameters below 12 mm are excluded here, because they vary too much for reasonable generalization. Properties are generally better for
@@ -16,7 +16,7 @@ ROPE_MINIMUM_BREAK = [161.90, 215.80, 269.80, 343.30, 407.10, 490.50, 569, 647.4
 ρ_SK75 = 0.975 * 0.001kg/(10mm)^3
 σ_TS_SK75 = 3600N/mm^2
 
-BACKCOLOR = color_with_luminance(PALETTE[8], 0.9);
+BACKCOLOR = color_with_lumin(PALETTE[8], 90);
 function restart()
     empty_figure(joinpath(@__DIR__, "test_17.png"))
     background(BACKCOLOR)
@@ -31,7 +31,7 @@ pts = let
     pop!(posx)
     for (i,d) in enumerate(ROPE_D)
         p = if i == 1
-                -0.45 * MechanicalSketch.WI * MechanicalSketch.SCALEDIST
+                -0.45 * WI * SCALEDIST
         else
             posx[i-1] + max(60.0mm, d*1.1)
         end
@@ -50,7 +50,7 @@ circleradius(A) = sqrt(A/π)
 # Plot packed area
 let
     A_rope = ROPE_WEIGHT ./ ρ_SK75 |> mm^2
-    sethue(color_with_luminance(PALETTE[5], 0.8))
+    sethue(color_with_lumin(PALETTE[5], 80))
     circle.(pts , circleradius.(A_rope),:fill)
 end
 
@@ -93,7 +93,7 @@ breaking_strength(d) = spinfactor(d) * ideal_spin_strength(d)
 
 # Plot spin factors
 setline(3PT)
-sethue(color_with_luminance(PALETTE[5], 0.8))
+sethue(color_with_lumin(PALETTE[5], 80))
 bottoms = map(pt -> pt + (0.0mm, -1200.0mm), pts)
 tops = map(pt -> pt + (0.0mm, 300.0mm), bottoms)
 line.(bottoms, tops, :stroke)

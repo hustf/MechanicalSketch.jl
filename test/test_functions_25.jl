@@ -201,7 +201,7 @@ function draw_streamlines_1(origo, xs, ys, f_xy, h)
             sethue(PALETTE[1])
             prline_2(origo, vxf, vyf)
             # Reddish and darker is backward
-            sethue(color_with_luminance(PALETTE[4], 0.3))
+            sethue(color_with_lumin(PALETTE[4], 30))
             prline_2(origo, vxb, vyb)
             sethue(PALETTE[8])
         end

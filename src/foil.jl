@@ -70,10 +70,10 @@ function foil_draw(p::Point ;
     polyrotate!(f, α)
     polymove!(f,  O, p)
     poly(f, :fill)
-    luminback = luminance(backgroundcolor)
-    luminfront = get_current_luminance()
+    luminback = lumin(backgroundcolor)
+    luminfront = get_current_lumin()
     avglumin = (luminback + luminfront) / 2
-    contrastcol = color_with_luminance(get_current_RGB(), avglumin)
+    contrastcol = color_with_lumin(get_current_RGB(), avglumin)
     gsave()
     sethue(contrastcol)
     poly(f, :stroke)

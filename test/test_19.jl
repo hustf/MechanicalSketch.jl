@@ -1,11 +1,11 @@
 import MechanicalSketch
-import MechanicalSketch: color_with_luminance, color_from_palette, empty_figure, background, sethue, O, finish
+import MechanicalSketch: color_with_lumin, color_from_palette, empty_figure, background, sethue, O, finish
 import MechanicalSketch: PALETTE, m
 import MechanicalSketch: circle, ellipse, squircle
 import MechanicalSketch: box, clipreset, readpng, placeimage, setopacity
 
 let
-BACKCOLOR = color_with_luminance(PALETTE[8], 0.8);
+BACKCOLOR = color_with_lumin(PALETTE[8], 80);
 function restart()
     empty_figure(joinpath(@__DIR__, "test_19.png"))
     background(BACKCOLOR)

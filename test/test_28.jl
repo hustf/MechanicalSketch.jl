@@ -1,11 +1,11 @@
 import MechanicalSketch
-import MechanicalSketch: empty_figure, PALETTE, O, HE, finish,
-    color_with_luminance, color_from_palette, set_scale_sketch,
-    sethue, settext, WI, EM, circle, arrow,
-    @import_expand, Quantity
+import MechanicalSketch: empty_figure, PALETTE, O, HE, finish
+import MechanicalSketch: color_with_lumin, color_from_palette, set_scale_sketch
+import MechanicalSketch: sethue, settext, WI, EM, circle, arrow
+import MechanicalSketch: @import_expand, Quantity
 
 let
-BACKCOLOR = color_with_luminance(PALETTE[8], 0.9);
+BACKCOLOR = color_with_lumin(PALETTE[8], 90);
 
 if !@isdefined N
     @import_expand ~m # Will error if m² already is in the namespace

@@ -1,9 +1,9 @@
 using MechanicalSketch
-import MechanicalSketch: foil_draw, °, background, sethue, O, finish,
-      m, N, kN, s, arrow, color_from_palette
+import MechanicalSketch: foil_draw, °, background, sethue, O, finish
+import MechanicalSketch: m, N, kN, s, arrow, color_from_palette, color_with_lumin
 
 let
-BACKCOLOR = color_with_luminance(PALETTE[5], 0.3)
+BACKCOLOR = color_with_lumin(PALETTE[5], 30)
 function restart()
     empty_figure(joinpath(@__DIR__, "test_7.png"))
     background(BACKCOLOR)

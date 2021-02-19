@@ -1,27 +1,19 @@
 using MechanicalSketch
 import MechanicalSketch: foil_points_local, foil_spline_local,
     text, circle, Turtle, Pencolor, Penwidth, Forward, Turn,
-    HueShift, O, sethue, finish, EM, WI, m, background
+    HueShift, O, sethue, finish, EM, WI, background
 let
-    this_fig = empty_figure(joinpath(@__DIR__, "test_1.png"))
+    empty_figure(joinpath(@__DIR__, "test_1.png"));
     background("midnightblue")
 
-    foil_points_local()
-
-    foil_points_local(l = 1, t = 0.02, c= 0.05)
-    foil_spline_local(l = 1m, t = 0.02m, c= 0.05m)
-
-    foil_spline_local(l = 1, t = 0.02, c= 0.05)
-    posy = 0
-    posx = -this_fig.width / 2
+    posx = -WI / 2
     sethue("green")
     stri = "Da jeg var på vei til kirken ∈ dag morges så kom jeg forbi en liten sjømann. En frisk og hyggelig liten sjømann som hilste meg."
-    text(stri, posx, posy)
+    text(stri, posx, 0)
     sethue("yellow")
-    posy += EM
-
+  
     text("1234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890",
-        posx, posy)
+        posx, EM)
     circle(O, 20, :stroke)
     t = Turtle()
     Pencolor(t, "cyan")

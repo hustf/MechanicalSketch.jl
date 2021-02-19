@@ -1,4 +1,5 @@
 using Test
+#=
 @testset "1" begin
     include("test_1.jl")
 end
@@ -32,15 +33,12 @@ end end
 @testset "11" begin let
     include("test_11.jl")
 end end
-
 @testset "12" begin let
     include("test_12.jl")
 end end
-
 @testset "13" begin let
     include("test_13.jl")
 end end
-
 @testset "14" begin let
     include("test_14.jl")
 end end
@@ -95,6 +93,25 @@ end end
 @testset "31" begin let
     include("test_31.jl")
 end end
+=#
 @testset "32" begin let
     include("test_32.jl")
+end end
+@testset "33" begin let
+    include("test_33.jl")
+end end
+@testset "34" begin let
+    include("test_34.jl")
+end end
+@testset "35" begin let
+    include("test_35.jl")
+end end
+@testset "36" begin let
+    include("test_36.jl")
+end end
+@testset "37" begin let
+    include("test_37.jl")
+end end
+@testset "38" begin let
+    include("test_38.jl")
 end end

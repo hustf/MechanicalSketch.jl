@@ -4,7 +4,7 @@ import MechanicalSketch: PALETTE, settext, setline, set_figure_height
 import MechanicalSketch: circle, arrow, normalize_datarange, line
 import MechanicalSketch: @import_expand, @layer, Point, Table
 import MechanicalSketch: ∙, °, trace_rotate_hue, rotate_hue, noise_between_wavelengths
-import MechanicalSketch: get_current_RGB, color_from_palette
+import MechanicalSketch: get_current_RGB, color_from_palette, draw_barplot
 import Statistics: cor
 let
 
@@ -92,7 +92,7 @@ for i in 1:(n_velocity + 1)
     for j in 1:sets_per_v
         col = (i - 1) * sets_per_v + j
         origo = curpoint + (8.5EM +EM * 3.25 * (j - 1), 0.0)
-        draw_sampleplot_31(origo, sample_matrix[:, col] * 2EM, 2.25EM, firstsampleno = -9)
+        draw_barplot(origo, sample_matrix[:, col] * 2EM, 2.25EM, first_sample_no = -9)
         if i > n_velocity
             str = round(s⁻¹, f_periodic[j], digits = 2)
             settext("$str", origo)
@@ -218,7 +218,7 @@ for i in 1:(n_velocity + 1)
     for j in 1:sets_per_v
         col = (i - 1) * sets_per_v + j
         origo = curpoint + (8.5EM +EM * 3.25 * (j - 1), 0.0)
-        draw_sampleplot_31(origo, sample_matrix[:, col] * 2EM, 2.25EM, firstsampleno = -9)
+        draw_barplot(origo, sample_matrix[:, col] * 2EM, 2.25EM, first_sample_no = -9)
         if i > n_velocity
             str = round(s⁻¹, f_periodic[j], digits = 2)
             settext("$str", origo)

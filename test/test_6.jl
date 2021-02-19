@@ -1,10 +1,9 @@
 using MechanicalSketch
-import MechanicalSketch: sethue, background, foil_spline_local, boxtopleft, boxtopright,
-    BoundingBox, m, mm, °, polyrotate!, polymove!,
-    O, EM, poly, luminance, get_current_luminance, get_current_RGB, gsave, grestore,
-    color_with_luminance
+import MechanicalSketch: sethue, background, foil_spline_local, boxtopleft, boxtopright
+import MechanicalSketch: BoundingBox, m, mm, °, polyrotate!, polymove!, color_with_lumin
+import MechanicalSketch: O, EM, poly, lumin, get_current_lumin, get_current_RGB, gsave, grestore
 let
-BACKCOLOR = color_with_luminance(PALETTE[8], 0.7)
+BACKCOLOR = color_with_lumin(PALETTE[8], 70)
 function restart()
     empty_figure(joinpath(@__DIR__, "test_6.png"))
     background(BACKCOLOR)
@@ -35,10 +34,10 @@ for i = 0:9
     polymove!(f,  O, O + (-5m, -2m))
     poly(f, :fill)
     bckco = BACKCOLOR
-    luminback = luminance(bckco)
-    luminfront = get_current_luminance()
+    luminback = lumin(bckco)
+    luminfront = get_current_lumin()
     deltalumin = luminback - luminfront
-    contrastcol = color_with_luminance(get_current_RGB(), luminfront - deltalumin)
+    contrastcol = color_with_lumin(get_current_RGB(), luminfront - deltalumin)
     sethue(contrastcol)
     poly(f, :stroke)
 end

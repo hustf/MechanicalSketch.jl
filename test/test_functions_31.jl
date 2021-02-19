@@ -1,58 +1,10 @@
-function blackman_20(n)
-    N = 20
-    @assert n > 0
-    @assert n < N + 1
-    a0 = 0.42659
-    a1 = 0.49656
-    a2 = 0.076849
-    a0 - a1∙cos(2π*n / N) + a2∙cos(4π*n / N) + a2∙cos(4π∙n / N)
-end
-
 function samplepoints(streamlinelength, λ_min , λ_max, n)
     x0 = rand() * 1000.0m
     xs = range(x0, x0 + streamlinelength, length = n)
     no = noise_between_wavelengths(λ_min, λ_max, xs, normalize = false)
 end
 
-function samplebars_31(samples, maxwidth; firstsampleno = 1)
-    pts = Vector{Point}()
-    maxx = length(samples)
-    for (i, a) in enumerate(samples)
-        x = maxwidth * (i + firstsampleno - 1) / maxx
-        y = - a
-        push!(pts,  Point(x, 0y))
-        push!(pts,  Point(x, y))
-    end
-    pts
-end
 
-function draw_samplebars_31(origo, samples, maxwidth; rotatehue_degrees_total = 0°, firstsampleno = 1)
-    startcolo = get_current_RGB()
-    samplepoints = samplebars_31(samples,  maxwidth, firstsampleno = firstsampleno)
-    function foovertex(n)
-        if mod(n, 3) == 2
-            rotatedeg = (n - 1) * rotatehue_degrees_total / length(samplepoints)
-            sethue(rotate_hue(startcolo, rotatedeg))
-            circle(O, 0.006m, :stroke)
-        end
-    end
-    @layer begin
-        for i in range(1, length(samplepoints) - 1, step = 2)
-            line(origo + samplepoints[i], origo + samplepoints[i + 1], :stroke)
-            foovertex(i)
-        end
-    end
-end
-
-function draw_sampleplot_31(origo, samples, maxwidth; firstsampleno = 1)
-    @layer begin
-        sethue(PALETTE[3])
-        arrow(origo, origo + (0.0,  -2EM))
-        arrow(origo, origo + (maxwidth * (length(samples) + firstsampleno - 1) / length(samples) + 0.5EM, 0.0))
-        sethue(color_from_palette("red"))
-        draw_samplebars_31(origo, samples, maxwidth, rotatehue_degrees_total = 270°, firstsampleno = firstsampleno)
-    end
-end
 
 """
     z_transform_contributions(vs::T, z::Complex)

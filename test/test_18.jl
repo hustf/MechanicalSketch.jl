@@ -1,10 +1,9 @@
 import MechanicalSketch
-import MechanicalSketch: color_with_luminance, empty_figure, background, sethue, O, WI, HE, finish,
-    PALETTE,
-    m, mm, km, kg, rope_breaking_strength, rope_weight,
-    text_table, area_filled, set_scale_sketch, circle, °, text, g
+import MechanicalSketch: color_with_lumin, empty_figure, background, sethue, O, WI, HE, finish
+import MechanicalSketch: PALETTE, SCALEDIST, m, mm, km, kg, rope_breaking_strength, rope_weight
+import MechanicalSketch: text_table, area_filled, set_scale_sketch, circle, °, text, g
 let
-BACKCOLOR = color_with_luminance(PALETTE[8], 0.8);
+BACKCOLOR = color_with_lumin(PALETTE[8], 80);
 function restart()
     empty_figure(joinpath(@__DIR__, "test_18.png"))
     background(BACKCOLOR)
@@ -35,7 +34,7 @@ pts = let
     pop!(posx)
     for (i,d) in enumerate(diameters)
         p = if i == 1
-                -0.45 * MechanicalSketch.WI * MechanicalSketch.SCALEDIST
+                -0.45 * WI * SCALEDIST
         else
             posx[i-1] + max(5.0mm, d*1.1)
         end
@@ -54,7 +53,7 @@ let
 end
 # Plot packed area
 let
-    sethue(color_with_luminance(PALETTE[5], 0.8))
+    sethue(color_with_lumin(PALETTE[5], 80))
     circle.(pts , radius_filled, :fill)
 end
 

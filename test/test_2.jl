@@ -1,7 +1,7 @@
 using MechanicalSketch
 import MechanicalSketch: get, getinverse, textextents,  Point, rect, label,
-    EM, TXTOFFV, WI, background, sethue, text, background, @colorant_str
-
+    EM, TXTOFFV, WI, background, sethue, text, background, @colorant_str,
+    lumin, finish
 let
 
 this_fig = empty_figure(joinpath(@__DIR__, "test_2.png"))
@@ -13,7 +13,7 @@ height_px = this_fig.height
 for (i, c)  in  enumerate(0:0.08:1)
     colo = get(PALETTE, c)
     r, g, b = sethue(colo)
-    lightness = MechanicalSketch.HSL(colo).l
+    lightness = lumin(colo) / 100
     gamma = 2.2
     lumin2 = 0.2126 * r^gamma + 0.7152 * g^gamma + 0.0722 * b^gamma
     posx = width_px * (-0.5 + 0.1 * c)
@@ -38,18 +38,14 @@ label("S" * stri, :S, Point(0 , 1EM), leader = true, offset = EM, leaderoffsets 
 sethue(color_from_palette("red"))
 label("E" * stri, :E, Point(0, 1EM), leader = true, offset = EM, leaderoffsets = [2., 3.])
 label("W" * stri, :W, Point(0 , 1EM), leader = true, offset = EM, leaderoffsets = [-2., -3.])
-
-
-
 sethue(get(PALETTE, getinverse(PALETTE, colorant"green" )))
 label("5N" * stri, :N, Point(-WI/4, 5EM), leader = true, offset = EM, leaderoffsets = [2., 3.])
 label("5S" * stri, :S, Point(-WI/4, 5EM), leader = true, offset = EM, leaderoffsets = [-2., -3.])
 sethue(color_from_palette("darkblue"))
 label("5E" * stri, :E, Point(-WI/4, 5EM), leader = true, offset = EM, leaderoffsets = [2., 3.])
 label("5W" * stri, :W, Point(-WI/4 , 5EM), leader = true, offset = EM, leaderoffsets = [-2., -3.])
-
 sethue(get(PALETTE, getinverse(PALETTE, colorant"blue" )))
 label("7" * stri, :W, Point(WI/4 , 7EM), leader = true, offset = EM, leaderoffsets = [-2., -3.])
 
-MechanicalSketch.finish()
+finish()
 end

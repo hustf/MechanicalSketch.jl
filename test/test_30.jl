@@ -1,9 +1,9 @@
 import MechanicalSketch
 import MechanicalSketch: empty_figure, PALETTE, O, HE, WI, EM, finish, ∙, Point
 import MechanicalSketch: @import_expand, set_scale_sketch, SCALEDIST, settext
-import MechanicalSketch: noise, normalize_datarange, pngimage, placeimage, @layer
+import MechanicalSketch: noise, normalize_datarange, place_image, @layer
 import MechanicalSketch: poly, dimension_aligned, sethue, arrow, circle, prettypoly
-import MechanicalSketch: Length, noise_between_wavelengths
+import MechanicalSketch: Length, noise_between_wavelengths, Greys_9, BinLegend
 import DSP.Periodograms: spectrogram, Spectrogram
 import DSP.Util:         nextfastfft
 import DSP.Windows:      tukey
@@ -46,10 +46,11 @@ length_one_pixel = physwidth / n_pixels
 include("test_functions_29.jl")
 include("test_functions_30.jl")
 no = normalize_datarange([noise_between_wavelengths(λ_b..., x) for x in (1:n_pixels) * length_one_pixel])
+greylegend = BinLegend(;maxlegend = 1.0, noofbins = 128, colorscheme = reverse(Greys_9))
 @layer begin
-    placeimage(pngimage(no) , curpoint; centered = false)
-    placeimage(pngimage(no) , curpoint + (0,1); centered = false)
-    placeimage(pngimage(no) , curpoint + (0,2); centered = false)
+    place_image(curpoint, greylegend.(no); centered = false)
+    place_image(curpoint + (0,1), greylegend.(no); centered = false)
+    place_image(curpoint + (0,2), greylegend.(no); centered = false)
     sethue(PALETTE[3])
     dimension_aligned(curpoint, curpoint + (λ_calibration[1], 0.0m), offset = -EM,
         fromextension = (0, EM), toextension = (0, 0.5EM))

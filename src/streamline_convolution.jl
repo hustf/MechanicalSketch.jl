@@ -743,8 +743,8 @@ end
     color_matrix_mix(lumin_mat, quant_scalar_mat, legend, luminosity_variation)
 
 Input: 
-    lumin_mat                 Matrix{Float64} - determines luminosity at a pixel. Values in the range -1.0 to 1.0.
-    quant_scalar_mat               Matrix of quantities, which are converted to colors using 'legend'
+    lumin_mat              Matrix{Float64} - determines luminosity at a pixel. Values in the range -1.0 to 1.0.
+    quant_scalar_mat       Matrix of quantities, which are converted to colors using 'legend'
     legend                 <: ColorLegend
     luminosity_variation   Possible range is [0,1], recommended is 0.67. 1.0:full luminosity variation with convolution.
 

@@ -4,16 +4,17 @@ import MechanicalSketch: @import_expand, set_scale_sketch, Length
 import MechanicalSketch: generate_complex_potential_source, generate_complex_potential_vortex
 import MechanicalSketch: clamped_velocity_matrix, matrix_to_function, function_to_interpolated_function
 import MechanicalSketch: Quantity, bresenhams_line_algorithm, get_scale_sketch, lenient_min_max
-import MechanicalSketch: rk4_step, Extrapolation, draw_color_map, pngimage
+import MechanicalSketch: rk4_step, Extrapolation, place_image
 import MechanicalSketch: box_line_algorithm, crossing_line_algorithm, circle_algorithm
 import MechanicalSketch: function_to_interpolated_function, noise_for_lic, line_integral_convolution_complex
 import MechanicalSketch: LicSceneOpts, lic_matrix_current, rotate_hue, complex_arg0_scale, normalize_datarange
 import MechanicalSketch: ColorSchemes, placeimage, rotate_hue, color_with_lumin
-import MechanicalSketch: ColorLegendIsoBins, setfont, FS, fontsize, background, sethue, dimension_aligned, line
+import MechanicalSketch: BinLegend, setfont, FS, fontsize, background, sethue, dimension_aligned, line
 import Base.show
 import MechanicalSketch: Movie, Scene, animate, color_matrix_current, draw_legend, @layer
-import MechanicalSketch: fontsize, fontface, setfont, setline, setdash, origin, setmatrix, color_with_luminance
-import MechanicalSketch: convolution_matrix
+import MechanicalSketch: fontsize, fontface, setfont, setline, setdash, origin, setmatrix, color_with_lumin
+import MechanicalSketch: convolution_matrix, ColorSchemes
+import ColorSchemes:     isoluminant_cgo_80_c38_n256
 
 
 let
@@ -48,12 +49,13 @@ max_velocity = 0.5m/s
 velocity_matrix = clamped_velocity_matrix(ϕ_33; physwidth = physwidth, physheight = physheight, cutoff = max_velocity);
 speedmatrix = hypot.(velocity_matrix)
 c1 = convolution_matrix(velocity_matrix)
-
-legen = ColorLegendIsoBins(maxlegend = max_velocity, noofbins = 6, name = :Speed)
+lum = 50
+cols = isoluminant_cgo_80_c38_n256.colors .|> co -> color_with_lumin(co, lum)
+legen = BinLegend(maxlegend = max_velocity, binwidth = 0.1m/s, colorscheme = cols, name = :Speed)
 
 function scenepic(scene, framenumber)
     colmat = color_matrix_current(scene, framenumber)
-    draw_color_map(scene.opts.O, colmat, normalize_data_range = false)
+    place_image(scene.opts.O, colmat)
 end
 
 function sc1(scene, framenumber)

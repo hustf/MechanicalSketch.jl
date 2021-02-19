@@ -31,7 +31,7 @@ end
 """
 function rounded_stripped(quantity, digits)
     rounded = if quantity isa  Quantity
-        round(typeof(quantity), quantity, digits = digits)
+        round(unit(quantity), quantity, digits = digits)
     else
          round(quantity, digits = digits)
     end
@@ -150,7 +150,7 @@ function draw_values(pos, rows, pixel_widths; kwargs...)
             ps = pixelwidth(s)
             psleading = pixelwidth(sleading)
             Δpx_sumpixelwidth = sumpixelwidth * reldotpos - psleading
-            # For the column contents, we don't use settext. Consider using Luxor's Table for text tables.
+            # For the column contents, we don't use settext, but the 'TOY API'.
             text(s, p + (Δpx_textbox + 1.0* Δpx_sumpixelwidth, 0))
             #= debug lines
             line(p, p + (Δpx_textbox, -row_height()), :stroke)
@@ -164,21 +164,60 @@ end
 
 """
     text_table(pos::Point; kwargs...)
-    -> Array{String, 2}, text output without alignmnent
+    -> Array{String, co}, text output without alignmnent
+
+Draw a table with columns aligned on decimal separator.
+Each keyword argument contains one column with header.
+The unit from each column is included in the header for this column.
+
+# Examples
+```julia-repl
+text_table(pos, diameters = diameters,
+                packed_d = 2 .* radius_filled,
+                MBL = mbls,
+                mbl = mbls .|> g,
+                Lineweight = weights)
+
+s2 = text_table(pos; Symb(" ") => diameters)
+```
 """
 function text_table(pos::Point; kwargs...)
-    pixel_widths = column_widths(;kwargs...)
-    valrows = value_rows(;kwargs...)
-    cols = t_cols(;kwargs...)
-    hdrs = header_strings(;kwargs...)
-    draw_header(pos, pixel_widths, hdrs)
-    pos += (0.0, row_height())
-    vcat(reshape(hdrs,1,:), draw_values(pos, valrows, pixel_widths; kwargs...))
+    widths = column_widths(;kwargs...)
+    text_table_fixed_columns(pos::Point, widths; kwargs...)
 end
+
+"""
+    text_table_fixed_columns(pos::Point, widths; kwargs...)
+    -> Array{String, co}, text output without alignmnent
+
+Draw a table with fixed column widths. 
+Widths can be single number, length, or a collection.
+See text_table.
+"""
+function text_table_fixed_columns(pos::Point, widths; kwargs...)
+    ncols = t_cols(;kwargs...)
+    vecwidths = if widths isa Number
+        [widths for i = 1:ncols]
+    else
+        widths
+    end
+    @assert length(vecwidths) == ncols
+    pixwidths = get_scale_sketch.(vecwidths)
+    nrows = value_rows(;kwargs...)
+    hdrs = header_strings(;kwargs...)
+    draw_header(pos, pixwidths, hdrs)
+    pos += (0.0, row_height())
+    # Draw values and return text including headers
+    vcat(reshape(hdrs, 1, :), draw_values(pos, nrows, pixwidths; kwargs...))
+end
+
 """
    settext_centered_above_with_markup(str, pos::Point)
 
-The string can include Pango-style mark-up. Line break: \r, otherwise html-like
+The string can include Pango-style mark-up. Line break: \r, otherwise html-like.
+
+Note TODO: Not used so far, but may be useful if a non-toy-api version is made later.
+Also examine the latex capabilities in Pango as an alternative to svg.
 """
 function settext_centered_above_with_markup(str, pos::Point)
     pixel_width = pixelwidth(str)

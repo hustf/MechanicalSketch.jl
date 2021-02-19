@@ -1,8 +1,8 @@
 using MechanicalSketch
 import MechanicalSketch: °, background, sethue, O, PT, finish,
-      m, color_with_luminance, drawcart, setline, circle
+      m, color_with_lumin, drawcart, setline, circle
 let
-BACKCOLOR = color_with_luminance(PALETTE[3], 0.7)
+BACKCOLOR = color_with_lumin(PALETTE[3], 70)
 function restart()
     empty_figure(joinpath(@__DIR__, "test_9.png"))
     background(BACKCOLOR)

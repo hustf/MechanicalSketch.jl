@@ -1,16 +1,17 @@
 import MechanicalSketch
 import MechanicalSketch: empty_figure, PALETTE, O, HE, WI, EM, finish, ∙, Point, settext
-import MechanicalSketch: @import_expand, set_scale_sketch, Length
+import MechanicalSketch: @import_expand, set_scale_sketch, Length, color_with_lumin, color_with_alpha
 import MechanicalSketch: generate_complex_potential_source, generate_complex_potential_vortex
 import MechanicalSketch: clamped_velocity_matrix, matrix_to_function, function_to_interpolated_function
-import MechanicalSketch: Quantity, bresenhams_line_algorithm, get_scale_sketch, lenient_min_max
-import MechanicalSketch: rk4_step, Extrapolation, draw_color_map, pngimage
+import MechanicalSketch: Quantity, bresenhams_line_algorithm, get_scale_sketch, lenient_max
+import MechanicalSketch: rk4_step, Extrapolation, place_image, @layer, sethue
 import MechanicalSketch: box_line_algorithm, crossing_line_algorithm, circle_algorithm
 import MechanicalSketch: function_to_interpolated_function, noise_for_lic, line_integral_convolution_complex
 import MechanicalSketch: LicSceneOpts, lic_matrix_current, rotate_hue, complex_arg0_scale, normalize_datarange
 import MechanicalSketch: ColorSchemes, placeimage, rotate_hue, color_with_lumin, convolution_matrix, clamped_velocity_matrix
-import MechanicalSketch: ColorLegendIsoBins, streamlines_add!
-import ColorSchemes:     Paired_6
+import MechanicalSketch: BinLegend, BinLegendVector, streamlines_add!, draw_legend, setopacity, rect
+import MechanicalSketch: leonardo, ColSchemeNoMiddle, fontsize
+import ColorSchemes:     Paired_6, Greys_9, isoluminant_cgo_80_c38_n256
 import Base.show
 
 
@@ -20,9 +21,11 @@ if !@isdefined m²
     @import_expand s
     @import_expand °
 end
+
 include("test_functions_33.jl")
 
-empty_figure(joinpath(@__DIR__, "test_33.png"));
+empty_figure(joinpath(@__DIR__, "test_33.png"); 
+    backgroundcolor = color_with_lumin(PALETTE[8], 10))
 
 # Scaling and placement
 physwidth = 10.0m
@@ -45,56 +48,90 @@ streamlinepixels = falses(size(velocity_matrix))
 streamlines_add!(v_xy, streamlinepixels)
 
 cent1 = Oadj + (-Δx, Δy)
-ulp, _ = draw_color_map(cent1, streamlinepixels * 1.0)
+legend1 = BinLegend(;maxlegend = 1.0, minlegend = 0.0, noofbins = 2, 
+                colorscheme = leonardo, 
+                nan_color = color_with_lumin(PALETTE[1], 80), name = Symbol("Value{Float64}"))
+bw(x::Bool) = legend1(Float64(x))
+ulp, _ = place_image(cent1, bw.(streamlinepixels))
+@layer begin
+    fontsize(25)
+    draw_legend(ulp + (EM, EM), legend1)
+end
 str = "    1: Streamline pixels"
 settext(str, ulp, markup = true)
 
 complex_convolution_matrix = convolution_matrix(velocity_matrix, streamlinepixels)
-
+legend2 = BinLegendVector(;operand_example = first(complex_convolution_matrix),
+        max_magn_legend = lenient_max(complex_convolution_matrix), 
+        noof_ang_bins = 40, noof_magn_bins = 5,
+        name = Symbol("Convolution matrix"))
 cent2 = Oadj + (Δx, Δy)
-ulp, _ = draw_color_map(cent2, complex_convolution_matrix)
+ulp, _ = place_image(cent2, legend2.(complex_convolution_matrix))
+@layer begin
+    fontsize(25)
+    draw_legend(ulp + (EM, EM), legend2)
+end
 str = "    2: Phase and amplitude for the animation"
 settext(str, ulp, markup = true)
 
 
 cent3 = Oadj + (-Δx, 0.0m)
 curmat = lic_matrix_current(complex_convolution_matrix, 0, zeroval = -0.0)
-ulp, _ = draw_color_map(cent3, curmat)
+legend3 = BinLegend(;maxlegend = 1.0, minlegend = -1.0, noofbins = 256, 
+                       colorscheme = reverse(Greys_9), 
+                       name = Symbol(" "))
+
+ulp, _ = place_image(cent3, legend3.(curmat))
+@layer begin
+    fontsize(25)
+    draw_legend(ulp + (EM, EM), legend3; max_vert_height = 3.0m, background_opacity = 0.4)
+end
 str = "    3: A single frame taken from 2"
 settext(str, ulp, markup = true)
 
 
 cent4 = Oadj + (Δx, 0.0m)
 speedmatrix = hypot.(velocity_matrix)
-binwidth = max_velocity / 8
-legend4 = ColorLegendIsoBins(maxlegend = max_velocity, binwidth = binwidth, colorscheme = Paired_6)
-colormat = legend4.(speedmatrix);
-ulp, _ = draw_color_map(cent4, colormat, normalize_data_range = false);
-str = "    4: Color legend for speed, binwidth = $(round(m/s, binwidth, digits=4))"
+binwidth = 0.1m/s
+lum = 50
+cols = isoluminant_cgo_80_c38_n256.colors .|> co -> color_with_lumin(co, lum)
+legend4 = BinLegend(maxlegend = max_velocity, binwidth = binwidth, 
+          colorscheme = cols, 
+          name = :Speed)
+ulp, _ = place_image(cent4, legend4.(speedmatrix));
+@layer begin
+    fontsize(25)
+    draw_legend(ulp + (EM, EM), legend4)
+end
+str = "    4: isoluminant_cgo_80_c38_n256 at lumin = $lum"
 settext(str, ulp, markup = true)
 
 
 cent5 = Oadj + (-Δx, -Δy)
-mixmat = map(legend4.(speedmatrix), normalize_datarange(curmat)) do col, lu
-    color_with_lumin(col, 100 * lu)
+mixmat = map(legend4.(speedmatrix), curmat) do col, lu
+    color_with_lumin(col, 50 + 50 * lu)
 end;
-ulp, _ = draw_color_map(cent5, mixmat, normalize_data_range = false);
-str = "    5: Luminance from 3, Chroma and hue from 4"
+ulp, _ = place_image(cent5, mixmat);
+str = "    5: Chroma and hue from 4, lumin as in 3."
 settext(str, ulp, markup = true)
 
 
 cent6 = Oadj + (Δx, -Δy)
-noofbins = 6
-legend6 = ColorLegendIsoBins(maxlegend = max_velocity, noofbins = noofbins)
-mixmat = map(legend6.(speedmatrix), normalize_datarange(curmat)) do col, lu
-    color_with_lumin(col, 100 * lu)
+noofbins = 256
+legend6 = BinLegend(;maxlegend = max_velocity, binwidth,
+        colorscheme = Paired_6, name = :Speed)
+mixmat = map(legend6.(speedmatrix), curmat) do col, lu
+    color_with_lumin(col, 50 + lu * 50)
 end;
-ulp, _ = draw_color_map(cent6, mixmat, normalize_data_range = false);
-str = "    6: Same, with default colorscheme, noofbins = $noofbins"
+ulp, _ = place_image(cent6, mixmat)
+@layer begin
+    fontsize(25)
+    draw_legend(ulp + (EM, EM), legend6)
+end
+str = "    6: Colorscheme: Paired_6"
 settext(str, ulp, markup = true)
 
-
-
+set_scale_sketch(m)
 finish()
 
 end # let

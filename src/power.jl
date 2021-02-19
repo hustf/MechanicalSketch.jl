@@ -22,16 +22,16 @@ function showpower(p::Point, power::Power;
                    labelpower::Bool = true)
 
     fractionpower = power / ( maxpower|> typeof(power))
-    rounded = round(typeof(power), power, digits = 1)
+    rounded = round(unit(power), power, digits = 1)
     symbsize = 1.5fs
     # Prepare color selection
-    luminback = luminance(backgroundcolor)
-    luminfront = get_current_luminance()
+    luminback = lumin(backgroundcolor)
+    luminfront = get_current_lumin()
     deltalumin = luminback - luminfront
     avglumin = luminfront + 0.5deltalumin
     curcol = get_current_RGB()
-    avgcol = color_with_luminance(curcol, luminfront + 0.5 * deltalumin)
-    contrastcol = color_with_luminance(curcol, luminfront + 2 * deltalumin)
+    avgcol = color_with_lumin(curcol, luminfront + 0.5 * deltalumin)
+    contrastcol = color_with_lumin(curcol, luminfront + 2 * deltalumin)
 
     gsave()
     fontsize(symbsize)
@@ -49,7 +49,7 @@ function showpower(p::Point, power::Power;
     labelpower && text(string(rounded), p + (1.5WI, 0) - fs.*(0.03, -0.04))
 
     # Inside symbol
-    sethue(color_with_luminance(color_from_palette("red"), luminback))
+    sethue(color_with_lumin(color_from_palette("red"), luminback))
     fontsize(symbsize)
     text(str, p)
     # Front text

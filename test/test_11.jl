@@ -5,7 +5,7 @@ using JuMP    # Julia Mathematical Programming language
 using Ipopt   # Nonlinear solver
 
 let
-BACKCOLOR = color_with_luminance(PALETTE[1], 0.7)
+BACKCOLOR = color_with_lumin(PALETTE[1], 70)
 function restart()
     empty_figure(joinpath(@__DIR__, "test_11.png"))
     background(BACKCOLOR)

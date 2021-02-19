@@ -1,14 +1,14 @@
 using MechanicalSketch
 import MechanicalSketch: °, background, sethue, O, PT, EM, finish,
-      color_from_palette, color_with_luminance,
+      color_from_palette, color_with_lumin,
       mm, °, kN, kg,
       m, m², m³, s, N, kN, kPa, g, kW,
       arrow, drawcart, circle, foil_draw,
       line, showpower
-import MechanicalSketch: rope_pos_tension, SCALEDIST, setline
+import MechanicalSketch: rope_pos_tension, setline
 
 let
-BACKCOLOR = color_with_luminance(PALETTE[8], 0.7);
+BACKCOLOR = color_with_lumin(PALETTE[8], 92);
 function restart()
     empty_figure(joinpath(@__DIR__, "test_12.png"))
     background(BACKCOLOR)
@@ -26,7 +26,7 @@ v_w = 10m/s
 
 "Wind velocity vector"
 w = (0m/s, v_w)
-sethue(color_with_luminance(color_from_palette("red"), 0.7))
+sethue(color_with_lumin(color_from_palette("red"), 70))
 arrow(O + p + 0.5w, w,
     backgroundcolor = BACKCOLOR,
     labellength = true)
@@ -36,7 +36,7 @@ v_cart = -15m/s
 
 "Generated wind speed vector, same for kite and cart since the model is quasi static"
 w_generated = (-v_cart, 0m/s)
-sethue(color_with_luminance(color_from_palette("green"), 0.7))
+sethue(color_with_lumin(color_from_palette("green"), 70))
 arrow(O + p + 0.5w_generated + 2w,
     w_generated,
     backgroundcolor = BACKCOLOR,
@@ -46,7 +46,7 @@ arrow(O + p + 0.5w_generated + 2w,
 w_rel = w + w_generated
 "Relative wind velocity"
 v = hypot(w_rel)
-sethue(color_with_luminance(color_from_palette("blue"), 0.7))
+sethue(color_with_lumin(color_from_palette("blue"), 70))
 arrow(O + p + 0.5w_rel , w_rel,
     backgroundcolor = BACKCOLOR,
     labellength = true)
@@ -116,7 +116,7 @@ arrow(O + p_foil, Fk, α = α_chord,
     labellength = true)
 
 # Draw the relative wind in front of the kite
-sethue(color_with_luminance(color_from_palette("blue"), 0.7))
+sethue(color_with_lumin(color_from_palette("blue"), 70))
 arrow(O + p_foil - 1.5w_rel , w_rel,
     backgroundcolor = BACKCOLOR,
     labellength = false)
@@ -125,7 +125,7 @@ arrow(O + p_foil - 1.5w_rel , w_rel,
 ps =  map(p-> p + p_foil, psf);
 
 #Draw rope
-setline(diameter_rope / SCALEDIST)
+setline(diameter_rope)
 for i = 1:Ns
     line(O + ps[i], O + ps[i+1], :stroke)
 end
@@ -171,7 +171,7 @@ showpower(O + p_foil + (10EM, 0), power_kite; backgroundcolor = BACKCOLOR)
 
 "Horizontal force, rope"
 Fs =  -Fk_x - F_brake |> N
-sethue(color_with_luminance(PALETTE[6], 0.1))
+sethue(color_with_lumin(PALETTE[6], 10))
 arrow(O + 0.5p_foil + 0.5p, Fs,
     backgroundcolor = BACKCOLOR,
     labellength = true)
