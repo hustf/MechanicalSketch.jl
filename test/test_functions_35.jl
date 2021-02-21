@@ -24,6 +24,7 @@ Return the upper left and bottom right points of the placed and scaled image.
 function place_image_35(pos::Point, image::SVGimage; 
                       width = missing, height = missing,
                       centered = false)
+    @assert !ismissing(width) + !ismissing(height) < 2 "Width and height can not be specified simultaneously."
     original_width, original_height = get_width_height_35(image)
     # Find scaling from input to output
     scalefac = if ismissing(width) && ismissing(height)

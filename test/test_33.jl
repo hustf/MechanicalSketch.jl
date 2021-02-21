@@ -1,16 +1,14 @@
 import MechanicalSketch
-import MechanicalSketch: empty_figure, PALETTE, O, HE, WI, EM, finish, ∙, Point, settext
-import MechanicalSketch: @import_expand, set_scale_sketch, Length, color_with_lumin, color_with_alpha
+import MechanicalSketch: empty_figure, PALETTE, O, HE, WI, EM, finish, ∙, settext
+import MechanicalSketch: @import_expand, set_scale_sketch, color_with_lumin
 import MechanicalSketch: generate_complex_potential_source, generate_complex_potential_vortex
-import MechanicalSketch: clamped_velocity_matrix, matrix_to_function, function_to_interpolated_function
-import MechanicalSketch: Quantity, bresenhams_line_algorithm, get_scale_sketch, lenient_max
-import MechanicalSketch: rk4_step, Extrapolation, place_image, @layer, sethue
-import MechanicalSketch: box_line_algorithm, crossing_line_algorithm, circle_algorithm
-import MechanicalSketch: function_to_interpolated_function, noise_for_lic, line_integral_convolution_complex
-import MechanicalSketch: LicSceneOpts, lic_matrix_current, rotate_hue, complex_arg0_scale, normalize_datarange
-import MechanicalSketch: ColorSchemes, placeimage, rotate_hue, color_with_lumin, convolution_matrix, clamped_velocity_matrix
-import MechanicalSketch: BinLegend, BinLegendVector, streamlines_add!, draw_legend, setopacity, rect
-import MechanicalSketch: leonardo, ColSchemeNoMiddle, fontsize
+import MechanicalSketch: clamped_velocity_matrix, matrix_to_function
+import MechanicalSketch: lenient_max
+import MechanicalSketch: place_image, @layer
+import MechanicalSketch: lic_matrix_current
+import MechanicalSketch: ColorSchemes, color_with_lumin, convolution_matrix, clamped_velocity_matrix
+import MechanicalSketch: BinLegend, BinLegendVector, streamlines_add!, draw_legend
+import MechanicalSketch: leonardo, fontsize
 import ColorSchemes:     Paired_6, Greys_9, isoluminant_cgo_80_c38_n256
 import Base.show
 

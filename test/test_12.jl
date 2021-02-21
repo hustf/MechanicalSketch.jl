@@ -1,14 +1,14 @@
 using MechanicalSketch
-import MechanicalSketch: °, background, sethue, O, PT, EM, finish,
-      color_from_palette, color_with_lumin,
-      mm, °, kN, kg,
-      m, m², m³, s, N, kN, kPa, g, kW,
-      arrow, drawcart, circle, foil_draw,
-      line, showpower
+import MechanicalSketch: °, background, sethue, O, PT, finish
+import MechanicalSketch: color_from_palette, color_with_lumin
+import MechanicalSketch: mm, °, kN, kg
+import MechanicalSketch: m, m², m³, s, N, kN, kPa, g, kW
+import MechanicalSketch: arrow, drawcart, circle, foil_draw
+import MechanicalSketch: line, showpower
 import MechanicalSketch: rope_pos_tension, setline
 
 let
-BACKCOLOR = color_with_lumin(PALETTE[8], 92);
+BACKCOLOR = color_with_lumin(PALETTE[8], 85);
 function restart()
     empty_figure(joinpath(@__DIR__, "test_12.png"))
     background(BACKCOLOR)

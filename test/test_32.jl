@@ -4,11 +4,11 @@ import MechanicalSketch: PALETTE, setfont, settext, setline, fontsize, color_wit
 import MechanicalSketch: dimension_aligned
 import MechanicalSketch: generate_complex_potential_source, generate_complex_potential_vortex
 import MechanicalSketch: @import_expand, Quantity, @layer
-import MechanicalSketch: place_image, set_scale_sketch, get_scale_sketch, lenient_min_max, ∙
+import MechanicalSketch: place_image, set_scale_sketch, get_scale_sketch, ∙
 import MechanicalSketch: clamped_velocity_matrix, line_integral_convolution_complex, lic_matrix_current, LicSceneOpts
 import MechanicalSketch: normalize_datarange, matrix_to_function, noise_for_lic, function_to_interpolated_function
 import MechanicalSketch: Movie, Scene, animate, circle, line, Point, arrow, poly, draw_legend
-import MechanicalSketch: Time, get_scale_sketch, sawtooth, x_y_iterators_at_pixels, Greys_9, BinLegend
+import MechanicalSketch: get_scale_sketch, x_y_iterators_at_pixels, Greys_9, BinLegend
 import Interpolations:   Extrapolation
 
 let

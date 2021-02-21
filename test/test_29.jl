@@ -3,10 +3,11 @@ import MechanicalSketch: empty_figure, PALETTE, O, HE, WI, EM, finish, ∙, Poin
 import MechanicalSketch: @import_expand, set_scale_sketch, settext, SCALEDIST
 import MechanicalSketch: noise, normalize_datarange, place_image, BinLegend, @layer
 import MechanicalSketch: poly, dimension_aligned, sethue, arrow, circle, prettypoly, Greys_9
+using  MechanicalSketch: MechanicalUnits, upreferred, ComplexQuantity, Quantity
+import MechanicalUnits:  dimension, NoDims
 import DSP.Periodograms: spectrogram, Spectrogram
 import DSP.Util:         nextfastfft
 import DSP.Windows:      tukey
-import MechanicalSketch: MechanicalUnits.dimension, NoDims, upreferred, ComplexQuantity, Quantity
 import Statistics:       mean
 #let
 if !@isdefined m²

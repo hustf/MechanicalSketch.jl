@@ -3,8 +3,8 @@ import MechanicalSketch: empty_figure, sethue, O, WI, HE, EM, FS, finish
 import MechanicalSketch: PALETTE, settext, setline, set_figure_height
 import MechanicalSketch: circle, arrow, normalize_datarange, line
 import MechanicalSketch: @import_expand, @layer, Point, Table
-import MechanicalSketch: ∙, °, trace_rotate_hue, rotate_hue, noise_between_wavelengths
-import MechanicalSketch: get_current_RGB, color_from_palette, draw_barplot
+import MechanicalSketch: ∙, °, trace_rotate_hue, noise_between_wavelengths
+import MechanicalSketch: color_from_palette, draw_barplot
 import Statistics: cor
 let
 

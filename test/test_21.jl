@@ -1,9 +1,9 @@
 import MechanicalSketch
 import MechanicalSketch: color_with_lumin, empty_figure, background, sethue, O, EM, FS, finish, PALETTE
-import MechanicalSketch: dimension_aligned, settext, arrow, placeimage, readpng, setfont, gsave, grestore
+import MechanicalSketch: dimension_aligned, settext, arrow, setfont
 import MechanicalSketch: ComplexQuantity, generate_complex_potential_vortex, @import_expand, string_polar_form
 import MechanicalSketch: place_image, x_y_iterators_at_pixels, ColSchemeNoMiddle
-import MechanicalSketch: BinLegend, draw_legend
+import MechanicalSketch: BinLegend, draw_legend, latexify, @layer, fontsize
 
 let
 if !@isdefined m²
@@ -39,6 +39,11 @@ legend = BinLegend(;maxlegend = maximum(A), minlegend = minimum(A), noofbins = 2
 
 colormat = legend.(A);
 ulp, lrp = place_image(O, colormat);
+legendpos = O + ((lrp[1] - ulp[1]) / 2 + EM, (ulp[2] - lrp[2]) / 2)
+@layer begin
+    fontsize(0.8FS)
+    draw_legend(legendpos, legend)
+end
 
 # Add some decoration to the plot
 sethue(color_with_lumin(PALETTE[5], 30))
@@ -46,7 +51,8 @@ dimension_aligned(O + (-physwidth / 2, physheight / 2), O + (physwidth / 2, phys
 dimension_aligned(O + p_vortex, O)
 dimension_aligned(O + (-physwidth / 2, - physheight / 2 ),  O +  (-physwidth / 2, physheight / 2 ))
 
-begin # Leader for a value
+@layer begin # Leader for a value
+    sethue(color_with_lumin(PALETTE[5], 90))
     p0 = (0.0 + 1.0im)m
     arrow(O + p0 - (3EM, -2EM), O + p0 )
     fvalue = ϕ_vortex(p0)
@@ -56,23 +62,24 @@ begin # Leader for a value
     txt =  "ϕ<sub>vortex</sub>( $strargument ) = ϕ<sub>vortex</sub>( $strargumentpol ) =$strvalue"
     settext(txt, O + p0 + (-12EM, 3EM), markup=true)
 end
-setfont("DejaVu Sans", FS)
-str = "ϕ: Z ↣ R   is the velocity potential, here for a vortex.\r            Surprise: It is irrotational outside of the centre."
-settext(str, O + (-0.7 * physwidth, -6.3m), markup = true)
-setfont("Calibri", FS)
-# Add an image of the vortex formula, and vortex strength value
-formulafilename = joinpath(@__DIR__, "..", "resource", "vortex.png")
-img = readpng(formulafilename);
-gsave()
-placeimage(img, O + (4.0, -6.3)m)
-grestore()
-str = "K = $K"
-settext(str, O + (4.0, -6.3)m + (3.3EM, 4.5EM), markup = true)
 
+# Convert the function to latex and display
+la1 = latexify(quote
+    ϕ_vortex(θ:: Angle)::Potential = $K * θ
+end);
+pt = O + (-14.0, -5.0)m
+ptul, ptlr, scalefactor = place_image(pt, la1, height = 1EM)
 
-legendpos = O + ((lrp[1] - ulp[1]) / 2 + EM, (ulp[2] - lrp[2]) / 2)
+# Following text
+#setfont("DejaVu Sans", FS)
+str = "is, surprisingly, irrotational outside of the centre"
+settext(str, ptlr + (EM, 0), markup = true)
 
-draw_legend(legendpos, legend)
+# Convert the outer function to latex
+la2 = latexify(quote
+    ϕ_vortex(p::ComplexQuantity)::Potential = ϕ_vortex(-angle(p - $p_vortex))
+end)
+place_image(pt + (0, 3EM), la2; scalefactor)
 
 finish()
 nothing

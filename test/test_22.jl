@@ -1,6 +1,6 @@
 import MechanicalSketch
 import MechanicalSketch: color_with_lumin, empty_figure, background, sethue, O,  WI, HE, FS, EM, finish
-import MechanicalSketch: dimension_aligned, settext, setfont, set_scale_sketch, PALETTE, Point
+import MechanicalSketch: settext, setfont, set_scale_sketch, PALETTE, Point
 import MechanicalSketch: @import_expand, x_y_iterators_at_pixels
 import MechanicalSketch: place_image, lenient_max
 import MechanicalSketch: BinLegendVector, draw_legend

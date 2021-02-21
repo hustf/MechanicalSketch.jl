@@ -3,7 +3,7 @@ import MechanicalSketch: color_with_lumin, O, WI, HE, EM, FS, finish
 import MechanicalSketch: PALETTE, setfont, settext, background, empty_figure, sethue, move, do_action
 import MechanicalSketch: dimension_aligned, noise, line, lenient_max
 import MechanicalSketch: ComplexQuantity, generate_complex_potential_source, generate_complex_potential_vortex
-import MechanicalSketch: @import_expand, Quantity, x_y_iterators_at_pixels
+import MechanicalSketch: Quantity, x_y_iterators_at_pixels
 import MechanicalSketch: place_image, set_scale_sketch, draw_legend
 import MechanicalSketch: ∙, ∇_rectangle, SVector, normalize_datarange, BinLegend
 import MechanicalSketch: Greys_9

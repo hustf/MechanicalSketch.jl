@@ -2,7 +2,7 @@ import MechanicalSketch
 import MechanicalSketch: color_with_lumin, sethue, O, WI, EM, FS, HE, finish, background
 import MechanicalSketch: PALETTE, setfont, settext
 import MechanicalSketch: dimension_aligned,line, circle, move, do_action
-import MechanicalSketch: ComplexQuantity, generate_complex_potential_source, generate_complex_potential_vortex
+import MechanicalSketch: generate_complex_potential_source, generate_complex_potential_vortex
 import MechanicalSketch: @import_expand, x_y_iterators_at_pixels
 import MechanicalSketch: place_image, set_scale_sketch, lenient_min_max
 import MechanicalSketch: ∙, ∇_rectangle, empty_figure, BinLegendVector, draw_legend

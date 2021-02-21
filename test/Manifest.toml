@@ -149,12 +149,6 @@ git-tree-sha1 = "21fb992ef1b28ff8f315354d3808ebf4a8fa6e45"
 uuid = "e30172f5-a6a5-5a46-863b-614d45cd2de4"
 version = "0.26.2"
 
-[[DocumenterEpub]]
-deps = ["Dates", "Documenter", "EzXML", "FileIO", "ImageMagick", "Markdown", "NodeJS", "Test", "ZipFile"]
-git-tree-sha1 = "a8cbad63aebeac30dfbedd2c7dee130fbb3ef495"
-uuid = "be4a6882-a45f-4bf3-9876-0e7ffb31ffcc"
-version = "0.1.4"
-
 [[DocumenterTools]]
 deps = ["Base64", "DocStringExtensions", "Documenter", "FileWatching", "LibGit2", "Sass"]
 git-tree-sha1 = "9b40fd93f54ba5ef9d364981124a8ed389fd634e"
@@ -555,12 +549,6 @@ version = "1.0.0"
 [[NetworkOptions]]
 uuid = "ca575930-c2e3-43a9-ace4-1e988b2c1908"
 
-[[NodeJS]]
-deps = ["Pkg"]
-git-tree-sha1 = "350ac618f41958e6e0f6b0d2005ae4547eb1b503"
-uuid = "2bd173c7-0d6d-553b-b6af-13a54713934c"
-version = "1.1.1"
-
 [[OffsetArrays]]
 deps = ["Adapt"]
 git-tree-sha1 = "986e7c0a0ef1863be969d191957ac32cb17d0d79"
@@ -838,12 +826,6 @@ deps = ["Base64", "Dates", "Printf"]
 git-tree-sha1 = "78c02bd295bbd0ca330f95e07ccdfcb69f6cbcd4"
 uuid = "ddb6d928-2868-570f-bddf-ab3f9cf99eb6"
 version = "0.4.6"
-
-[[ZipFile]]
-deps = ["Libdl", "Printf", "Zlib_jll"]
-git-tree-sha1 = "c3a5637e27e914a7a445b8d0ad063d701931e9f7"
-uuid = "a5390f91-8eb1-5f08-bee0-b1d1ffed6cea"
-version = "0.9.3"
 
 [[Zlib_jll]]
 deps = ["Libdl"]

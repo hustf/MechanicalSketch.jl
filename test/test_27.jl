@@ -1,6 +1,6 @@
 import MechanicalSketch
 import MechanicalSketch: empty_figure, background, sethue, O, WI, HE, EM, FS, finish
-import MechanicalSketch: PALETTE, setfont, settext, setline
+import MechanicalSketch: PALETTE, settext, setline
 import MechanicalSketch: dimension_aligned, move, do_action, noise, rk4_steps!
 import MechanicalSketch: generate_complex_potential_source, generate_complex_potential_vortex
 import MechanicalSketch: @import_expand, Quantity, @layer, x_y_iterators_at_pixels

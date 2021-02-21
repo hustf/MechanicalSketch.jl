@@ -1,13 +1,13 @@
 import MechanicalSketch
-import MechanicalSketch: empty_figure, sethue, O, WI, HE, EM, FS, finish
-import MechanicalSketch: PALETTE, settext, setline, set_figure_height
-import MechanicalSketch: circle, arrow, normalize_datarange, line
-import MechanicalSketch: @import_expand, @layer, Point, Table
-import MechanicalSketch: ∙, °, trace_rotate_hue, rotate_hue, noise_between_wavelengths
-import MechanicalSketch: get_current_RGB, color_from_palette, get_scale_sketch
-import MechanicalSketch: placeimage, readsvg, readpng, color_with_lumin, upreferred
-import MechanicalSketch: Luxor, Length, set_scale_sketch, text
-import Luxor:            Cairo.CairoSurfaceBase, SVGimage, Rsvg, translate, scale, getscale, rect
+import MechanicalSketch: empty_figure, O, WI, HE, finish
+import MechanicalSketch: PALETTE
+import MechanicalSketch: circle
+import MechanicalSketch: @import_expand, @layer, Point
+import MechanicalSketch: ∙, °
+import MechanicalSketch: get_scale_sketch
+import MechanicalSketch: placeimage, readsvg, readpng, color_with_lumin
+import MechanicalSketch: Luxor, Length, set_scale_sketch, text, SVGimage
+import Luxor:            Cairo.CairoSurfaceBase, translate, scale
 
 let
 

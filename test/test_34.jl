@@ -1,18 +1,14 @@
 import MechanicalSketch
-import MechanicalSketch: empty_figure, PALETTE, O, HE, WI, EM, FS, PT, finish, ∙, Point, settext
-import MechanicalSketch: @import_expand, set_scale_sketch, Length
+import MechanicalSketch: PALETTE, O, HE, WI, EM, FS, PT, ∙, settext
+import MechanicalSketch: @import_expand, set_scale_sketch
 import MechanicalSketch: generate_complex_potential_source, generate_complex_potential_vortex
-import MechanicalSketch: clamped_velocity_matrix, matrix_to_function, function_to_interpolated_function
-import MechanicalSketch: Quantity, bresenhams_line_algorithm, get_scale_sketch, lenient_min_max
-import MechanicalSketch: rk4_step, Extrapolation, place_image
-import MechanicalSketch: box_line_algorithm, crossing_line_algorithm, circle_algorithm
-import MechanicalSketch: function_to_interpolated_function, noise_for_lic, line_integral_convolution_complex
-import MechanicalSketch: LicSceneOpts, lic_matrix_current, rotate_hue, complex_arg0_scale, normalize_datarange
-import MechanicalSketch: ColorSchemes, placeimage, rotate_hue, color_with_lumin
+import MechanicalSketch: clamped_velocity_matrix
+import MechanicalSketch: place_image
+import MechanicalSketch: LicSceneOpts
+import MechanicalSketch: ColorSchemes, color_with_lumin
 import MechanicalSketch: BinLegend, setfont, FS, fontsize, background, sethue, dimension_aligned, line
-import Base.show
 import MechanicalSketch: Movie, Scene, animate, color_matrix_current, draw_legend, @layer
-import MechanicalSketch: fontsize, fontface, setfont, setline, setdash, origin, setmatrix, color_with_lumin
+import MechanicalSketch: fontsize, fontface, setfont, color_with_lumin
 import MechanicalSketch: convolution_matrix, ColorSchemes
 import ColorSchemes:     isoluminant_cgo_80_c38_n256
 

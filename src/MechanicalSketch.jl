@@ -1,6 +1,6 @@
 module MechanicalSketch
 import Luxor
-import Luxor: Drawing,Turtle, Pencolor, Penwidth, Forward, Turn, HueShift, Point,
+import Luxor: Drawing,Turtle, Pencolor, Penwidth, Forward, Turn, HueShift, Point, SVGimage,
 paper_sizes,
 Tiler, Partition,
 rescale,
@@ -121,6 +121,9 @@ using MechanicalUnits
 #import MechanicalUnits: Power, oneunit, numtype, AbstractQuantity # TODO import these to MechanicalUnits!
 import MechanicalUnits.Unitfu: Power, oneunit, numtype, AbstractQuantity
 @import_expand kW # Don't use ~ since that would also import WI, which we use elsewhere.
+import Latexify, LaTeXStrings, NodeJS
+import Latexify: @latexify, latexify, @latexrecipe
+import LaTeXStrings: LaTeXString, @L_str
 """
 Rotations given with units occur around the positive z axis, when y is up and x is to the right.
 We don't dispatch on the dimension of angles, because the dimension is NonDims (for good reason).

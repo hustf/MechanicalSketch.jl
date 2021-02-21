@@ -1,12 +1,12 @@
 import MechanicalSketch
 import MechanicalSketch: empty_figure, finish
-import MechanicalSketch: PALETTE, setfont, settext, setline, WI, EM, HE, O
+import MechanicalSketch: PALETTE, settext, setline, WI, EM, HE, O
 import MechanicalSketch: dimension_aligned, noise, rk4_steps!
-import MechanicalSketch: ComplexQuantity, generate_complex_potential_source, generate_complex_potential_vortex
+import MechanicalSketch: generate_complex_potential_source, generate_complex_potential_vortex
 import MechanicalSketch: @import_expand, Quantity, @layer, sethue
 import MechanicalSketch: place_image, draw_legend, set_scale_sketch, BinLegend
-import MechanicalSketch: lenient_max, normalize_datarange, x_y_iterators_at_pixels
-import MechanicalSketch: ∙, ∇_rectangle, SA, SVector, draw_streamlines
+import MechanicalSketch: normalize_datarange, x_y_iterators_at_pixels
+import MechanicalSketch: ∙, ∇_rectangle, SVector, draw_streamlines
 import Interpolations: interpolate, Gridded, Linear, Flat, extrapolate
 import MechanicalSketch: Greys_9
 let

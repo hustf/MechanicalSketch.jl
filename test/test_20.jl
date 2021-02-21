@@ -1,10 +1,10 @@
 import MechanicalSketch
 import MechanicalSketch: color_with_lumin, empty_figure, background, sethue
-import MechanicalSketch: PALETTE, O, EM, FS, finish, x_y_iterators_at_pixels
-import MechanicalSketch: dimension_aligned, settext, arrow, placeimage, readpng, setfont, gsave, grestore
+import MechanicalSketch: PALETTE, O, EM, FS, finish, x_y_iterators_at_pixels, latexify
+import MechanicalSketch: dimension_aligned, settext, arrow, setfont
 import MechanicalSketch: ComplexQuantity, generate_complex_potential_source, @import_expand, string_polar_form
-import MechanicalSketch: place_image, normalize_binwise, ∙, fontface, fontsize, @layer, text_table, rect
-import MechanicalSketch: bin_bounds, draw_barplot, BinLegend, draw_legend, StaticArrays, ColorSchemes
+import MechanicalSketch: place_image, normalize_binwise, ∙, fontface, fontsize, @layer
+import MechanicalSketch: bin_bounds, BinLegend, draw_legend, StaticArrays, ColorSchemes
 import ColorSchemes:     PuOr_8, ColorScheme
 import StaticArrays:     SVector
 
@@ -65,22 +65,7 @@ bibo = bin_bounds(legend3)
 @test legend3(mi) != legend3.nan_color
 @test legend3(ma) != legend3.nan_color
 legend3.(bibo)
-#=
-begin # Visual test of bins
-    restart()
-    values = mi:binwidth3:ma
-    samples = tfoo.(values)
-    draw_barplot(O + (-12m, 3m), samples * 2EM, 6EM, firstcolor = PALETTE[1])
-    text_table(O + (-6m, 4m), values = values, samples = samples) 
-    values = mi:(binwidth3 / 10):ma
-    samples = tfoo.(values)
-    draw_barplot(O + (6m, 0m), samples * 2EM, 6EM , firstcolor = PALETTE[1])
-    text_table(O + (0m, 9m), values = values, samples = samples)
-    ul, br = draw_legend(O + (-6, -4)m, legend3)
-    rect(ul, (br - ul)[1], (br - ul)[2], :stroke)
-    finish()
-end
-=#
+
 # Since we have values on both sides of zero, create a legend including zero.
 binwidth = 0.1m²∙s⁻¹
 binbounds = Tuple((-5:5)binwidth)
@@ -100,9 +85,7 @@ legendpos = O + ((lrp[1] - ulp[1]) / 2 + EM, (ulp[2] - lrp[2]) / 2)
 @layer begin
     # Font for the 'toy' text interface
     fontface("Calibri")
-    # 1 pt font size = 12/72 inch - by the book.
-    # Letter spacing works differently here than in Word, so we adjust a little.
-    fontsize(FS)
+    fontsize(0.9FS)
     draw_legend(legendpos, legend)
 end
 
@@ -113,7 +96,8 @@ dimension_aligned(O + (-physwidth / 2, physheight / 2), O + (physwidth / 2, phys
 dimension_aligned(O + p_source, O + (-7.5 + 1.0im)m)
 dimension_aligned(O + (-physwidth / 2, - physheight / 2 ),  O +  (-physwidth / 2, physheight / 2 ))
 
-begin # Leader for a value
+@layer begin # Leaders
+    sethue(color_with_lumin(PALETTE[5], 90))
     p0 = (-7.5 + 1.0im)m
     arrow(O + p0 + (2EM, -EM), O + p0)
     fvalue = ϕ_source(p0)
@@ -121,8 +105,6 @@ begin # Leader for a value
     strargument = string(p0)
     txt =  "ϕ<sub>source</sub>(" * strargument * ") = " * strvalue
     settext(txt, O + p0 + (3EM, -EM), markup=true)
-end
-begin # Leader for another value
     p0 = (-4.0 - 2.0im)m
     arrow(O + p0 + (2EM, -EM), O + p0)
     fvalue = ϕ_source(p0)
@@ -131,19 +113,26 @@ begin # Leader for another value
     txt =  "ϕ<sub>source</sub>( " * strargument * " ) = " * strvalue
     settext(txt, O + p0 + (3EM, -EM), markup=true)
 end
-setfont("DejaVu Sans", FS)
-str = "ϕ: Z ↣ R   is the <b>velocity potential</b>. \r            It exists for irrotational flows only. This source is an example."
-settext(str, O + (-0.7 * physwidth, -6.3m), markup = true)
-setfont("Calibri", FS)
 
-# Add an image of the source formula, and source strength value
-formulafilename = joinpath(@__DIR__, "..", "resource", "source.png")
-img = readpng(formulafilename);
-gsave()
-placeimage(img, O + (4.0, -6.3)m)
-grestore()
-str = "q = $q_source"
-settext(str, O + (4.0, -6.3)m + (3.3EM, 4.5EM), markup = true)
+# Convert the function to latex and display
+la1 = latexify(quote
+    ϕ_source(r:: Length)::Potential = $q_source * log(r / oneunit(r)) / (2π)
+end)
+pt = O + (-14.0, -7 / 2)m
+ptul, ptlr, scalefactor = place_image(pt, la1, height = 3EM)
+
+# Following text
+setfont("DejaVu Sans", FS)
+str = "exists for irrotational flows only"
+settext(str, ptlr + (EM, -0.5FS), markup = true)
+
+# Convert the outer function to latex
+la2 = latexify(quote
+    ϕ_source(p::ComplexQuantity)::Potential = ϕ(hypot(p - $p_source))
+end)
+place_image(pt + (0, 5EM), la2; scalefactor)
+
 
 finish()
+
 end # let

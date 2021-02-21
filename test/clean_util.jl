@@ -8,6 +8,9 @@ function read_all_lines(fis::Vector)
     lins
 end
 
+function line_no(fi, no)
+    read_all_lines(fi)[no]
+end
 function words(fi)
     wd = String[]
     for line in read_all_lines(fi)
@@ -52,11 +55,10 @@ end
 
 #singlewords_whichline(fi)
 function first_let_line(fi)
-    local no = 0
-    for (no, line) in enumerate(readlines(fi))
-        startswith(strip(line), "let") && return no
-    end
-    10
+    lins = readlines(fi)
+    n = length(lins)
+    crite(l) = startswith(strip(l), "let") || startswith(strip(l), "#let")
+    findfirst(crite, lins)
 end
 function referred_files(fi)
     reffis = String[]
@@ -75,14 +77,13 @@ end
 For each file, print a list of candidates for unecessary import, ie occuring in the first ten lines of each file and only once"
 """
 function loopfiles(;mustinclude = "")
-    excludelist = ["MechanicalSketch", "__DIR__", "using", "import"]
+    excludelist = ["MechanicalSketch", "__DIR__", "using", "import", "Test"]
     for fi in filter(s->endswith(s, ".jl"), readdir())
         if contains(fi, mustinclude)
             referredfiles = referred_files(fi)
             fis = [fi; referredfiles...]
             letatline = first_let_line(fi)
-            println()
-            println(fi, ":")
+            printstyled(stdout, "\n", fi, ":\n"; color=:yellow)
             wd_li = filter(singlewords_whichline(fis)) do (wd, lin)
                 lin < letatline &&
                     length(wd) > 1 &&
@@ -90,11 +91,21 @@ function loopfiles(;mustinclude = "")
                             !isdefined(Base, Symbol(wd)) &&
                                 wd ∉ excludelist
             end
-            byalpha = sort(collect(keys(sort(wd_li, byvalue= true))))
             byline = collect(keys(sort(wd_li, byvalue= true)))
             w_ll = word_lastline(fis)
+            println("Single occurence words:")
+            plno = 0
+            lstr = ""
             for wd in byline
-                println(rpad(wd, 20), "\t", w_ll[wd])
+                lno = wd_li[wd]
+                if lno > plno || wd == last(byline)
+                    rstr = " at line $plno"
+                    plno > 0 && println(lpad(lstr, 70), rstr)
+                    lstr = wd
+                    plno = lno
+                else
+                    lstr *= ", " * wd
+                end
             end
         end
     end

@@ -59,36 +59,8 @@ function generate_complex_potential_vortex(; pos = complex(0.0, 0.0)m, vorticity
     end
 end
 
-
-
-"""
-quantities_at_pixels(CQ_to_Q;
-    physwidth = 10.0m,
-    physheight = 4.0m)
-    → Q    A matrix of output quantitities
-where
-    CQ_to_Q: CQ  → Q     - a function
-    other parameters define the points for which to evaluate CQ_to_Q
-where
-    CQ is a complex valued Quantity (a coordinate in a vector field, or a vector at a point)
-    Q is a real valued Quantity
-# TODO - is this practically the same as function_to_matrix, defined elsewhere?
-# Consider using traits for complex arguments
-"""
-function quantities_at_pixels(CQ_to_Q;
-    physwidth = 10.0m,
-    physheight = 4.0m,
-    centered = true)
-    @error "quantities_at_pixels to be replaced by function_to matrix."
-    xs, ys = x_y_iterators_at_pixels(;physwidth, physheight, centered)
-    [CQ_to_Q(complex(x, y)) for y in ys, x in xs]
-end
-
 absolute_scale() = ColorSchemes.linear_grey_10_95_c0_n256
 complex_arg0_scale() = ColorSchemes.linear_ternary_red_0_50_c52_n256
-
-
-
 
 
 "Scale and move real values to fit in the closed interval 0.0 to 1.0, given minimum and maximum values in A"
@@ -148,6 +120,7 @@ the argument (polar angle) of a complex number
 Ref. domain colouring, complex plane https://en.wikipedia.org/wiki/Domain_coloring
 """
 function hue_from_complex_argument!(color_values, A)
+    @error "Replaced by Legend"
     @assert length(A) == length(color_values)
     for i in 1:length(A) # Works for matrices also
         cqua = A[i]
@@ -171,7 +144,7 @@ pixels for NaN and Inf values.
 # TODO adapt ColorLegend for this functionality?
 """
 function color_matrix(qua::AbstractArray; normalize_data_range = true)
-    @warn "color_matrix to be replaced"
+    @error "color_matrix is replaced"
     # Boolean collection, valid elements which should be opaque
     valid_element = map(x-> isnan(x) || isinf(x) ? false : true, qua)
 
