@@ -188,26 +188,47 @@ color_without_alpha(c::LCHuv) = c
 color_without_alpha(c::RGBA) = convert(RGB, c)
 color_without_alpha(c::RGB) = c
 
-#=
 """
     chroma(c)
     
 Return chroma or similar term, depending on color type
 """
 function chroma(c::C) where C<:Union{LCHab, LCHuv, LCHabA, LCHuvA}
-    comp3(c)
+    comp2(c)
 end
-functionchroma(c::C) where C<:Union{HSV, HSL, HSVA, HSLA}
-    comp1(c)
-end
-function chroma(c::RGB)
+function chroma(c::C) where C<:Union{HSV, HSL, HSVA, HSLA, RGB, RGBA}
     chroma(convert(LCHuv, c))
 end
-function chroma(c::RGBA)
-    chroma(convert(LCHuvA, c))
+
+"""
+    saturation(c)
+    
+Return chroma or similar term, depending on color type
+"""
+function saturation(c::C) where C<:Union{LCHab, LCHuv, LCHabA, LCHuvA, RGB, RGBA}
+    saturation(convert(HSV, c))
+end
+function saturation(c::C) where C<:Union{HSV, HSL, HSVA, HSLA}
+    comp2(c)
 end
 
-=#
+"""
+    color_with_saturation(col, saturation)
+Modify saturation.
+"""
+function color_with_saturation(c::C, saturation) where C<:Union{LCHab, LCHuv, RGB}
+    convert(C, color_with_saturation(convert(HSV, c), saturation ))
+end
+function color_with_saturation(c::C, saturation) where C<:Union{LCHabA, LCHuvA, RGBA}
+    convert(C, color_with_saturation(convert(HSVA, c), saturation ))
+end
+function color_with_saturation(c::C, saturation) where C<:Union{HSV, HSL}
+    C(comp1(c), saturation, comp3(c))
+end
+function color_with_saturation(c::C, saturation) where C<:Union{HSVA, HSLA}
+    C(comp1(c), saturation, comp3(c), comp4(c))
+end
+
 
 # This definition don't really belong anywhere. ColorSchemes is mostly a complete library, but this is useful and missing.
 const ColSchemeNoMiddle = ColorSchemes.ColorScheme(SVector([[get(PuOr_8, x, :clamp) for x in range(0, 0.3, length = 10)];

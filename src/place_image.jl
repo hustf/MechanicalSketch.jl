@@ -40,14 +40,6 @@ function place_image(p::Point, colmat::VecOrMat{T}; centered = true, alpha = mis
     Δp = centered * Point(nx / 2, ny / 2)
     (p - Δp, p - Δp + (nx, ny))
 end
-# TODO add scaling functionality, as with svgimage?
-function place_image(p::Point, data::Luxor.Cairo.CairoSurfaceBase; centered = true, alpha = missing)
-    # Layer to overcome a bug where Luxor would not draw the following strokes
-    @layer ismissing(alpha) ? placeimage(data, p; centered = centered) : placeimage(data, p, alpha; centered = centered)
-    ny, nx = data.height, data.width
-    Δp = centered * Point(nx / 2, ny / 2)
-    (p - Δp, p - Δp + (nx, ny))
-end
 
 
 """
@@ -57,15 +49,29 @@ end
     place_image(pos::Point, formula::LaTeXString; modifylatex = true, modifysvgcolor = true,
                   width = missing, height = missing, scalefactor = missing,
                   centered = false)
+    place_image(pos::Point, data::Luxor.Cairo.CairoSurfaceBase; centered = true, alpha = missing,
+                  width = missing, height = missing, scalefactor = missing)
     -> (upper left point, lower right point, scalefac)
 
 Return the upper left, lower right corners, also the calculated scaling factor from original to placed image.
-Formulas can be made using MechanicalSketch.@latexify and other methods, see Latexify.
 
-modifylatex = true: Calls 'modify_latex', which subscripts bracketed indexes and other things.
-modifysvgcolor = true: Calls Replace currentColor with the last color and opacity from 'setcolor', 'setopacity' or 'sethue'.
-Scaling can be specified using one of 'height', 'width' and 'scalefactor'.
+'image::SVGimage' can be made using MechanicalSketch.readsvg (from Luxor, as usual). It takes files or string input.
+'formula::LaTeXString' can be made using MechanicalSketch.@latexify and other methods, see Latexify. 
+                       Reuse output 'scalefactor' as input for following formula images.
+'data::Luxor.Cairo.CairoSurfaceBase' can be made using MechanicalSketch.readpng (from Luxor). 
+
+'height', 'width' and 'scalefactor': Uniform scaling should work with quantities or numbers (i.e. pixels or points).
+
+'modifylatex' = true: Calls 'modify_latex', which subscripts bracketed indexes and a number of other adaptions.
+'modifysvgcolor' = true: Replace currentColor with the last color and opacity from 'setcolor', 'setopacity' or 'sethue'.
+'alpha' = 0.0 - 1.0 : 0.0 is completely translucent, 1.0 is opaque. The effect vary depending on input type.
 """
+function place_image(pos::Point, formula::LaTeXString; modifylatex = true, modifysvgcolor = true,
+    width = missing, height = missing, scalefactor = missing,
+    centered = false)
+    svim = readsvg(tex2svg_string(formula; modifylatex, modifysvgcolor))
+    place_image(pos, svim ; width, height, scalefactor, centered)
+end
 function place_image(pos::Point, image::SVGimage; 
                       width = missing, height = missing, scalefactor = missing,
                       centered = false)
@@ -81,11 +87,20 @@ function place_image(pos::Point, image::SVGimage;
     end
     ptupleft, ptupleft + (dest_width_pix, dest_height_pix), scalefac
 end
-function place_image(pos::Point, formula::LaTeXString; modifylatex = true, modifysvgcolor = true,
-                      width = missing, height = missing, scalefactor = missing,
-                      centered = false)
-    svim = readsvg(tex2svg_string(formula; modifylatex, modifysvgcolor))
-    place_image(pos, svim ; width, height, scalefactor, centered)
+
+function place_image(pos::Point, data::Luxor.Cairo.CairoSurfaceBase; centered = true, alpha = missing,
+                     width = missing, height = missing, scalefactor = missing)
+    scalefac, original_width, original_height = scalingfactor(data, width, height, scalefactor)
+    # Destination size
+    dest_width_pix, dest_height_pix = get_scale_sketch.(scalefac .* (original_width, original_height))
+    # Destination upper left corner (we'll place the image non-centered afterwards)
+    ptupleft = centered ?  pos - 0.5 .* (dest_width_pix, dest_height_pix) : pos
+    @layer begin
+        translate(ptupleft) 
+        scale(scalefac)
+        ismissing(alpha) ? placeimage(data, Point(0, 0); centered = false) : placeimage(data, Point(0, 0), alpha; centered = false)
+    end
+    ptupleft, ptupleft + (dest_width_pix, dest_height_pix), scalefac
 end
 """
     scalingfactor(image, width, height, scalefactor)
@@ -173,24 +188,33 @@ end
 Iteratively 
     - get rid of latex outer enclosing dollar and paranthesises.
     - get rid of latex outer enclosing paranthesises.
+    - drop ∙ used within units: N∙m => Nm
     - drop {\\vysmblkcircle}, which is used within units
     - fix display of unit superscripts
     - remove underscore escaping
+    - reorder √ function to square root
+    - reorder dot multiplication function
     - replace square bracket with contents in subscript
 """
 function modify_latex(formula::String)::String
     st = String(formula)
     if startswith(st, "\$") && endswith(st, "\$")
+        # get rid of latex outer enclosing dollar and paranthesises.
         modify_latex(st[nextind(st, begin, 1):prevind(st, end, 1)])
     elseif startswith(formula, "\\left(") && endswith(formula, "\\right)")
+        # get rid of latex outer enclosing paranthesises.
         modify_latex(st[nextind(st, begin, 6):prevind(st, end, 7)])
-    elseif occursin('∙', st)
-        modify_latex(replace(st, '∙' => ""))
+    #elseif occursin('∙', st)
+    #    # drop ∙ used within units: N∙m => Nm
+    #    modify_latex(replace(st, '∙' => ""))
     elseif occursin("{\\vysmblkcircle}", st)
+        # drop {\\vysmblkcircle} used within units (no space)
         modify_latex(replace(st, "{\\vysmblkcircle}" => ""))
     elseif occursin("\\^-{^", st)
+        # fix display of unit superscripts
         modify_latex(replace(st, "\\^-{^" => "{^-}{^"))
     elseif occursin("\\_", st)
+        # remove underscore escaping
         regex = r"\\_(\w+)"
         ma = match(regex, st)
         if !isnothing(ma)
@@ -203,7 +227,50 @@ function modify_latex(formula::String)::String
         else
             @error "Bad regex"
         end
+    elseif occursin("\\sqrt\\left( ", st)
+        # reorder √ function to square root
+        #"\\sqrt\\left( capture \\right)"
+        # => \\sqrt{capture}
+        regex = r"\\sqrt\\left\( (.*?) \\right\)"
+        ma = match(regex, st)
+        if !isnothing(ma)
+            captured = ma.captures[1]
+            matched = ma.match
+            replacement = "\\sqrt{" * captured * "}"
+            output = replace(st, matched => replacement; count = 1)
+            modify_latex(output)
+        else
+            @error "Bad regex"
+        end
+    elseif occursin("\\vysmblkcircle\\left( ", st)
+        # reorder dot multiplication function:
+        # \\vysmblkcircle\\left(factor1, factor2 \\right)
+        # =>  factor1 \\cdot factor2
+        # A more solid approach is probably defining: #@latexrecipe ∙
+        regex = r"\\vysmblkcircle\\left\( (.*?), (.*?) \\right\)"
+        ma = match(regex, st)
+        if !isnothing(ma)
+            captured1 = ma.captures[1]
+            captured2 = ma.captures[2]
+            matched = ma.match
+            replacement = captured1 * " \\cdot " * captured2
+            output = replace(st, matched => replacement; count = 1)
+#=
+            println("\n# reorder dot multiplication function:")
+            @show st
+            @show captured1
+            @show captured2
+            @show matched
+            @show output
+            @assert st != output
+=#
+            modify_latex(output)
+        else
+            @error "Bad regex"
+        end
     else
+        # replace square bracket with contents in subscript
+        # Also: The only exit point from this iterative function.
         regex = r"\\left\[(.*?)\\right\]"
         ma = match(regex, st)
         if !isnothing(ma)

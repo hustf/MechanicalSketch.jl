@@ -1,3 +1,5 @@
+# To do: Replace Length with any quantity, scale with get_scale_sketch
+# Write a macro to extend all curve-like functions which take input not a Point.
 """
     circle(p::Point, r::Length, action)
     circle(p::Point; r = missing, d = missing, action = :stroke)
@@ -13,18 +15,21 @@ function circle(p::Point; r = missing, d = missing, action = :stroke)
     r = ismissing(d) ? r : d / 2
     circle(p, r, action)
 end
-function ellipse(p::Point, w::Q, h::Q, action=:none)  where {Q<:Length}
+"ellipse(p::Point, w::Q, h::Q; action = :stroke)  where {Q<:Quantity}"
+function ellipse(p::Point, w::Q, h::Q; action = :stroke)  where {Q<:Quantity}
     ellipse(p, get_scale_sketch(w), get_scale_sketch(h), action)
 end
-function squircle(center::Point, hradius::Q, vradius::Q, action=:none;
-    kwargs...) where {Q<:Length}
-    squircle(center, get_scale_sketch(hradius), get_scale_sketch(vradius),
-    action;
-    kwargs...)
+"squircle(center::Point, hradius::Q, vradius::Q; action=:stroke, kwargs...)  where {Q<:Quantity}"
+function squircle(center::Point, hradius::Q, vradius::Q; action = :stroke, kwargs...) where {Q<:Quantity}
+    squircle(center, get_scale_sketch(hradius), get_scale_sketch(vradius), action;  kwargs...)
 end
 
+"rect(p::Point, w::Q, h::Q; action=:stroke, kwargs...)  where {Q<:Quantity}"
+function rect(p::Point, w::Q, h::Q; action=:stroke, kwargs...)  where {Q<:Quantity}
+    rect(p, get_scale_sketch(w), get_scale_sketch(h), action; kwargs...)
+end
 #= Full list of curve functions:
- circle, center3pts, ellipse, sqcircle,
+ circle, center3pts, ellipse, squircle,
 arc, carc, arc2r, carc2r, sector, pie, curve, circlepath,
 hypotrochoid, epitrochoid, spiral, intersection2circles,
 intersectioncirclecircle, circlepointtangent

@@ -195,6 +195,25 @@ function show(io::IO, mime::MIME"image/svg+xml", l::BinLegend)
 end
 
 """
+draw_background(pt_upleft, width, height; 
+                         background_hue = color_with_lumin(PALETTE[8], 0.1),
+                         background_opacity = 0.2)
+Background for legend
+"""
+function draw_background(pt_upleft, width::T, height::T; 
+                         background_hue = color_with_lumin(PALETTE[8], 0.1),
+                         background_opacity = 0.2) where T
+    @layer begin
+        sethue(background_hue)
+        setopacity(background_opacity)
+        if T <: Quantity
+            rect(pt_upleft, width, height; action = :fill)
+        else
+            rect(pt_upleft, width, height, :fill)
+        end
+    end
+end
+"""
     draw_legend(p::Point, l::BinLegendVector{T, N, M, U}; include_nan_color = true,
         max_vert_height = 10EM,
         background_hue = color_with_lumin(PALETTE[8], 0.1),
@@ -235,14 +254,7 @@ function draw_legend(p::Point, l::BinLegend; include_nan_color = true,
     colwidth = max(5.0EM, column_widths(;l.name => binb_sinking)[1])
     fullwidth = pos_table[1] + colwidth - p[1]
     fullheight = pos_table[2] + estimate_full_height - p[2]
-
-    # Background for legend
-    @layer begin
-        sethue(background_hue)
-        setopacity(background_opacity)
-        rect(p, fullwidth, fullheight, :fill)
-    end
-
+    draw_background(p, fullwidth, fullheight; background_hue, background_opacity)
     # Plot
     ptul, ptbr = _draw_legend_boxes(box_tl, l, include_nan_color, vals_sinking)
     text_table_fixed_columns(pos_table, colwidth ; l.name => binb_sinking)

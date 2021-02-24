@@ -58,11 +58,11 @@ function set_scale_sketch()
 end
 
 """
-    get_scale_sketch(q::Quantity)
+    get_scale_sketch(q::Quantity)::Float64
 
 Return the number of pixels (or points, this may be ambiguous) corresponding to a given quantity.
 
-    get_scale_sketch(u::FreeUnits)
+    get_scale_sketch(u::FreeUnits)::Float64
 
 Return the number of pixels (or points, this may be ambiguous) corresponding to one unit of u.
 
@@ -74,11 +74,11 @@ Return the number of pixels (or points, this may be ambiguous) corresponding to 
     set_scale_sketch()
     70 m/s
 """
-get_scale_sketch(q::Length) = upreferred(q / SCALEDIST)::Float64
-get_scale_sketch(q::Velocity) = upreferred(q / SCALEVELOCITY)::Float64
-get_scale_sketch(q::Force) = upreferred(q / SCALEFORCE)::Float64
-get_scale_sketch(u::FreeUnits) = get_scale_sketch(1∙u)::Float64
-get_scale_sketch(x) = x
+get_scale_sketch(q::Length)::Float64 = upreferred(q / SCALEDIST)
+get_scale_sketch(q::Velocity)::Float64 = upreferred(q / SCALEVELOCITY)
+get_scale_sketch(q::Force)::Float64 = upreferred(q / SCALEFORCE)
+get_scale_sketch(u::FreeUnits)::Float64 = get_scale_sketch(1∙u)
+get_scale_sketch(x)::Float64 = x
 """
     set_figure_height(h::Int)
 

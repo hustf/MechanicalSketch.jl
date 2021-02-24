@@ -8,7 +8,7 @@ import MechanicalSketch: °, background, sethue, O, PT, EM, finish,
 import MechanicalSketch: rope_pos_tension, setline, kW
 
 let
-BACKCOLOR = color_with_lumin(PALETTE[8], 70);
+BACKCOLOR = PALETTE[8];
 function restart()
     empty_figure(joinpath(@__DIR__, "test_13.png"))
     background(BACKCOLOR)
@@ -166,7 +166,7 @@ arrow(O + p + 0.5w_generated + 2w,
 
 
 #"Relative wind velocity"
-sethue(color_with_lumin(color_from_palette("blue"), 70))
+sethue(sethue(PALETTE[1]))
 arrow(O + p + 0.5w_rel , w_rel,
     backgroundcolor = BACKCOLOR,
     labellength = true)
@@ -183,7 +183,7 @@ arrow(O + p_foil, Fk, α = α_chord,
     labellength = true)
 
 # Draw the relative wind in front of the kite
-sethue(color_with_lumin(color_from_palette("blue"), 70))
+sethue(PALETTE[1])
 arrow(O + p_foil - 1.5w_rel , w_rel,
     backgroundcolor = BACKCOLOR,
     labellength = false)

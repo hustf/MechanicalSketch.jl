@@ -8,6 +8,7 @@ let
 
     posx = -WI / 2
     sethue("green")
+    # The unicode ∈ may not be supported by the default font and show as a square instead. 
     stri = "Da jeg var på vei til kirken ∈ dag morges så kom jeg forbi en liten sjømann. En frisk og hyggelig liten sjømann som hilste meg."
     text(stri, posx, 0)
     sethue("yellow")

@@ -59,7 +59,7 @@ function value_strings(n_rows, n_columns, digits = 2; kwargs...)
     ms
 end
 
-"Pixel width using current settings"
+"Pixel width of drawing using current settings"
 pixelwidth(s::String) = textextents(s)[3]
 
 """

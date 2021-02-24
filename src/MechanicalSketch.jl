@@ -239,14 +239,19 @@ polyrotate!(f, ang::Angle) = polyrotate!(f, - ustrip( ang |> rad))
 """
     empty_figure(filename = "HiThere.png";
     backgroundcolor = color_with_lumin(PALETTE[8], 10),
-    hue = PALETTE[8] )
+    hue = PALETTE[8], height = missing, width = missing)
 
 Establish a drawing sized for A4 300 dpi figures (WI, HE),
 black on white figure, line width 3 pt  default.
+
+Default scale is given elsewhere, but correspond to:
+    height = 20m
+    height = 70m/s
+    height = 20kN
 """
 function empty_figure(filename = "HiThere.png";
         backgroundcolor = color_with_lumin(PALETTE[8], 10),
-        hue = PALETTE[8] )
+        hue = PALETTE[8], height = missing, width = missing)
     fig = Drawing(WI, HE, filename)
     # Font for the 'toy' text interface
     # (use e.g. JuliaMono for unicode symbols like ∈. There are no nice fonts for text AND math.
@@ -261,9 +266,17 @@ function empty_figure(filename = "HiThere.png";
     setdash("solid")
     # Origo at centre
     origin()
-    # Scale and rotation - x right, y up ('z' is in.). And rotations may
+    # Scale and rotation in pixels - x right, y up ('z' is in.). And rotations may
     # clockwise. Just deal with it. Or stick to using dimensions.
     setmatrix([1, 0, 0, 1, WI / 2, HE / 2])
+    @assert !ismissing(width) + !ismissing(height) < 2 "Width or height can be specified here."
+    if ismissing(width) && ismissing(height)
+        # Default is implicit in SCALEDIST = 20m / HE
+    elseif ismissing(width)
+        set_scale_sketch(height, HE)
+    else
+        set_scale_sketch(width, WI)
+    end
     fig
 end
 

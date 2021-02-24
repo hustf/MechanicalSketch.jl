@@ -11,7 +11,7 @@ import StaticArrays:     SVector
 using Test
 
 let
-if !@isdefined s
+if !@isdefined s⁻¹
     @import_expand m # Will error if m² already is in the namespace
     @import_expand s
     @import_expand °

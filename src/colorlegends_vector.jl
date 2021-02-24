@@ -253,12 +253,7 @@ function draw_legend(p::Point, l::BinLegendVector{T, N, M, U}; include_nan_color
     fullwidth = pos_table[1] + colwidth +0.5EM - p[1]
     fullheight = pos_table[2] + estimate_full_height - p[2]
 
-    # Background for legend
-    @layer begin
-        sethue(background_hue)
-        setopacity(background_opacity)
-        rect(p, fullwidth, fullheight, :fill)
-    end
+    draw_background(p, fullwidth, fullheight; background_hue, background_opacity)
 
     # Plot magnitude boxes
     
