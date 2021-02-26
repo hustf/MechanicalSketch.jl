@@ -107,6 +107,8 @@ Create position iterators with units corresponding to screen pixels.
 Use this to evaluate functions for visualization.
 When looping over combinations, use ys as the inner loop for faster matrix lookup.
 For image matrices, x vary over rows, y vary over columns.
+
+NOTE! Replace this functionality with 'coords_spatial(img)' (google it)
 """
 function x_y_iterators_at_pixels(;physwidth = 10.0m, physheight = 4.0m, centered = true)
     # Resolution for interpolation nodes
