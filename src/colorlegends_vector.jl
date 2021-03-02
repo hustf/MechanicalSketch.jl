@@ -237,7 +237,7 @@ function draw_legend(p::Point, l::BinLegendVector{T, N, M, U}; include_nan_color
     # In bin values
     vals_sinking = T.(reverse(bin_magn_bounds))[2:end]
     # Can we fit the entire legend, or is it too tall?
-    max_vert_height_pix = get_scale_sketch(max_vert_height)
+    max_vert_height_pix = scale_to_pt(max_vert_height)
     estimate_full_height = 0.0
     while true
         estimate_full_height = (length(vals_sinking) + 2 + include_nan_color) * row_height()

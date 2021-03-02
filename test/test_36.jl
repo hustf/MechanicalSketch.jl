@@ -3,22 +3,19 @@ import MechanicalSketch: rect, squircle, PALETTE, ∙, WI, HE, O, EM
 import MechanicalSketch: @latexify, latexify, place_image, modify_latex
 import MechanicalSketch: paint, setmesh, mesh, box, rule, BoundingBox
 import MechanicalSketch: @layer, color_with_lumin, setline, sethue, Length
-import MechanicalSketch: get_scale_sketch, pixelwidth, text, draw_background
+import MechanicalSketch: scale_to_pt, pixelwidth, text, draw_background
 import MechanicalSketch: Point, row_height, circle, blend, addstop, setblend
 import MechanicalSketch: setdash, line, RGBA, chroma, saturation, color_with_saturation
 import MechanicalSketch: settext, brush, translate, pixelwidth, box
-import MechanicalSketch: setopacity
-import Base: pop!
+import MechanicalSketch: setopacity, scale_to_pt, scale_pt_to_unit
+import Base.pop!
+
 
 if !@isdefined m²
     @import_expand ~m # Will error if m² already is in the namespace
     @import_expand s
     @import_expand °
 end
-
-# TO DO find a better, easier way. For example, convert to length? That is too general.
-WI_l = 1m * WI / get_scale_sketch(m)
-HE_l = 1m * HE / get_scale_sketch(m)
 include("test_functions_36.jl")
 
 empty_figure(joinpath(@__DIR__, "test_36.png"), height = 15m);
@@ -43,12 +40,11 @@ moveto!(pa, panelorigo )
 drawit(pa)
 pt += (0, 2EM)
 settext("Start comic strip:", pt, markup = true)
-
 #
 pa.name = "1"
 move_y!(pa, -7m)
 set_width_height!(pa, 3.5w, 3.5m)
-moveto_x!(pa, -WI_l / 2 + 1.2 * 3.5w / 2)
+moveto_x!(pa, 1.2 * 3.5w / 2 + scale_pt_to_unit(m) * (-WI / 2 ))
 Δy = height(pa) * (2 /  (1 + √5))^3
 ground = Container{Ground}(; y = Δy, w = 5 *  height(pa), h = Δy)
 putin!(pa, ground)
@@ -57,7 +53,6 @@ putin!(ground, stack)
 putin!(stack, Thing{Section}{Mounted}(;name = "1st"))
 drawit(pa)
 
-#
 pa.name = "2"
 move_x!(pa,  1.2 * 3.5w)
 putin!(ground, Thing{Section}{Transit}(;name = "2nd", y = 0.25m, x = 1.0m ))
@@ -71,3 +66,21 @@ pop!(ground)
 drawit(pa)
 
 finish()
+
+#=import MechanicalSketch: BezierPath, BezierPathSegment, bezier, bezier′, bezier′′, makebezierpath, drawbezierpath, bezierpathtopoly, beziertopoly, pathtobezierpaths,
+bezierfrompoints, beziercurvature, bezierstroke, setbezierhandles, shiftbezierhandles
+h = 1m
+empty_figure(joinpath(@__DIR__, "test_36.png"), height = 15m);
+pts = [Point(-w,-w),
+Point(-w,w),
+Point(w,w),
+Point(w,-w),
+Point(-w,-w)]
+
+for (sm, ptx) in zip(range(0.0, 1.0; length = 4), 0.5.*[-0.75WI, -0.25WI, 0.25WI, 0.75WI])
+   pt = Point(ptx, 0.0)
+   be = makebezierpath(pts .+ pt; smoothing = sm)
+   drawbezierpath(be, :stroke; close = true)
+end
+be = makebezierpath(pts; smoothing = 0.1)
+=#

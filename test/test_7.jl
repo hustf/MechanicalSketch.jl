@@ -1,6 +1,7 @@
 using MechanicalSketch
 import MechanicalSketch: foil_draw, °, background, sethue, O, finish
 import MechanicalSketch: m, N, kN, s, arrow, color_from_palette, color_with_lumin
+import MechanicalSketch: empty_figure, PALETTE
 
 let
 BACKCOLOR = color_with_lumin(PALETTE[5], 30)

@@ -1,4 +1,4 @@
-# To do: Replace Length with any quantity, scale with get_scale_sketch
+# To do: Replace Length with any quantity, scale with scale_to_pt
 # Write a macro to extend all curve-like functions which take input not a Point.
 """
     circle(p::Point, r::Length, action)
@@ -9,7 +9,7 @@
 action can be :nothing, :fill, :stroke, :fillstroke, :fillpreserve, :strokepreserve, :clip.
     The default without keyword arguments is :nothing.
 """
-circle(p::Point, r::Length, action) = circle(p, get_scale_sketch(r), action)
+circle(p::Point, r::Length, action) = circle(p, scale_to_pt(r), action)
 function circle(p::Point; r = missing, d = missing, action = :stroke)
     @assert ismissing(r) + ismissing(d) == 1
     r = ismissing(d) ? r : d / 2
@@ -17,16 +17,16 @@ function circle(p::Point; r = missing, d = missing, action = :stroke)
 end
 "ellipse(p::Point, w::Q, h::Q; action = :stroke)  where {Q<:Quantity}"
 function ellipse(p::Point, w::Q, h::Q; action = :stroke)  where {Q<:Quantity}
-    ellipse(p, get_scale_sketch(w), get_scale_sketch(h), action)
+    ellipse(p, scale_to_pt(w), scale_to_pt(h), action)
 end
 "squircle(center::Point, hradius::Q, vradius::Q; action=:stroke, kwargs...)  where {Q<:Quantity}"
 function squircle(center::Point, hradius::Q, vradius::Q; action = :stroke, kwargs...) where {Q<:Quantity}
-    squircle(center, get_scale_sketch(hradius), get_scale_sketch(vradius), action;  kwargs...)
+    squircle(center, scale_to_pt(hradius), scale_to_pt(vradius), action;  kwargs...)
 end
 
 "rect(p::Point, w::Q, h::Q; action=:stroke, kwargs...)  where {Q<:Quantity}"
 function rect(p::Point, w::Q, h::Q; action=:stroke, kwargs...)  where {Q<:Quantity}
-    rect(p, get_scale_sketch(w), get_scale_sketch(h), action; kwargs...)
+    rect(p, scale_to_pt(w), scale_to_pt(h), action; kwargs...)
 end
 #= Full list of curve functions:
  circle, center3pts, ellipse, squircle,
@@ -117,4 +117,4 @@ function box_fill_outline(pt_topleft, colfill;
     box(pt_topleft, pt_topleft + (width, height), :stroke)
     grestore()
 end
-setline(x::Length) = setline(get_scale_sketch(x))
+setline(x::Length) = setline(scale_to_pt(x))

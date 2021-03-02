@@ -1,6 +1,6 @@
 import MechanicalSketch
 import MechanicalSketch: empty_figure, PALETTE, O, HE, WI, EM, finish, ∙, Point
-import MechanicalSketch: @import_expand, set_scale_sketch, settext, SCALEDIST
+import MechanicalSketch: @import_expand, set_scale_sketch, settext, scale_pt_to_unit
 import MechanicalSketch: noise, normalize_datarange, place_image, BinLegend, @layer
 import MechanicalSketch: poly, dimension_aligned, sethue, arrow, circle, prettypoly, Greys_9
 using  MechanicalSketch: MechanicalUnits, upreferred, ComplexQuantity, Quantity

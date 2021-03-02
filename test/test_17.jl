@@ -1,7 +1,7 @@
 import MechanicalSketch
-import MechanicalSketch: mm, kg, m, set_scale_sketch, HE, WI, EM, PT, circle, text, N, kN, PALETTE,
-    color_with_lumin, empty_figure, background, sethue, O, °, finish,
-    line, setline, setopacity, SCALEDIST
+import MechanicalSketch: mm, kg, m, set_scale_sketch, HE, WI, EM, PT, circle, text, N, kN, PALETTE
+import MechanicalSketch: color_with_lumin, empty_figure, background, sethue, O, °, finish
+import MechanicalSketch: line, setline, setopacity, scale_pt_to_unit, empty_figure
 let
 # Rope data from https://www.hendrikvedergroup.com/_asset/_public/Hendrik-Veder-Group/Downloads/8896-03-Dyneema-folder-offset_LR-v4.pdf
 # Diameters below 12 mm are excluded here, because they vary too much for reasonable generalization. Properties are generally better for
@@ -31,7 +31,7 @@ pts = let
     pop!(posx)
     for (i,d) in enumerate(ROPE_D)
         p = if i == 1
-                -0.45 * WI * SCALEDIST
+                -0.45 * WI * scale_pt_to_unit(m)
         else
             posx[i-1] + max(60.0mm, d*1.1)
         end

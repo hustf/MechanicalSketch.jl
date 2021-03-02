@@ -1,10 +1,3 @@
-"y is up, same scale as x"
-scaledisty() = -SCALEDIST
-"y is up, same scale as x"
-scalevelocityy() = -SCALEVELOCITY
-"y is up, same scale as x"
-scaleforcey() = -SCALEFORCE
-
 
 """
     set_scale_sketch(s::T, pixels::Int) where {T <: Length}
@@ -48,23 +41,24 @@ function set_scale_sketch(x::Symbol)
         throw(DomainError(" set_scale_sketch with one argument only responds to (units of) Length, Force or Velocity"))
     end
 end
-set_scale_sketch(s::T, pixels::Int) where {T <: Length} = global SCALEDIST = s / pixels
-set_scale_sketch(s::T, pixels::Int) where {T <: Force} = global SCALEFORCE = s / pixels
-set_scale_sketch(s::T, pixels::Int) where {T <: Velocity} = global SCALEVELOCITY = s / pixels
+set_scale_sketch(x::T, pixels::Int) where {T <: Length} =  push!(SCALE, :DISTANCE => x / pixels)
+set_scale_sketch(x::T, pixels::Int) where {T <: Force} = push!(SCALE, :FORCE => x / pixels)
+set_scale_sketch(x::T, pixels::Int) where {T <: Velocity} = push!(SCALE, :VELOCITY => x / pixels)
 function set_scale_sketch()
+    # Default scale
     set_scale_sketch(:Length)
     set_scale_sketch(:Force)
     set_scale_sketch(:Velocity)
 end
 
 """
-    get_scale_sketch(q::Quantity)::Float64
+    scale_to_pt(q::Quantity)::Float64
 
-Return the number of pixels (or points, this may be ambiguous) corresponding to a given quantity.
+Return the number of pixels (or pts, this may be ambiguous) corresponding to a given quantity.
 
-    get_scale_sketch(u::FreeUnits)::Float64
+    scale_to_pt(u::FreeUnits)::Float64
 
-Return the number of pixels (or points, this may be ambiguous) corresponding to one unit of u.
+Return the number of pixels (or pts, this may be ambiguous) corresponding to one unit of u.
 
     To reset default 20m per screen height HE:
     set_scale_sketch()
@@ -74,11 +68,31 @@ Return the number of pixels (or points, this may be ambiguous) corresponding to 
     set_scale_sketch()
     70 m/s
 """
-get_scale_sketch(q::Length)::Float64 = upreferred(q / SCALEDIST)
-get_scale_sketch(q::Velocity)::Float64 = upreferred(q / SCALEVELOCITY)
-get_scale_sketch(q::Force)::Float64 = upreferred(q / SCALEFORCE)
-get_scale_sketch(u::FreeUnits)::Float64 = get_scale_sketch(1∙u)
-get_scale_sketch(x)::Float64 = x
+scale_to_pt(q::Length)::Float64 = upreferred(q / scale_pt_to_unit(oneunit(q)))
+scale_to_pt(q::Velocity)::Float64 = upreferred(q / scale_pt_to_unit(oneunit(q)))
+scale_to_pt(q::Force)::Float64 = upreferred(q / scale_pt_to_unit(oneunit(q)))
+scale_to_pt(x)::Float64 = x
+
+
+"""
+    scale_pt_to_unit(u::FreeUnits)
+"""
+scale_pt_to_unit(u::FreeUnits) = scale_pt_to_unit(1∙u)
+function scale_pt_to_unit(q::Length)
+    @assert oneunit(q) == q "Ambiguous input. The scaling concerns one unit of the argument. Multiply by the number of units elsewhere."
+    (q / unit(q)) ∙ unit(q)(SCALE[:DISTANCE])
+end
+function scale_pt_to_unit(q::Velocity)
+    @assert oneunit(q) == q "Ambiguous input. The scaling concerns one unit of the argument. Multiply by the number of units elsewhere."
+    (q / unit(q)) ∙ unit(q)(SCALE[:VELOCITY])
+end
+function scale_pt_to_unit(q::Force)
+    @assert oneunit(q) == q "Ambiguous input. The scaling concerns one unit of the argument. Multiply by the number of units elsewhere."
+    (q / unit(q)) ∙ unit(q)(SCALE[:FORCE])
+end
+
+
+
 """
     set_figure_height(h::Int)
 
@@ -96,6 +110,9 @@ function set_figure_width(w::Int)
     global WI = w
 end
 
+function rotate(a::Angle)
+    rotate(-ustrip( a |> rad))
+end
 """
     x_y_iterators_at_pixels( physwidth = 10.0m, physheight = 4.0m, centered = true)
     ->(xs, ys)
@@ -112,8 +129,8 @@ NOTE! Replace this functionality with 'coords_spatial(img)' (google it)
 """
 function x_y_iterators_at_pixels(;physwidth = 10.0m, physheight = 4.0m, centered = true)
     # Resolution for interpolation nodes
-    nx = round(Int64, get_scale_sketch(physwidth))
-    ny = round(Int64, get_scale_sketch(physheight))
+    nx = round(Int64, scale_to_pt(physwidth))
+    ny = round(Int64, scale_to_pt(physheight))
     # Bounding box
     xmin = -centered * physwidth / 2
     xmax = (1 - centered / 2) * physwidth

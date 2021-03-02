@@ -212,7 +212,7 @@ Create a simplex-based noise function to be used for visualizing f_xy.
 
 Input:  f_xy: (Q, Q)  → (Q, Q) or CQ: Function taking a tuple of quantities, outputs quantities
         matrix:    Used for finding the size of output. The relation between pixel indices and spatial
-            positions is implicitly given by ´get_scale_sketch(m)´
+            positions is implicitly given by ´scale_to_pt(m)´
         centered   keyword argument. If true, values at the centre of the matrix corresponds to (x,y) = (0, 0)m
 
 Output: f: (Q, Q)  → R Function taking a tuple of quantities, outputs a real number
@@ -224,8 +224,8 @@ This corresponds to larger velocities.
 """
 function noise_for_lic(f_xy, matrix::BitMatrix; centered = true)
     ny, nx = size(matrix)
-    physwidth = 1.0m * nx / get_scale_sketch(m)
-    physheight = 1.0m * ny / get_scale_sketch(m)
+    physwidth = nx * scale_pt_to_unit(m)
+    physheight =  ny * scale_pt_to_unit(m)
     xmin = -centered * physwidth / 2
     xmax = (1 - centered / 2) * physwidth
     ymin = -centered * physheight / 2
@@ -301,8 +301,8 @@ Input matrix streamlinepixels is modified in place.
 """
 function streamlines_add!(v_xy::Extrapolation, streamlinepixels::BitMatrix; centered = true, targetdensity = 0.42)
     ny, nx = size(streamlinepixels)
-    physwidth = 1.0m * nx / get_scale_sketch(m)
-    physheight = 1.0m * ny / get_scale_sketch(m)
+    physwidth = nx * scale_pt_to_unit(m)
+    physheight = ny * scale_pt_to_unit(m)
     xmin = -centered * physwidth / 2
     xmax = (1 - centered / 2) * physwidth
     ymin = -centered * physheight / 2
@@ -516,7 +516,7 @@ Input:
     centered          Bool      Keyword argument. If true, values at the centre of the matrix corresponds to (x,y) = (0, 0)m
     targetdensity     Real      Keyword argument. Fraction of pixels covered by streamlines.
 
-    The relation between pixel indices and spatial positions is implicitly given by ´get_scale_sketch(m)´ together with 'centered'
+    The relation between pixel indices and spatial positions is implicitly given by ´scale_to_pt(m)´ together with 'centered'
 
 Output:
     CR²
@@ -551,7 +551,7 @@ Input:
     centered          Bool      Keyword argument. If true, values at the centre of the matrix corresponds to (x,y) = (0, 0)m
 
     Both matrix arguments must have the same number of rows and columns.
-    The relation between pixel indices and spatial positions is implicitly given by ´get_scale_sketch(m)´ together with 'centered'
+    The relation between pixel indices and spatial positions is implicitly given by ´scale_to_pt(m)´ together with 'centered'
 
 Output:
     CR²
@@ -582,7 +582,7 @@ Input:
     streamlinepixels:        Bool², matrix where 'true' indicates that a line-integral-convolution should be calculate for this pixel.
     centered                 Keyword argument. If true, values at the centre of the matrix corresponds to (x,y) = (0, 0)m
 
-    The relation between pixel indices and spatial positions is implicitly given by ´get_scale_sketch(m)´ and 'centered'
+    The relation between pixel indices and spatial positions is implicitly given by ´scale_to_pt(m)´ and 'centered'
 
 Output:
     CR²
@@ -600,8 +600,8 @@ function convolution_matrix(f_xy, streamlinepixels::BitMatrix; centered = true)
         f_xy
     else
         ny, nx = size(streamlinepixels)
-        physwidth = 1.0m * nx / get_scale_sketch(m)
-        physheight = 1.0m * ny / get_scale_sketch(m)
+        physwidth = nx * scale_pt_to_unit(m)
+        physheight = ny * scale_pt_to_unit(m)
         function_to_interpolated_function(f_xy; physwidth = physwidth, physheight = physheight)
     end
     # Prepare a noise function:
@@ -620,7 +620,7 @@ Input:
     streamlinepixels:        Bool², matrix where 'true' indicates that a line-integral-convolution should be calculate for this pixel.
     centered                 keyword argument. If true, values at the centre of the matrix corresponds to (x,y) = (0, 0)m
 
-    The relation between pixel indices and spatial positions is implicitly given by ´get_scale_sketch(m)´
+    The relation between pixel indices and spatial positions is implicitly given by ´scale_to_pt(m)´
 
 Output:
     CR²
@@ -634,8 +634,8 @@ Output phase and amplitude information for 'streamlinepixels'. Used for renderin
 """
 function convolution_matrix(f_xy::Extrapolation, n_xy::Extrapolation, streamlinepixels::BitMatrix; centered = true)
     ny, nx = size(streamlinepixels)
-    physwidth = 1.0m * nx / get_scale_sketch(m)
-    physheight = 1.0m * ny / get_scale_sketch(m)
+    physwidth = nx * scale_pt_to_unit(m)
+    physheight = ny * scale_pt_to_unit(m)
     xmin = -centered * physwidth / 2
     xmax = (1 - centered / 2) * physwidth
     ymin = -centered * physheight / 2

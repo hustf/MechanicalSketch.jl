@@ -23,9 +23,9 @@ function dimension_aligned(p1::Point, p2::Point;
     function distancestring(val)
         string(if digits == 0
                 rounded =
-                unit * Int(ustrip(round(unit, val * SCALEDIST)))
+                unit * Int(ustrip(round(unit, val * scale_pt_to_unit(m))))
             else
-                round(unit, val * SCALEDIST, digits = digits)
+                round(unit, val * scale_pt_to_unit(m); digits = digits)
             end)
     end
 

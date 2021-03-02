@@ -130,9 +130,7 @@ We don't dispatch on the dimension of angles, because the dimension is NonDims (
 In the context of this package, defining Angle is considered harmless:
 """
 const Angle = Union{typeof(1.0°), typeof(1°), typeof(1.0f0°), typeof(1.0rad), typeof(1rad), typeof(1.0f0*rad)}
-
-# TODO: Cleanup
-#import REPL.TerminalMenus ## Where used?
+# TODO move Angle to numeric types...
 import ColorSchemes
 import ColorSchemes: getinverse, get
 import ColorSchemes: RGB, RGBA
@@ -145,13 +143,6 @@ import ForwardDiff
 import StaticArrays
 import StaticArrays: SA, SVector
 import Interpolations:   interpolate, Linear, Flat, extrapolate, Extrapolation, Gridded
-export Drawing, empty_figure,
-    color_from_palette,
-    color_with_lumin,
-    PALETTE,
-    dimension_aligned,
-    SCALEDIST,
-    Point, upreferred
 const CHORD_ZERO = 0.25
 const FOIL_CHORD_POS = [0, 0.0125, 0.025, 0.05, 0.075, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 0.95, 1]
 const FOIL_HALF_T = [0, 0.117, 0.1575, 0.2179, 0.2649, 0.3042, 0.4146, 0.4764, 0.5, 0.4816, 0.4149, 0.3159, 0.1989, 0.0811, 0.0306, 0]
@@ -181,7 +172,7 @@ For line thickness, we are used to points.
 """
 const PT = Int(round(EM / 12))
 """
-WI is the pixel widt of the figure. See HE and origo, O.
+WI is the pixel width of the figure. See HE and origo, O.
 
 We want to make quality figures for A4 with 5 cm total margin. Width and height are
     a4_w_72dpi, _ = Luxor.paper_sizes["A4"]
@@ -194,22 +185,14 @@ We want to make quality figures for A4 with 5 cm total margin. Width and height 
 const WI = 1889
 "HE is the pixel height of the figure. See WI and orgo, O"
 global HE = 1259
-"Used for scaling quantities to pixels. Use set_scale_sketch to change"
-global SCALEDIST = 20m / HE
-"Used for scaling quantities to pixels. Use set_scale_sketch to change"
-global SCALEVELOCITY = 70m/s / HE
-"Used for scaling quantities to pixels. Use set_scale_sketch to change"
-global SCALEFORCE = 20kN / HE
+const SCALE = Dict{Symbol, Quantity{Float64}}()
 
+Point(x::Quantity{T, D}, y::Quantity{S, D}) where {T, S, D} = Point(scale_to_pt(x), -scale_to_pt(y))
 
-# CONSIDER generalize to quantity, let get_scale_sketch(x) do the transformation?
-Point(x::T, y::T) where T<:Length = Point(x / SCALEDIST, y / scaledisty())
-Point(x::T, y::T) where T<:Velocity = Point(x / SCALEVELOCITY , y / scalevelocityy())
-Point(x::T, y::T) where T<:Force = Point(x / SCALEFORCE , y / scaleforcey())
 include("numeric_types.jl")
 
 
-# Vector subtraction and division using QuantityTuples
+# Vector subtraction and division using QuantityTuples which don't need to have the exact same type.
 +(tup1::QuantityTuple, tup2::QuantityTuple) = .+(tup1, tup2)
 -(tup1::QuantityTuple, tup2::QuantityTuple) = .-(tup1, tup2)
 
@@ -233,8 +216,6 @@ include("numeric_types.jl")
 # extend function in base with Point
 hypot(p::Point) = hypot(p.x, p.y)
 hypot(p::QuantityTuple) = hypot(p[1], p[2])
-polyrotate!(f, ang::Angle) = polyrotate!(f, - ustrip( ang |> rad))
-
 
 """
     empty_figure(filename = "HiThere.png";
@@ -244,10 +225,10 @@ polyrotate!(f, ang::Angle) = polyrotate!(f, - ustrip( ang |> rad))
 Establish a drawing sized for A4 300 dpi figures (WI, HE),
 black on white figure, line width 3 pt  default.
 
-Default scale is given elsewhere, but correspond to:
-    height = 20m
-    height = 70m/s
-    height = 20kN
+Initial scale is set with set_scale_sketch()
+    pt height = 20m
+    pt height = 70m/s
+    pt height = 20kN
 """
 function empty_figure(filename = "HiThere.png";
         backgroundcolor = color_with_lumin(PALETTE[8], 10),
@@ -271,24 +252,28 @@ function empty_figure(filename = "HiThere.png";
     setmatrix([1, 0, 0, 1, WI / 2, HE / 2])
     @assert !ismissing(width) + !ismissing(height) < 2 "Width or height can be specified here."
     if ismissing(width) && ismissing(height)
-        # Default is implicit in SCALEDIST = 20m / HE
+        set_scale_sketch()
     elseif ismissing(width)
         set_scale_sketch(height, HE)
     else
         set_scale_sketch(width, WI)
     end
     fig
-end
+end 
+
 
 """
     text(t, pt::Point, angle::T; kwargs) where {T <: Angle}
 For angles with unit, use rotation around z axis.
 """
 text(t, pt::Point, angle::T) where {T <: Angle} = text(t, pt; angle = - ustrip( angle |> rad))
+# TODO collect luxor functions with angle arguments in separate file.
+polyrotate!(f, ang::Angle) = polyrotate!(f, - ustrip( ang |> rad))
 
 
 include("lenient_num_analogue.jl")
 include("scale.jl")
+set_scale_sketch()
 include("colors.jl")
 include("dimension_aligned.jl")
 include("foil.jl")

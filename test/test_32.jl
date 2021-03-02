@@ -4,11 +4,11 @@ import MechanicalSketch: PALETTE, setfont, settext, setline, fontsize, color_wit
 import MechanicalSketch: dimension_aligned
 import MechanicalSketch: generate_complex_potential_source, generate_complex_potential_vortex
 import MechanicalSketch: @import_expand, Quantity, @layer
-import MechanicalSketch: place_image, set_scale_sketch, get_scale_sketch, ∙
+import MechanicalSketch: place_image, set_scale_sketch, scale_to_pt, ∙
 import MechanicalSketch: clamped_velocity_matrix, line_integral_convolution_complex, lic_matrix_current, LicSceneOpts
 import MechanicalSketch: normalize_datarange, matrix_to_function, noise_for_lic, function_to_interpolated_function
 import MechanicalSketch: Movie, Scene, animate, circle, line, Point, arrow, poly, draw_legend
-import MechanicalSketch: get_scale_sketch, x_y_iterators_at_pixels, Greys_9, BinLegend
+import MechanicalSketch: scale_to_pt, x_y_iterators_at_pixels, Greys_9, BinLegend, scale_pt_to_unit
 import Interpolations:   Extrapolation
 
 let
@@ -35,7 +35,7 @@ velocity_matrix = clamped_velocity_matrix(ϕ_32; physwidth = physwidth, physheig
 # One complex matrix: Phase and amplitude for the visualization. This can generate cyclic movies
 complex_convolution_matrix = convolute_image_32(velocity_matrix) # 15.071 s (364518 allocations: 61.17 MiB)
 # The distribution of phase angles (complex argument) ought to be flat between -π and π. Let's check that:
-n_pixels = round(Int, get_scale_sketch(physwidth))
+n_pixels = round(Int, scale_to_pt(physwidth))
 phasetop, binwidth, relfreq = phase_histog(complex_convolution_matrix, n_pixels)
 histogrampoints = Point.(collect(phasetop * n_pixels / 2π), -EM .* relfreq);
 

@@ -1,6 +1,8 @@
 using MechanicalSketch
-import MechanicalSketch: O, label, background, sethue, setdash, fontface, fontsize, line,
-    FS, EM, translate, color_with_lumin, midpoint, getrotation, rotate
+import MechanicalSketch: O, label, background, sethue, setdash, fontface, fontsize, line
+import MechanicalSketch: FS, EM, translate, color_with_lumin, midpoint, getrotation, rotate
+import MechanicalSketch: empty_figure, finish, color_from_palette
+
 let
     this_fig = empty_figure(joinpath(@__DIR__, "test_4.png"))
     background(color_from_palette("seagreen1"))
@@ -19,7 +21,5 @@ let
     rotate(π)
     labelelledtri()
     label("-----------")
-
-
-    MechanicalSketch.finish()
+    finish()
 end

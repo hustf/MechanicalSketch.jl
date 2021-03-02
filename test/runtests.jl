@@ -1,5 +1,5 @@
 using Test
-
+# Note, try run_process_test.jl
 @testset "1" begin
     include("test_1.jl")
 end
@@ -110,7 +110,4 @@ end end
 end end
 @testset "37" begin let
     include("test_37.jl")
-end end
-@testset "38" begin let
-    include("test_38.jl")
 end end

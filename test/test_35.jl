@@ -1,10 +1,9 @@
 import MechanicalSketch
 import MechanicalSketch: empty_figure, O, WI, HE, finish
 import MechanicalSketch: PALETTE
-import MechanicalSketch: circle
+import MechanicalSketch: circle, scale_to_pt, scale_pt_to_unit
 import MechanicalSketch: @import_expand, @layer, Point
 import MechanicalSketch: ∙, °
-import MechanicalSketch: get_scale_sketch
 import MechanicalSketch: placeimage, readsvg, readpng, color_with_lumin
 import MechanicalSketch: Luxor, Length, set_scale_sketch, text, SVGimage
 import Luxor:            Cairo.CairoSurfaceBase, translate, scale
@@ -33,7 +32,7 @@ for (i, cent) in enumerate(centers)
     circle.(cent; r = 2m)
     text(string(i), cent + (1, 1)m, )
 end
-svfnam = joinpath("..", "svg", "dn69ygSyBh.svg")
+svfnam = joinpath("..", "resource", "dn69ygSyBh.svg")
 isfile(svfnam)
 sv = readsvg(svfnam)
 place_image_35(centers[1], sv, centered = true)

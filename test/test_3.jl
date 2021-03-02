@@ -1,8 +1,9 @@
 using MechanicalSketch
-import MechanicalSketch: Point, rect, arrow, line,
-    EM, TXTOFFV, O, PT, Point, WI, HE,
-    RGB, HSL, color_with_lumin, background, sethue, text, fontsize,
-    settext, setfont, setopacity, FS, color_with_lumin, color_with_lumin2
+import MechanicalSketch: Point, rect, arrow, line
+import MechanicalSketch: EM, TXTOFFV, O, PT, Point, WI, HE
+import MechanicalSketch: RGB, HSL, color_with_lumin, background, sethue, text, fontsize
+import MechanicalSketch: settext, setfont, setopacity, FS, color_with_lumin, color_with_lumin2
+import MechanicalSketch: empty_figure, PALETTE
 
 let
     this_fig = empty_figure(joinpath(@__DIR__, "test_3.png"))

@@ -1,7 +1,7 @@
 using MechanicalSketch
-import MechanicalSketch: °, background, sethue, O, EM, finish, HE, WI
-import MechanicalSketch: m, dimension_aligned, place_image, modify_latex
-import MechanicalSketch: @latexify, latexify, LaTeXString, @L_str
+import MechanicalSketch: °, background, sethue, O, EM, finish, HE, WI, empty_figure
+import MechanicalSketch: m, dimension_aligned, place_image, modify_latex, color_with_lumin
+import MechanicalSketch: @latexify, latexify, LaTeXString, @L_str, PALETTE, Point
 using JuMP    # Julia Mathematical Programming language
 using Ipopt   # Nonlinear solver
 

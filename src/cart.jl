@@ -1,7 +1,7 @@
 Turn(t::Turtle, r::Angle) = Turn(t, upreferred(-r / 1°))
 Orientation(t::Turtle, r::Angle) = Orientation(t, upreferred(-r / 1°))
-Circle(t::Turtle, radius::Length) = Circle(t, get_scale_sketch(r))
-Forward(t::Turtle, d::Length) = Forward(t, get_scale_sketch(d))
+Circle(t::Turtle, radius::Length) = Circle(t, scale_to_pt(r))
+Forward(t::Turtle, d::Length) = Forward(t, scale_to_pt(d))
 
 
 """

@@ -1,6 +1,6 @@
 using MechanicalSketch
-import MechanicalSketch: °, background, sethue, O, PT, finish,
-      m, s, arrow, color_with_lumin
+import MechanicalSketch: °, background, sethue, O, PT, finish, Point
+import MechanicalSketch: empty_figure, m, s, arrow, color_with_lumin, PALETTE
 
 let
 BACKCOLOR = color_with_lumin(PALETTE[8], 70)

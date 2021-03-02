@@ -1,7 +1,7 @@
 using MechanicalSketch
 import MechanicalSketch: foil_spline_local
 import MechanicalSketch: text, circle, Turtle, Pencolor, Penwidth, Forward, Turn
-import MechanicalSketch: HueShift, O, sethue, finish, EM, WI, background
+import MechanicalSketch: HueShift, O, sethue, finish, EM, WI, background, empty_figure
 let
     empty_figure(joinpath(@__DIR__, "test_1.png"));
     background("midnightblue")

@@ -1,7 +1,8 @@
 using MechanicalSketch
 import MechanicalSketch: get, getinverse, textextents,  Point, rect, label,
     EM, TXTOFFV, WI, background, sethue, text, background, @colorant_str,
-    lumin, finish
+    lumin, finish, empty_figure, PALETTE, color_from_palette
+
 let
 
 this_fig = empty_figure(joinpath(@__DIR__, "test_2.png"))

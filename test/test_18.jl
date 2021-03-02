@@ -1,7 +1,7 @@
 import MechanicalSketch
 import MechanicalSketch: color_with_lumin, empty_figure, background, sethue, O, WI, HE, finish
-import MechanicalSketch: PALETTE, SCALEDIST, m, mm, km, kg, rope_breaking_strength, rope_weight
-import MechanicalSketch: text_table, area_filled, set_scale_sketch, circle, °, text, g
+import MechanicalSketch: PALETTE, scale_pt_to_unit, m, mm, km, kg, rope_breaking_strength, rope_weight
+import MechanicalSketch: text_table, area_filled, set_scale_sketch, circle, °, text, g, empty_figure
 let
 BACKCOLOR = color_with_lumin(PALETTE[8], 80);
 function restart()
@@ -34,7 +34,7 @@ pts = let
     pop!(posx)
     for (i,d) in enumerate(diameters)
         p = if i == 1
-                -0.45 * WI * SCALEDIST
+                -0.45 * WI * scale_pt_to_unit(m)
         else
             posx[i-1] + max(5.0mm, d*1.1)
         end

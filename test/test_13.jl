@@ -1,10 +1,10 @@
 using MechanicalSketch
-import MechanicalSketch: °, background, sethue, O, PT, EM, finish,
-      color_from_palette, color_with_lumin,
-      m, °, kN, mm,
-      m, m², m³, s, N, kN, kPa, g, kg,
-      arrow, drawcart, circle, foil_draw,
-      line, showpower
+import MechanicalSketch: °, background, sethue, O, PT, EM, finish
+import MechanicalSketch: color_from_palette, color_with_lumin
+import MechanicalSketch: m, °, kN, mm, PALETTE
+import MechanicalSketch: m, m², m³, s, N, kN, kPa, g, kg
+import MechanicalSketch: arrow, drawcart, circle, foil_draw
+import MechanicalSketch: line, showpower, empty_figure
 import MechanicalSketch: rope_pos_tension, setline, kW
 
 let
@@ -29,11 +29,11 @@ Cs = 1.4
 
 "Rope minimum breaking stress"
 σ_MB = 41.2kN / (π / 4  * (6mm)^2 ) |> N/mm^2
-
+# or
 σ_MB = kN / (π / 4  * (6mm)^2 ) |> N/mm^2
-
+# or
 σ_MB = 5768kN / (π / 4  * (96mm)^2 ) |> N/mm^2
-
+# or
 σ_MB = 407.1kN / (π / 4  * (20mm)^2 ) |> N/mm^2
 
 "Wing loading, dimensioning, from Boeing 737"

@@ -44,8 +44,8 @@ function matrix_to_function(matrix::Array{Quantity{Complex{Float64}, D, U}, 2}) 
     # Image processing convention: a column has a horizontal line of pixels
     ny, nx = size(matrix)
     # We assume every element correspond to a position, unit of length
-    physwidth = nx * 1m / get_scale_sketch(m)
-    physheight = ny * 1m / get_scale_sketch(m)
+    physwidth = nx * scale_pt_to_unit(m)
+    physheight = ny * scale_pt_to_unit(m)
     xs, ys = x_y_iterators_at_pixels(;physwidth, physheight)
     # Adapt to Interpolations
     tuplemat = map( cmplx -> (real(cmplx), imag(cmplx)), transpose(matrix)[ : , end:-1:1])
@@ -80,8 +80,8 @@ function matrix_to_function(matrix::Array{Float64,2})
     # Image processing convention: a column has a horizontal line of pixels
     ny, nx = size(matrix)
     # We assume every element correspond to a position, unit of length
-    physwidth = nx * 1m / get_scale_sketch(m)
-    physheight = ny * 1m / get_scale_sketch(m)
+    physwidth = nx * scale_pt_to_unit(m)
+    physheight = ny * scale_pt_to_unit(m)
     
     xs, ys = x_y_iterators_at_pixels(;physwidth, physheight)
     # Adapt to Interpolations

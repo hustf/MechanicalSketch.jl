@@ -202,24 +202,11 @@ function text_table_fixed_columns(pos::Point, widths; kwargs...)
         widths
     end
     @assert length(vecwidths) == ncols
-    pixwidths = get_scale_sketch.(vecwidths)
+    pixwidths = scale_to_pt.(vecwidths)
     nrows = value_rows(;kwargs...)
     hdrs = header_strings(;kwargs...)
     draw_header(pos, pixwidths, hdrs)
     pos += (0.0, row_height())
     # Draw values and return text including headers
     vcat(reshape(hdrs, 1, :), draw_values(pos, nrows, pixwidths; kwargs...))
-end
-
-"""
-   settext_centered_above_with_markup(str, pos::Point)
-
-The string can include Pango-style mark-up. Line break: \r, otherwise html-like.
-
-Note TODO: Not used so far, but may be useful if a non-toy-api version is made later.
-Also examine the latex capabilities in Pango as an alternative to svg.
-"""
-function settext_centered_above_with_markup(str, pos::Point)
-    pixel_width = pixelwidth(str)
-    settext(str, pos + (-pixelwidth(str) / 2, 0), markup = true)
 end

@@ -4,6 +4,23 @@ They are a subset of quantities, although some function methods may
 need extending outside T<:Real
 
 """
+
+# TODO improve this. We want to use promotion to define tuples with
+# identical types.
+# It might also be nice to use traits, so that we can dispatch on 
+# 2d quantities.
+#=
+ dimensionality(T<:Real) = Val{1}()
+....etc  d
+
+There are propably examples in Julia base, for n-dimensional arrays.
+
+ foo(x::T) where T = foo(dimensionality(T), x)
+ foo(::Val{2}, x) = 
+
+ angle(::Val{2}, x::{Quantity{<:Complex} })
+ =#
+
 const ComplexQuantity = Quantity{<:Complex}
 
 const RealQuantity = Quantity{<:Real}

@@ -1,6 +1,6 @@
 import MechanicalSketch
 import MechanicalSketch: empty_figure, PALETTE, O, HE, WI, EM, finish, ∙, Point
-import MechanicalSketch: @import_expand, set_scale_sketch, SCALEDIST, settext
+import MechanicalSketch: @import_expand, set_scale_sketch, scale_pt_to_unit, settext
 import MechanicalSketch: noise, normalize_datarange, place_image, @layer
 import MechanicalSketch: poly, dimension_aligned, sethue, arrow, circle, prettypoly
 import MechanicalSketch: Length, noise_between_wavelengths, Greys_9, BinLegend
@@ -111,7 +111,7 @@ poly(curpoint .+ histogrampoints, :stroke)
     arrow(curpoint, curpoint + (0.0,  -EM))
     settext("<i>Relative frequency</i>", curpoint + (0.0,  -EM ), markup=true)
     arrow(curpoint, curpoint + (0.95 * WI, 0.0))
-    settext("<i>Noise values</i>, max 1.0", curpoint + ( 0.8 * SCALEDIST * WI, 0.0m), markup=true)
+    settext("<i>Noise values</i>, max 1.0", curpoint + ( 0.8 * scale_pt_to_unit(m) * WI, 0.0m), markup=true)
 end
 
 finish()

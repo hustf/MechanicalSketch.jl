@@ -114,8 +114,8 @@ function convolute_image_32(matrix::Array{Quantity{Complex{Float64}, D, U}, 2}) 
     fxy = matrix_to_function(matrix)
     ny, nx = size(matrix)
     # We assume every element correspond to a position, unit of length
-    physwidth = nx * 1m / get_scale_sketch(m)
-    physheight = ny * 1m / get_scale_sketch(m)
+    physwidth = nx * scale_pt_to_unit(m)
+    physheight = ny * scale_pt_to_unit(m)
     # Iterators for position - linear integration between points.
     xs = range(-physwidth / 2, stop = physwidth / 2, length = nx)
     ys = range(-physheight / 2, stop = physheight / 2, length = ny)

@@ -126,8 +126,8 @@ function ∇_rectangle(CQ_to_Q;
     cutoff = NaN)
 #=
     # Discretize per pixel
-    nx = round(Int64, get_scale_sketch(physwidth))
-    ny = round(Int64, get_scale_sketch(physheight))
+    nx = round(Int64, scale_to_pt(physwidth))
+    ny = round(Int64, scale_to_pt(physheight))
 
     # Iterators for each pixel relative to the center, O
     pixiterx = (1 - div(nx + 1, 2):(nx - div(nx, 2)))

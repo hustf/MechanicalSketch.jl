@@ -2,6 +2,8 @@ using MechanicalSketch
 import MechanicalSketch: sethue, background, foil_spline_local, boxtopleft, boxtopright
 import MechanicalSketch: BoundingBox, m, mm, °, polyrotate!, polymove!, color_with_lumin
 import MechanicalSketch: O, EM, poly, lumin, get_current_lumin, get_current_RGB, gsave, grestore
+import MechanicalSketch: empty_figure, PALETTE,  dimension_aligned, color_from_palette, Point
+
 let
 BACKCOLOR = color_with_lumin(PALETTE[8], 70)
 function restart()

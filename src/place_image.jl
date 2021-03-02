@@ -77,7 +77,7 @@ function place_image(pos::Point, image::SVGimage;
                       centered = false)
     scalefac, original_width, original_height = scalingfactor(image, width, height, scalefactor)
     # Destination size
-    dest_width_pix, dest_height_pix = get_scale_sketch.(scalefac .* (original_width, original_height))
+    dest_width_pix, dest_height_pix = scale_to_pt.(scalefac .* (original_width, original_height))
     # Destination upper left corner
     ptupleft = centered ?  pos - 0.5 .* (dest_width_pix, dest_height_pix) : pos
     @layer begin
@@ -92,7 +92,7 @@ function place_image(pos::Point, data::Luxor.Cairo.CairoSurfaceBase; centered = 
                      width = missing, height = missing, scalefactor = missing)
     scalefac, original_width, original_height = scalingfactor(data, width, height, scalefactor)
     # Destination size
-    dest_width_pix, dest_height_pix = get_scale_sketch.(scalefac .* (original_width, original_height))
+    dest_width_pix, dest_height_pix = scale_to_pt.(scalefac .* (original_width, original_height))
     # Destination upper left corner (we'll place the image non-centered afterwards)
     ptupleft = centered ?  pos - 0.5 .* (dest_width_pix, dest_height_pix) : pos
     @layer begin
@@ -114,9 +114,9 @@ function scalingfactor(image, width, height, scalefactor::Union{Float64, Missing
         if ismissing(width) && ismissing(height)
             1.0
         elseif ismissing(height)
-            get_scale_sketch(width) / get_scale_sketch(original_width)
+            scale_to_pt(width) / scale_to_pt(original_width)
         elseif ismissing(width)
-            get_scale_sketch(height) / get_scale_sketch(original_height)
+            scale_to_pt(height) / scale_to_pt(original_height)
         end
     else
         scalefactor
@@ -133,11 +133,11 @@ get_width_height(image)
 - CairoSurfaceBase{UInt32} (output from 'readpng')
 - matrix  - it is assumed that matrices follow the image convention: A column represent horizontal pixels.
 
-The width and height of image based on get_scale_sketch(m).
+The width and height of image based on scale_to_pt(m).
 Note that the width can be inaccurate, as this is ambiguous for svg input.
 """
-get_width_height(image) =  (1m / get_scale_sketch(m)) .* (image.width, image.height)
-get_width_height(image::Matrix) =  (1m / get_scale_sketch(m)) .* reverse(size(matrix))
+get_width_height(image) =  scale_pt_to_unit(m) .* (image.width, image.height)
+get_width_height(image::Matrix) =  scale_pt_to_unit(m) .* reverse(size(matrix))
 
 """
     tex2svg_string(formula::String)

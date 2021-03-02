@@ -1,9 +1,10 @@
 using MechanicalSketch
-import MechanicalSketch: background, background, sethue, O, EM, finish,
-    lumin, get_current_lumin, get_current_RGB, color_with_lumin,
-    sethue, fontface, textpath, textextents, PT, fontsize, gsave, grestore,
-    newpath, translate, m, text, fillpreserve, clip, rect, clipreset,
-    setline
+import MechanicalSketch: background, background, sethue, O, EM, finish, empty_figure
+import MechanicalSketch: lumin, get_current_lumin, get_current_RGB, color_with_lumin
+import MechanicalSketch: sethue, fontface, textpath, textextents, PT, fontsize, gsave, grestore
+import MechanicalSketch: newpath, translate, m, text, fillpreserve, clip, rect, clipreset
+import MechanicalSketch: setline, PALETTE, color_from_palette
+
 let
 BACKCOLOR = color_with_lumin(PALETTE[2], 70);
 function restart()

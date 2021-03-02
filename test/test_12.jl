@@ -1,11 +1,11 @@
 using MechanicalSketch
-import MechanicalSketch: °, background, sethue, O, PT, finish
+import MechanicalSketch: °, background, sethue, O, PT, finish, EM
 import MechanicalSketch: color_from_palette, color_with_lumin
 import MechanicalSketch: mm, °, kN, kg
 import MechanicalSketch: m, m², m³, s, N, kN, kPa, g, kW
 import MechanicalSketch: arrow, drawcart, circle, foil_draw
-import MechanicalSketch: line, showpower
-import MechanicalSketch: rope_pos_tension, setline
+import MechanicalSketch: line, showpower, empty_figure
+import MechanicalSketch: rope_pos_tension, setline, PALETTE
 
 let
 BACKCOLOR = color_with_lumin(PALETTE[8], 85);

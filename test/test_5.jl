@@ -1,6 +1,7 @@
 using MechanicalSketch
 import MechanicalSketch: sethue, background, O, EM, m, color_with_lumin, settext
 import MechanicalSketch: mm, arrow, HE, @layer, setdash, line, setopacity
+import MechanicalSketch: empty_figure, PALETTE, dimension_aligned
 
 let
 empty_figure(joinpath(@__DIR__, "test_5.png"))

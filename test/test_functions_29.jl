@@ -39,7 +39,7 @@ function spectrumbars_29(spect::Spectrum_29)
     maxa = maximum(spect.spectralamplitude[2:end])
     for (f, a) in iter
         λ = 1 / f
-        y = a * 2EM * SCALEDIST / maxa
+        y = a * 2EM * scale_pt_to_unit(m) / maxa
         push!(pts,  Point(λ, 0y))
         push!(pts,  Point(λ, y))
         push!(pts,  Point(λ, 0y))
@@ -62,8 +62,8 @@ function draw_spectrum_29(origo, spect::Spectrum_29)
         sethue(PALETTE[3])
         arrow(origo, origo + (0.0,  -2EM))
         settext("<i>Amplitude</i>", origo + (0.0,  -2EM ), markup=true)
-        arrow(origo, origo + (min(1.05λ_max, 0.95 * SCALEDIST * WI), 0.0m))
-        settext("<i>Wave length, λ [m]</i>", origo + ( 0.8 * SCALEDIST * WI, 0.0m), markup=true)
+        arrow(origo, origo + (min(1.05λ_max, 0.95 * scale_pt_to_unit(m) * WI), 0.0m))
+        settext("<i>Wave length, λ [m]</i>", origo + ( 0.8 * scale_pt_to_unit(m) * WI, 0.0m), markup=true)
     end
 end
 
