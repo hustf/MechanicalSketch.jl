@@ -68,7 +68,7 @@ draw_legend(lowrightpoint + (EM, 0) + (0.0m, PHYSHEIGHT_23), legend)
 @layer begin
     sethue(PALETTE[1])
     setline(8)
-    draw_streamlines(OB_26, xs, ys, fxy, h)
+    draw_streamlines(OB_26, fxy; h)
     setline(1)
 end
 

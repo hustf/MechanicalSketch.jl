@@ -31,7 +31,7 @@ totwidth = totheight * WI / HE
 Δy = physheight * 1.1
 
 # Reused velocity field from earlier tests
-velocity_matrix = clamped_velocity_matrix(ϕ_32; physwidth = physwidth, physheight = physheight, cutoff = 0.5m/s);
+velocity_matrix = clamped_velocity_matrix(ϕ_32; physwidth, physheight, cutoff = 0.5m/s);
 # One complex matrix: Phase and amplitude for the visualization. This can generate cyclic movies
 complex_convolution_matrix = convolute_image_32(velocity_matrix) # 15.071 s (364518 allocations: 61.17 MiB)
 # The distribution of phase angles (complex argument) ought to be flat between -π and π. Let's check that:
@@ -43,16 +43,17 @@ histogrampoints = Point.(collect(phasetop * n_pixels / 2π), -EM .* relfreq);
 # We'll also prepare a uniform flow field, constant velocity 0.5 m/s.
 fxy_unif(x, y) = (0.5, 0.0)m∙s⁻¹
 # Phase and amplitude for the visualization. This can generate cyclic movies
-complex_convolution_matrix_uniform = convolute_image_32(fxy_unif, physwidth = physwidth, physheight = physheight)
+complex_convolution_matrix_uniform = convolute_image_32(fxy_unif; physwidth, physheight)
 
 # We'll also plot a vertically uniform flow field, horizontally increasing velocity from 0 to 0.5 m/s.
 fxy_lin(x, y) = (0.5 * (x / physwidth + 0.5), 0.0)m∙s⁻¹
 # Phase and amplitude for the visualization. This can generate cyclic movies
-complex_convolution_matrix_linear = convolute_image_32(fxy_lin, physwidth = physwidth, physheight = physheight)
+complex_convolution_matrix_linear = convolute_image_32(fxy_lin; physwidth, physheight)
 
 legend = BinLegend(;maxlegend = 0.2, minlegend = -1.0, noofbins = 256, 
                        colorscheme = reverse(Greys_9), 
                        nan_color = color_with_lumin(PALETTE[1], 80), name = Symbol("Value{Float64}"))
+                       
 # Define scene functions (parts of each image)
 
 # Rectangular flow field plot including a visual frame counter

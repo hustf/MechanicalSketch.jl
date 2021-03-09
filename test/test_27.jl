@@ -79,7 +79,7 @@ draw_legend(lowrightpoint + (EM, 0) + (0.0m, PHYSHEIGHT_23), botlegend)
 @layer begin
     sethue(PALETTE[1])
     setline(8)
-    draw_streamlines(OB, xs, ys, fxy, h)
+    draw_streamlines(OB, fxy)
     setline(1)
 end
 
@@ -94,4 +94,5 @@ settext(str, O + (-WI/2 + EM, 2 * EM) , markup = true)
 
 finish()
 set_scale_sketch()
+nothing
 end

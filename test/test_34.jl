@@ -42,7 +42,7 @@ cent5 = Oadj + (-Δx, -Δy)
 
 # Reused velocity field from earlier tests
 max_velocity = 0.5m/s
-velocity_matrix = clamped_velocity_matrix(ϕ_33; physwidth = physwidth, physheight = physheight, cutoff = max_velocity);
+velocity_matrix = clamped_velocity_matrix(ϕ_33; physwidth, physheight, cutoff = max_velocity);
 speedmatrix = hypot.(velocity_matrix)
 c1 = convolution_matrix(velocity_matrix)
 lum = 50

@@ -75,9 +75,7 @@ settext(str, O + (-WI/2 + EM, 1.5EM), markup = true)
 
 # Plot the complex-valued function, aka velocity vectors.
 B = begin
-        unclamped = ∇_rectangle(ϕ,
-            physwidth = physwidth,
-            physheight = physheight);
+        unclamped = ∇_rectangle(ϕ; physwidth, physheight)
         map(unclamped) do u
             hypot(u) > 0.5m/s ? NaN∙u : u
         end

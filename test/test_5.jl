@@ -5,7 +5,7 @@ import MechanicalSketch: empty_figure, PALETTE, dimension_aligned
 
 let
 empty_figure(joinpath(@__DIR__, "test_5.png"))
-background(color_with_lumin(PALETTE[6], 30))
+background(color_with_lumin(PALETTE[6], 40))
 @layer begin
   sethue("black")
   setopacity(0.5)

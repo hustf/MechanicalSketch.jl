@@ -1,4 +1,3 @@
-
 """
     set_scale_sketch(s::T, pixels::Int) where {T <: Length}
     set_scale_sketch(s::T, pixels::Int) where {T <: Force}

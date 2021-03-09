@@ -7,7 +7,7 @@ import MechanicalSketch: lenient_max
 import MechanicalSketch: place_image, @layer
 import MechanicalSketch: lic_matrix_current
 import MechanicalSketch: ColorSchemes, color_with_lumin, convolution_matrix, clamped_velocity_matrix
-import MechanicalSketch: BinLegend, BinLegendVector, streamlines_add!, draw_legend
+import MechanicalSketch: BinLegend, BinLegendVector, streamlines_matrix, draw_legend
 import MechanicalSketch: leonardo, fontsize
 import ColorSchemes:     Paired_6, Greys_9, isoluminant_cgo_80_c38_n256
 import Base.show
@@ -38,12 +38,11 @@ Oadj = O + (0, EM /3)
 
 # Reused velocity field from earlier tests
 max_velocity = 0.5m/s
-velocity_matrix = clamped_velocity_matrix(ϕ_33; physwidth = physwidth, physheight = physheight, cutoff = max_velocity);
+velocity_matrix = clamped_velocity_matrix(ϕ_33; physwidth, physheight, cutoff = max_velocity);
 
 v_xy = matrix_to_function(velocity_matrix)
 
-streamlinepixels = falses(size(velocity_matrix))
-streamlines_add!(v_xy, streamlinepixels)
+streamlinepixels = streamlines_matrix(v_xy; physwidth, physheight)
 
 cent1 = Oadj + (-Δx, Δy)
 legend1 = BinLegend(;maxlegend = 1.0, minlegend = 0.0, noofbins = 2, 
@@ -115,7 +114,6 @@ settext(str, ulp, markup = true)
 
 
 cent6 = Oadj + (Δx, -Δy)
-noofbins = 256
 legend6 = BinLegend(;maxlegend = max_velocity, binwidth,
         colorscheme = Paired_6, name = :Speed)
 mixmat = map(legend6.(speedmatrix), curmat) do col, lu

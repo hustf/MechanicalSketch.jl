@@ -50,8 +50,6 @@ function arrow(p::Point, Fx::F, Fy::F;
                 linewidth = PT,
                 backgroundcolor = colorant"white",
                 labellength::Bool = false) where {F <: Force}
-    # TODO linewidth - drop or implement
-    # TODO backgroundcolor - drop or implement
     ΔFx = Point(Fx * cos(α), Fx *sin(α))
     ΔFy = Point(-Fy * sin(α), Fy *cos(α))
     ΔF = ΔFx + ΔFy
@@ -74,7 +72,7 @@ function arrow(p::Point, Fx::F, Fy::F;
         arrow_nofill(p, p + ΔFx, arrowheadlength = arrowheadlength, arrowheadangle = pi/12, linewidth = PT / 2)
         shaftlength = hypot(ΔFy)
         arrowheadlength = shaftlength > 3 * EM ? EM :  shaftlength / 3
-        arrow_nofill(p, p + ΔFy, arrowheadlength = arrowheadlength, arrowheadangle = pi/12, linewidth = PT / 2)
+        arrow_nofill(p, p + ΔFy, arrowheadlength = arrowheadlength, arrowheadangle = π / 12, linewidth = PT / 2)
         grestore()
     end
 
@@ -177,36 +175,7 @@ function arrow(p::Point, vx::V, vy::V;
     return nothing
 end
 
-"Add a label at the end point, rounded absolute length with unit."
-function setlabel(endpoint, vx, vy, α)
-    Δvx = (vx * cos(α), vx *sin(α))
-    Δvy = (-vy * sin(α), vy *cos(α))
-    Δv = Δvx + Δvy
-    l = hypot(Δv)
-    rounded = round(unit(l), l, digits = 1)
-    direction = atan(Δv[2], Δv[1]) |> °
-    labdir = direction + 90°
-    labpos = if -90° <= labdir < -70°
-        :S
-    elseif labdir < -20°
-        :SE
-    elseif labdir < 20°
-        :E
-    elseif labdir < 70°
-        :NE
-    elseif labdir < 110°
-        :N
-    elseif labdir < 160°
-        :NW
-    elseif labdir < 200°
-        :W
-    elseif labdir < 250°
-        :SW
-    else
-        :S
-    end
-    label(string(rounded) , labpos, endpoint, offset = div(EM, 4))
-end
+
 function curved_point_arrow_with_vanes(p, Δv, endpoint, linewidth)
     arrowheadangle = pi/24
 
@@ -286,8 +255,8 @@ Same as Luxor.arrow, except for leaving the arrow head unfilled
 """
 function arrow_nofill(startpoint::Point, endpoint::Point;
     linewidth=1.0,
-    arrowheadlength=10,
-    arrowheadangle=pi/8,
+    arrowheadlength= EM / 4.4,
+    arrowheadangle = π / 8,
     decoration = 0.5,
     decorate = () -> ())
     gsave()
@@ -297,7 +266,9 @@ function arrow_nofill(startpoint::Point, endpoint::Point;
     isapprox(startpoint, endpoint) && throw(error("can't draw arrow between two identical points"))
     shaftlength = distance(startpoint, endpoint)
     shaftangle = atan(startpoint.y - endpoint.y, startpoint.x - endpoint.x)
+
     arrowheadtopsideangle = shaftangle + arrowheadangle
+
     # shorten the length so that lines
     # stop before we get to the arrow
     # thus wide shafts won't stick out through the head of the arrow.
@@ -312,14 +283,6 @@ function arrow_nofill(startpoint::Point, endpoint::Point;
     newpath()
     line(Point(fromx, fromy), Point(tox, toy), :stroke)
 
-    # draw the arrowhead
-    topx = endpoint.x + cos(arrowheadtopsideangle) * arrowheadlength
-    topy = endpoint.y + sin(arrowheadtopsideangle) * arrowheadlength
-    arrowheadbottomsideangle = shaftangle - arrowheadangle
-    botx = endpoint.x + cos(arrowheadbottomsideangle) * arrowheadlength
-    boty = endpoint.y + sin(arrowheadbottomsideangle) * arrowheadlength
-    poly([Point(topx, topy), endpoint, Point(botx, boty)], :stroke)
-
     # prepare to add decorations at point along shaft
     for decpos in decoration
         decpoint = between(startpoint, endpoint, decpos)
@@ -330,5 +293,129 @@ function arrow_nofill(startpoint::Point, endpoint::Point;
             decorate()
         end
     end
+    # draw the arrowhead
+    draw_arrowhead(endpoint, shaftangle; 
+        arrowheadangle, 
+        arrowheadlength, filled = false)
     grestore()
+end
+"""
+    draw_arrowhead(endpoint, shaftangle; 
+        arrowheadangle = π / 8, 
+        arrowheadlength  = EM / 4.4; filled = false)
+"""
+function draw_arrowhead(endpoint, shaftangle; 
+    arrowheadangle = π / 8, 
+    arrowheadlength  = EM / 4.4, filled = false)
+    arrowheadtopsideangle = shaftangle + arrowheadangle
+    # draw the arrowhead
+    topx = endpoint.x + cos(arrowheadtopsideangle) * arrowheadlength
+    topy = endpoint.y + sin(arrowheadtopsideangle) * arrowheadlength
+    arrowheadbottomsideangle = shaftangle - arrowheadangle
+    botx = endpoint.x + cos(arrowheadbottomsideangle) * arrowheadlength
+    boty = endpoint.y + sin(arrowheadbottomsideangle) * arrowheadlength
+    poly([Point(topx, topy), endpoint, Point(botx, boty)], filled ? :fill : :stroke)
+end
+
+
+"""
+    arrow(centerpos::Point, radius, α_sta::Angle, α_end::Angle;
+            linewidth=1.0,
+            arrowheadlength = EM / 4.4,
+            arrowheadangle = π / 8,
+            decoration = 0.5,
+            decorate = () -> (),
+            clockwise = false)
+
+Draw a curved arrow, an arc centered at `centerpos` starting at `α_sta` and
+ending at `α_end`.
+
+The arrowhead at the end is optional. Angles are measured counter-clockwise
+from the positive x-axis.
+
+Arrows don't use the current linewidth setting (`setline()`); you can specify
+the linewidth.
+
+The `decorate` keyword argument accepts a function that can execute code at
+locations on the arrow's shaft. The inherited graphic environment is centered at
+points on the curve between 0 and 1 given by scalar or vector `decoration`, and
+the x-axis is aligned with the direction of the curve at that point.
+"""
+function arrow(centerpos::Point, radius, α_sta::Angle, α_end::Angle;
+        linewidth=1.0,
+        arrowheadlength = EM / 4.4,
+        arrowheadangle = π / 8,
+        decoration = 0.5,
+        decorate = () -> (),
+        clockwise = false,
+        filled = false)
+    @assert radius >= zero(radius) " radius < 0 not supported. Flip keyword argument clockwise?"
+    gsave()
+    setlinejoin("butt")
+    setline(linewidth)
+    # Radius in points, unitless
+    r = scale_to_pt(oneunit(radius)) * radius / unit(radius)
+    while α_sta > α_end
+        α_end += unit(α_end)(360°)
+    end
+    # Full arc ccw angle span. Negative values for clockwise pointing arrows
+    Δα = clockwise ? α_sta - α_end : α_end - α_sta
+
+    # End arrow arc ccw angle span. Negative values for clockwise pointing arrows.
+    Δα_head = unit(α_end)(arrowheadlength / r) * (clockwise ? -1 : 1)
+    α_head = α_end - Δα_head
+
+    # Is there room for one arrow head?
+    if sign(Δα_head) != sign(Δα) && abs(Δα_head) < abs(Δα) 
+        @warn "Arrow head too large, try negative keyword argument arrowheadlength"
+        return
+    end
+
+    # In case we are drawing a sharp arrow head point and a wide shaft, we want to end the arc somewhere inside of the head.
+    # Sign convention: Positive values for cutting off ccw arcs.
+    Δα_cutoff = unit(α_end)((linewidth / 2) / tan(arrowheadangle) / r) * sign(Δα)
+    # Draw the arc to
+    α_cutoff = unit(α_end)(α_end - Δα_cutoff)
+
+    # Local origo at centre
+    translate(centerpos)
+    # Start, end, head crossing points and end of drawn arc in local pt coordinates, where +y is down
+    p0 = Point(r∙cos(α_sta), -r∙sin(α_sta))
+    p1 = Point(r∙cos(α_end), -r∙sin(α_end))
+    p1h = Point(r∙cos(α_end - Δα_head), -r∙sin(α_end - Δα_head))
+    p1c = Point(r∙cos(α_end - Δα_cutoff), -r∙sin(α_end - Δα_cutoff))
+
+    # Unitless, clockwise radian angles from origo 
+    β_sta = rad(-α_sta) / 1rad
+    β_head = rad(-α_head) / 1rad
+    β_cutoff = rad(-α_cutoff) / 1rad
+    β_end = rad(-α_end) / 1rad
+
+    # Draw the cut-off shaft arc
+    newpath()
+    move(p0.x, p0.y)
+    if clockwise
+        arc(0, 0, r, β_sta, β_cutoff, :stroke)
+    else
+        carc(0, 0, r,  β_sta, β_cutoff, :stroke)
+    end
+    closepath()
+    # prepare to add decorations at points along shaft
+
+    for decpos in decoration
+        decorationangle = rescale(decpos, 0, 1, β_sta, β_end)
+        decorationpoint = Point(r * cos(decorationangle), r * sin(decorationangle))
+        perp = perpendicular(decorationpoint)
+        @layer begin
+            translate(decorationpoint)
+            rotate(slope(decorationpoint, perp))
+            decorate()
+        end
+    end
+
+    # Head
+    draw_arrowhead(p1, β_cutoff + (clockwise ? -π / 2 : π / 2 ); 
+        arrowheadangle, arrowheadlength, filled)
+    grestore()
+    return
 end

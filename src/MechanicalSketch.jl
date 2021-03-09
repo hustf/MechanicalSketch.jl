@@ -1,6 +1,6 @@
 module MechanicalSketch
 import Luxor
-import Luxor: Drawing,Turtle, Pencolor, Penwidth, Forward, Turn, HueShift, Point, SVGimage,
+import Luxor: Drawing,Turtle, Pencolor, Penwidth, Forward, Turn, HueShift, SVGimage,
 paper_sizes,
 Tiler, Partition,
 rescale,
@@ -283,6 +283,7 @@ include("rope.jl")
 include("power.jl")
 include("table.jl")
 include("curves.jl")
+include("labels.jl")
 include("flow.jl")
 include("runge_kutta.jl")
 include("autodiff_unitfu.jl")
@@ -292,5 +293,6 @@ include("matrix_drawing.jl")
 include("colorlegends.jl")
 include("colorlegends_vector.jl")
 include("place_image.jl")
+include("latex.jl")
 include("chart.jl")
 end # module

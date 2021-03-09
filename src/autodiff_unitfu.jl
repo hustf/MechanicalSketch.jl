@@ -69,7 +69,7 @@ function ∇_R²_in_CQ_out(R²_to_R, ulxy, one_q_out::Quantity{T}) where {T}
     # Note could be sped up using in-place evaluation, but would need to drop StaticArrays.
     map(ulxy) do ul
         r² = ForwardDiff.gradient(R²_to_R, ul, cfg, Val{false}())::SVector{2, T}
-        complex(r²[1]*one_q_out, r²[2]∙one_q_out)
+        complex(r²[1] ∙ one_q_out, r²[2]∙one_q_out)
     end
 end
 
@@ -124,15 +124,7 @@ function ∇_rectangle(CQ_to_Q;
     physwidth = 10.0m,
     physheight = 4.0m,
     cutoff = NaN)
-#=
-    # Discretize per pixel
-    nx = round(Int64, scale_to_pt(physwidth))
-    ny = round(Int64, scale_to_pt(physheight))
 
-    # Iterators for each pixel relative to the center, O
-    pixiterx = (1 - div(nx + 1, 2):(nx - div(nx, 2)))
-    pixitery = (1 - div(ny + 1, 2):(ny - div(ny, 2)))
-=#  
     xs, ys = x_y_iterators_at_pixels(;physwidth, physheight)
 
     # Matrix of 2-element static vectors, one per pixel
@@ -167,10 +159,19 @@ Differentiates the complex potential function CQ_to_Q. Evaluates at pixels in a 
 physical dimensions and current sketch scale. Limits values to cutoff.
 """
 function clamped_velocity_matrix(CQ_to_Q; physwidth = 1.0m, physheight = 1.0m, cutoff = 0.5m/s)
-    unclamped = ∇_rectangle(CQ_to_Q,
-        physwidth = physwidth,
-        physheight = physheight);
+    unclamped = ∇_rectangle(CQ_to_Q; physwidth, physheight)
     map(unclamped) do u
         hypot(u) > cutoff ? cutoff∙u / hypot(u) : u
     end
+end
+
+"""
+    ∇(f; physwidth, physheight)
+    → derivative function based on linear interpolation between pixels.
+
+The values of the output function varies linearly between pixels. Take
+care if differentiating twice!
+"""
+function ∇(f; physwidth = 10.0m, physheight = 4.0m)
+    matrix_to_function(∇_rectangle(f; physwidth, physheight))
 end

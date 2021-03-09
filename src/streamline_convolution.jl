@@ -1,12 +1,16 @@
 """
-    draw_streamlines(center, xs, ys, f_xy, h)
+    draw_streamlines(pt, f_xy; physwidth = 10.0m, physheight = 4.0m, centered = true, 
+        h = 0.1s, nsteps = 10, probability = 0.0001)
+
 where
-    center is local origo, a Point, typically equal to global O.
-    xs, ys are quantity iterators, e.g. (-5.0:0.007942811755361398:5.0)m
+    pt         point on screen corresponding to local origo
+    centered   if true, physwidth and physheight extend symmetrically from origo
+               if false, physwidth and physheight extend on the positive x and y axes.
+                The streamlines are drawn to the right (+x) and above (+y) pt.
+    physwidth, physheight Together with 'scale_to_pt', determines input to f_xy which correspond to pixels.
     f_xy is a function of quantities x and y where the range is also a quantity
-    h is a step-size quantity. If the integration variable is time,
+    h is a step-size quantity, default time. If the integration variable is time,
         it defines the length of time betweeen points. It can be negative.
-Optional keyword arguments:
     nsteps is the number of steps to trace, forwards and backwards from each
         randomly selected point
     probability is the number of streamlines divided by length(xs)*length(ys)
@@ -14,9 +18,13 @@ Optional keyword arguments:
 Draws a few random streamlines, starting at a random number of points picked from (xs, ys).
 Streamlines are found by starting at the randomly picked centre of their extent.
 They may extend outside of the rectangle defined by xs and ys.
+A better visualization might be based on where particles enter.
 """
-function draw_streamlines(center, xs, ys, f_xy, h; nsteps = 10, probability = 0.0001)
+function draw_streamlines(pt, f_xy; physwidth = 10.0m, physheight = 4.0m, centered = true, 
+                          h = 0.1s, nsteps = 10, probability = 0.0001)
     gsave()
+    xs, ys = x_y_iterators_at_pixels(;physwidth, physheight, centered)
+
     cx = xs[1]::Quantity{Float64}
     cy = ys[1]
     @assert cx isa Quantity{Float64}
@@ -32,10 +40,11 @@ function draw_streamlines(center, xs, ys, f_xy, h; nsteps = 10, probability = 0.
             # Find the streamline path
             rk4_steps!(f_xy, vxf, vyf, h)
             rk4_steps!(f_xy, vxb, vyb, -h)
-            # Reorder to most recent position to oldest position
+            # Reorder to most recent position -> oldest position
             vx = vcat(reverse(vxf), vxb)
             vy = vcat(reverse(vyf), vyb)
-            trace_diminishing(center, vx, vy)
+            # Draw it
+            trace_diminishing(pt, vx, vy)
         end
     end
     grestore()
@@ -62,8 +71,8 @@ f_xy    Function of x and y for visualization
 n_xy    Noise function of x and y. The spectrum should be adapted for f_xy.
 x_mid   Coordinate for which to evaluate. Streamlines forward and back are found for convolution.
 y_mid   Coordinate for which to evaluate
-f_s Sampling frequency
-f_0 Frequency of interest
+f_s     Sampling frequency
+f_0     Frequency of interest
 
 
 The resulting complex number ŝ yields:
@@ -288,7 +297,7 @@ end
 
 
 """
-    streamlines_add!(v_xy::Extrapolation, streamlinepixels::BitMatrix; centered = true, targetdensity = 0.42)
+    streamlines_matrix!(streamlinepixels::BitMatrix, v_xy; centered = true, targetdensity = 0.42)
 
 Input:
     v_xy: (Q, Q)  → (Q, Q)    Function taking a tuple of quantities, outputs tuple of quantities
@@ -299,7 +308,7 @@ Input:
 
 Input matrix streamlinepixels is modified in place.
 """
-function streamlines_add!(v_xy::Extrapolation, streamlinepixels::BitMatrix; centered = true, targetdensity = 0.42)
+function streamlines_matrix!(streamlinepixels::BitMatrix, v_xy; centered = true, targetdensity = 0.42)
     ny, nx = size(streamlinepixels)
     physwidth = nx * scale_pt_to_unit(m)
     physheight = ny * scale_pt_to_unit(m)
@@ -329,7 +338,30 @@ function streamlines_add!(v_xy::Extrapolation, streamlinepixels::BitMatrix; cent
         # Check against a reasoable upper limit, 2500 * 4000 pixels
         count > 10^7 && break
     end
-    nothing
+    streamlinepixels
+end
+
+"""
+    streamlines_matrix(v_xy; physwidth = 10.0m, physheight = 4.0m, centered = true, targetdensity = 0.42)
+
+Input:
+    v_xy: (Q, Q)  → (Q, Q)      Function taking a tuple of quantities, outputs tuple of quantities
+    centered          Bool      Keyword argument. If true, values at the centre of the matrix corresponds to (x,y) = (0, 0)m
+    targetdensity     Real      Keyword argument. Fraction of pixels covered by streamlines.
+    physwidth         Quantity  Together with 'scale_to_pt', determines input to v_xy which correspond to pixels.
+    physheight        Quantity
+    centered          Bool
+
+Output:
+    streamlinepixels: A matrix of booleans where false indicates unoccupied pixel. The matrix
+        follows the image manipulation convention: xs correspond to output rows.
+"""
+function streamlines_matrix(v_xy; physwidth = 10.0m, physheight = 4.0m, centered = true, targetdensity = 0.42)
+    xs, ys = x_y_iterators_at_pixels(;physwidth, physheight, centered)
+    velocity_matrix = [v_xy(x, y) for y in ys, x in xs]
+    streamlinepixels = falses(size(velocity_matrix))
+    streamlines_matrix!(streamlinepixels, v_xy)
+    streamlinepixels
 end
 
 """
@@ -535,7 +567,7 @@ function convolution_matrix(matrix::Array{Quantity{Complex{Float64}, D, U}, 2};
                            centered = true, targetdensity = 0.42) where {D, U}
     v_xy = matrix_to_function(matrix)
     streamlinepixels = falses(size(matrix))
-    streamlines_add!(v_xy::Extrapolation, streamlinepixels::BitMatrix; centered, targetdensity)
+    streamlines_matrix!(streamlinepixels::BitMatrix, v_xy; centered, targetdensity)
     convolution_matrix(v_xy, streamlinepixels; centered)
 end
 
@@ -602,7 +634,7 @@ function convolution_matrix(f_xy, streamlinepixels::BitMatrix; centered = true)
         ny, nx = size(streamlinepixels)
         physwidth = nx * scale_pt_to_unit(m)
         physheight = ny * scale_pt_to_unit(m)
-        function_to_interpolated_function(f_xy; physwidth = physwidth, physheight = physheight)
+        function_to_interpolated_function(f_xy; physwidth, physheight)
     end
     # Prepare a noise function:
     # Simplex based continuous noise function
@@ -632,7 +664,8 @@ where
 
 Output phase and amplitude information for 'streamlinepixels'. Used for rendering line-integral-convolution showing a static vector field.
 """
-function convolution_matrix(f_xy::Extrapolation, n_xy::Extrapolation, streamlinepixels::BitMatrix; centered = true)
+function convolution_matrix(f_xy, n_xy::Extrapolation, streamlinepixels::BitMatrix; centered = true)
+    # used to be f_xy::Extrapolation
     ny, nx = size(streamlinepixels)
     physwidth = nx * scale_pt_to_unit(m)
     physheight = ny * scale_pt_to_unit(m)

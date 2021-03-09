@@ -110,66 +110,6 @@ function normalize_datarange(A)
 end
 
 
-"""
-    hue_from_complex_argument!(color_values, A)
-    Changes the hue in collection color_values by roting based on complex arguments in A
-
-Take a matrix of colors, modify elements of it by changing hue to be according to
-the argument (polar angle) of a complex number
-
-Ref. domain colouring, complex plane https://en.wikipedia.org/wiki/Domain_coloring
-"""
-function hue_from_complex_argument!(color_values, A)
-    @error "Replaced by Legend"
-    @assert length(A) == length(color_values)
-    for i in 1:length(A) # Works for matrices also
-        cqua = A[i]
-        if !isnan(cqua) && !isinf(cqua)
-            ang = angle(complex(cqua))rad
-            col = color_values[i]
-            if col != RGB(0.0, 0.0, 0.0)
-                color_values[i] = rotate_hue(col, ang)
-            end
-        end
-    end
-end
-
-
-"""
-    color_matrix(qua::AbstractArray; normalize_data_range = true) -> RGBA
-
-Map a collection of quantities to colors, transparent
-pixels for NaN and Inf values.
-
-# TODO adapt ColorLegend for this functionality?
-"""
-function color_matrix(qua::AbstractArray; normalize_data_range = true)
-    @error "color_matrix is replaced"
-    # Boolean collection, valid elements which should be opaque
-    valid_element = map(x-> isnan(x) || isinf(x) ? false : true, qua)
-
-     # Map value or magnitude to [0.0, 1.0], invalid elements are 1.0
-    norm_real_values = hypot.(normalize_data_range ? normalize_datarange(qua) : qua)
-
-    # Map [0.0, 1.0] to perceived luminosity color map
-    color_values = if eltype(qua) <: RealQuantity || eltype(qua) <: Real
-        get(absolute_scale(), norm_real_values)
-    else
-        # Complex quanitity
-        get(complex_arg0_scale(), norm_real_values)
-    end
-    # If input is complex, adjust the hue
-    if !(eltype(qua) <: RealQuantity || eltype(qua) <: Real)
-        # Set hue from complex argument (angle)
-        # while not changing perceived luminance
-        hue_from_complex_argument!(color_values, qua)
-    end
-
-    # Add transparency for any invalid elements
-    map(color_values, valid_element) do co, valid
-        RGBA(ColorSchemes.red(co), ColorSchemes.green(co), ColorSchemes.blue(co), Float64(valid))
-    end
-end
 
 
 

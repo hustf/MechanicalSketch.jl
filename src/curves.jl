@@ -97,24 +97,5 @@ function trace_rotate_hue(center, vx, vy; rotatehue_degrees_total = 270°)
     end
     grestore()
 end
-"""
-    box_fill_outline(pt_topleft, colfill; 
-                     height = row_height(), width = EM, luminfac = 2)
 
-Draw a filled box.
-Default height adapts to the current 'Top API' font, which is used for text tables.
-Outline color luminosity is 200% the luminosity of fill color, if possible.
-For dark backgrounds, consider luminfac = 0.5
-"""
-function box_fill_outline(pt_topleft, colfill; 
-                          height = row_height(), width = EM, luminfac = 2)
-    gsave()
-    sethue(colfill)
-    box(pt_topleft, pt_topleft + (width, height), :fill)
-    # outline
-    lu = get_current_lumin()
-    sethue(color_with_lumin(colfill, min(100, luminfac * lu)))
-    box(pt_topleft, pt_topleft + (width, height), :stroke)
-    grestore()
-end
 setline(x::Length) = setline(scale_to_pt(x))
