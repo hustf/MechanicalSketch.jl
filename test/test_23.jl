@@ -10,7 +10,7 @@ import MechanicalSketch: ∙, ∇_rectangle, x_y_iterators_at_pixels
 let
 BACKCOLOR = color_with_lumin(PALETTE[8], 10)
 function restart()
-    empty_figure(joinpath(@__DIR__, "test_23.png"))
+    empty_figure(filename = joinpath(@__DIR__, "test_23.png"))
     background(BACKCOLOR)
     sethue(PALETTE[8])
 end
@@ -18,8 +18,7 @@ restart()
 
 
 if !@isdefined m²
-    @import_expand m # Will error if m² already is in the namespace
-    @import_expand s
+    @import_expand(m, s)
 end
 
 "Source position"
@@ -85,7 +84,7 @@ OB = O + (-EM, + 0.25HE + 0.5EM )
 mi, ma = lenient_min_max(B)
 botlegend = BinLegendVector(;operand_example = first(B),
         max_magn_legend = ma, noof_magn_bins = 30, noof_ang_bins = 36,
-        name = :Velocity) 
+        name = :Velocity)
 colormat = botlegend.(B)
 ulp, lrp = place_image(OB, colormat)
 legendpos = lrp + (EM, 0) + (0.0m, physheight)

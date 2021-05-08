@@ -167,7 +167,7 @@ end
 
 """
     ∇(f; physwidth, physheight)
-    → derivative function based on linear interpolation between pixels.
+    → derivative function (x, y) based on linear interpolation between pixels.
 
 The values of the output function varies linearly between pixels. Take
 care if differentiating twice!

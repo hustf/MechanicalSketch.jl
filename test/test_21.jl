@@ -7,14 +7,13 @@ import MechanicalSketch: BinLegend, draw_legend, latexify, @layer, fontsize
 
 let
 if !@isdefined m²
-    @import_expand m # Will error if m² already is in the namespace
-    @import_expand s
+    @import_expand(m, s)
 end
 
 
 BACKCOLOR = color_with_lumin(PALETTE[8], 80)
 function restart()
-    empty_figure(joinpath(@__DIR__, "test_21.png"))
+    empty_figure(filename = joinpath(@__DIR__, "test_21.png"))
     background(BACKCOLOR)
     sethue(PALETTE[5])
 end

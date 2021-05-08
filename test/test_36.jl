@@ -12,13 +12,11 @@ import Base.pop!
 
 
 if !@isdefined m²
-    @import_expand ~m # Will error if m² already is in the namespace
-    @import_expand s
-    @import_expand °
+    @import_expand(~m, s, °)
 end
 include("test_functions_36.jl")
 
-empty_figure(joinpath(@__DIR__, "test_36.png"), height = 15m);
+empty_figure(filename = joinpath(@__DIR__, "test_36.png"), height = 15m);
 pt = O + (-WI / 2, -HE / 2) + (EM, 2.5EM)
 str = "<big>Testing</big>    <i>a)</i> latex    <i>b)</i> brush strokes    <i>c)</i> sequence of cropped panels\r
        The blocks use the golden ratio:"
@@ -70,7 +68,7 @@ finish()
 #=import MechanicalSketch: BezierPath, BezierPathSegment, bezier, bezier′, bezier′′, makebezierpath, drawbezierpath, bezierpathtopoly, beziertopoly, pathtobezierpaths,
 bezierfrompoints, beziercurvature, bezierstroke, setbezierhandles, shiftbezierhandles
 h = 1m
-empty_figure(joinpath(@__DIR__, "test_36.png"), height = 15m);
+empty_figure(filename = joinpath(@__DIR__, "test_36.png"), height = 15m);
 pts = [Point(-w,-w),
 Point(-w,w),
 Point(w,w),

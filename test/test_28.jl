@@ -8,9 +8,7 @@ let
 BACKCOLOR = color_with_lumin(PALETTE[8], 90);
 
 if !@isdefined N
-    @import_expand ~m # Will error if m² already is in the namespace
-    @import_expand ~N
-    @import_expand s
+    @import_expand( ~m, ~N, s)
 end
 
 include("test_functions_28.jl")
@@ -24,7 +22,7 @@ thisname = split(thisline, "\t")[1]
 Fx, Fy, Fz, _, _, _, px, py, pz = parse.(Quantity{Float64}, split(thisline, '\t')[3:end-1])
 
 
-empty_figure(joinpath(@__DIR__, "test_28.png"),
+empty_figure(filename = joinpath(@__DIR__, "test_28.png"),
     backgroundcolor = BACKCOLOR,
     hue = color_from_palette("blue"));
 

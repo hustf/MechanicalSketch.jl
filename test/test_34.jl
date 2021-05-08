@@ -16,9 +16,7 @@ import ColorSchemes:     isoluminant_cgo_80_c38_n256
 let
 
 if !@isdefined m²
-    @import_expand ~m # Will error if m² already is in the namespace
-    @import_expand s
-    @import_expand °
+    @import_expand(~m, s, °)
 end
 include("test_functions_33.jl")
 

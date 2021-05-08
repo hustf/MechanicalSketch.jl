@@ -1,5 +1,5 @@
 """
-    box_fill_outline(pt_topleft, colfill; 
+    box_fill_outline(pt_topleft, colfill;
                      height = row_height(), width = EM, luminfac = 2,
                      opacity = missing)
 
@@ -9,7 +9,7 @@ Outline color luminosity is 200% the luminosity of fill color, if possible.
 For dark backgrounds, consider luminfac = 0.5.
 By default, opacity is not changed from the current state. Range 0-1, where 1 is opaque.
 """
-function box_fill_outline(pt_topleft, colfill; 
+function box_fill_outline(pt_topleft, colfill;
                           height = row_height(), width = EM, luminfac = 2, boxopacity = missing)
     gsave()
     !ismissing(boxopacity) && setopacity(boxopacity)
@@ -32,7 +32,7 @@ function label_boxed(pt, str; colfill = color_with_lumin(get_current_RGBA(), 0.5
                luminfac = 1.0, boxopacity = 0.75, valign = :bottom)
     @layer begin
         box_fill_outline(pt, colfill; luminfac, height = -FS / 2, width = pixelwidth(str), boxopacity)
-        sethue(PALETTE[10])
+        #sethue(PALETTE[10])
         text(str, pt; valign)
     end
 end

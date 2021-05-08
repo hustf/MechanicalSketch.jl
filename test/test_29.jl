@@ -11,10 +11,9 @@ import DSP.Windows:      tukey
 import Statistics:       mean
 #let
 if !@isdefined m²
-    @import_expand ~m # Will error if m² already is in the namespace
-    @import_expand s
+    @import_expand(~m, s)
 end
-empty_figure(joinpath(@__DIR__, "test_29.png"));
+empty_figure(filename = joinpath(@__DIR__, "test_29.png"));
 
 curpoint = O + (-WI / 2 + EM, -HE / 2 + 3EM)
 velocities = range(0.05m/s, stop= 0.5m/s, length = 3)

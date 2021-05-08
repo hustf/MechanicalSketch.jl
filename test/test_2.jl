@@ -5,7 +5,7 @@ import MechanicalSketch: get, getinverse, textextents,  Point, rect, label,
 
 let
 
-this_fig = empty_figure(joinpath(@__DIR__, "test_2.png"))
+this_fig = empty_figure(filename = joinpath(@__DIR__, "test_2.png"))
 midcol = MechanicalSketch.HSL(get(PALETTE, 0.5))
 bckcol = MechanicalSketch.RGB(MechanicalSketch.HSL(midcol.h, midcol.s, midcol.l * 0.5))
 background(bckcol)

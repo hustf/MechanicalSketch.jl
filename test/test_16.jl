@@ -4,7 +4,7 @@ import MechanicalSketch: finish, set_scale_sketch, arrow, °, m, kN, empty_figur
 import MechanicalSketch: PALETTE
 
 let
-empty_figure(joinpath(@__DIR__, "test_16.png"))
+empty_figure(filename = joinpath(@__DIR__, "test_16.png"))
 background(color_with_lumin(PALETTE[6], 80))
 sethue(PALETTE[4])
 

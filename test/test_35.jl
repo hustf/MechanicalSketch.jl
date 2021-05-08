@@ -11,12 +11,10 @@ import Luxor:            Cairo.CairoSurfaceBase, translate, scale
 let
 
 if !@isdefined m²
-    @import_expand ~m # Will error if m² already is in the namespace
-    @import_expand s
-    @import_expand °
+    @import_expand(~m, s, °)
 end
 include("test_functions_35.jl")
-empty_figure(joinpath(@__DIR__, "test_35.png"),
+empty_figure(filename = joinpath(@__DIR__, "test_35.png"),
     backgroundcolor = color_with_lumin(PALETTE[8], 30));
 
 totheight = 10.0m

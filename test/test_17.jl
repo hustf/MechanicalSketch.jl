@@ -18,7 +18,7 @@ ROPE_MINIMUM_BREAK = [161.90, 215.80, 269.80, 343.30, 407.10, 490.50, 569, 647.4
 
 BACKCOLOR = color_with_lumin(PALETTE[8], 90);
 function restart()
-    empty_figure(joinpath(@__DIR__, "test_17.png"))
+    empty_figure(filename = joinpath(@__DIR__, "test_17.png"))
     background(BACKCOLOR)
     sethue(PALETTE[5])
     set_scale_sketch(sum(ROPE_D) * 1.3, HE)
@@ -49,13 +49,13 @@ circlearea(d) = π / 4 * d^2
 circleradius(A) = sqrt(A/π)
 # Plot packed area
 let
-    A_rope = ROPE_WEIGHT ./ ρ_SK75 |> mm^2
+    A_rope = ROPE_WEIGHT ./ ρ_SK75 .|> mm^2
     sethue(color_with_lumin(PALETTE[5], 80))
     circle.(pts , circleradius.(A_rope),:fill)
 end
 
 "Relative filled areas, actual to full circle"
-area_rel =  (ROPE_WEIGHT ./ ρ_SK75 |> mm^2) ./ circlearea.(ROPE_D)
+area_rel =  (ROPE_WEIGHT ./ ρ_SK75 .|> mm^2) ./ circlearea.(ROPE_D)
 # Plot relative filled areas
 setline(3PT)
 bottoms = map(pt -> pt + (0.0mm, -600.0mm), pts)

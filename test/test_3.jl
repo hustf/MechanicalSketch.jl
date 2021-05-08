@@ -8,15 +8,12 @@ import MechanicalSketch: transform, @layer, do_action, getmatrix, grestore, gsav
 import MechanicalSketch: box_fill_outline, label, row_height, pixelwidth, @import_expand
 import MechanicalSketch: scale_pt_to_unit, lumin, label_boxed
 if !@isdefined °
-    @import_expand ~m # Will error if m² already is in the namespace
-    @import_expand s
-    @import_expand °
-    @import_expand rad
+    @import_expand(~m, s, °, rad)
 end
 #let
     typcol = PALETTE[9];
     bckcol = color_with_lumin(typcol, 0.5 * lumin(typcol))
-    empty_figure(joinpath(@__DIR__, "test_3.png");
+    empty_figure(filename = joinpath(@__DIR__, "test_3.png");
         backgroundcolor = bckcol, hue = "white")
 
     # Straight arrow width

@@ -32,7 +32,7 @@ end
                   centered = false)
     place_image(pos::Point, data::Luxor.Cairo.CairoSurfaceBase; centered = true, alpha = missing,
                   width = missing, height = missing, scalefactor = missing)
-    -> (upper left point, lower right point, scalefac)
+    -> (upper left point, lower right point, scalefactor)
 
 Return the upper left, lower right corners, also the calculated scaling factor from original to placed image.
 

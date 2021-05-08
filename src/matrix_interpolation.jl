@@ -76,7 +76,7 @@ Convert the matrix with real-valued elements into a real-valued function. The do
 is quantities, i.e. two position coordinates. The size of the domain is taken from current sketch scale.
 The output function is linearly interpolated between pixels, based on the currently defined sketch scale.
 """
-function matrix_to_function(matrix::Array{Float64,2})
+function matrix_to_function(matrix)   # temp ::Array{Float64,2})
     # Image processing convention: a column has a horizontal line of pixels
     ny, nx = size(matrix)
     # We assume every element correspond to a position, unit of length

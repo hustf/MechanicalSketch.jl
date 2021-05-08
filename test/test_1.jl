@@ -3,16 +3,16 @@ import MechanicalSketch: foil_spline_local
 import MechanicalSketch: text, circle, Turtle, Pencolor, Penwidth, Forward, Turn
 import MechanicalSketch: HueShift, O, sethue, finish, EM, WI, background, empty_figure
 let
-    empty_figure(joinpath(@__DIR__, "test_1.png"));
+    empty_figure(filename = joinpath(@__DIR__, "test_1.png"));
     background("midnightblue")
 
     posx = -WI / 2
     sethue("green")
-    # The unicode ∈ may not be supported by the default font and show as a square instead. 
+    # The unicode ∈ may not be supported by the default font and show as a square instead.
     stri = "Da jeg var på vei til kirken ∈ dag morges så kom jeg forbi en liten sjømann. En frisk og hyggelig liten sjømann som hilste meg."
     text(stri, posx, 0)
     sethue("yellow")
-  
+
     text("1234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890",
         posx, EM)
     circle(O, 20, :stroke)

@@ -7,7 +7,7 @@ import MechanicalSketch: empty_figure, PALETTE,  dimension_aligned, color_from_p
 let
 BACKCOLOR = color_with_lumin(PALETTE[8], 70)
 function restart()
-    empty_figure(joinpath(@__DIR__, "test_6.png"))
+    empty_figure(filename = joinpath(@__DIR__, "test_6.png"))
     background(BACKCOLOR)
     sethue(PALETTE[7])
 end

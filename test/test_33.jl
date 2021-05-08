@@ -15,14 +15,12 @@ import Base.show
 
 let
 if !@isdefined m²
-    @import_expand ~m # Will error if m² already is in the namespace
-    @import_expand s
-    @import_expand °
+    @import_expand(~m, s, °)
 end
 
 include("test_functions_33.jl")
 
-empty_figure(joinpath(@__DIR__, "test_33.png"); 
+empty_figure(filename = joinpath(@__DIR__, "test_33.png");
     backgroundcolor = color_with_lumin(PALETTE[8], 10))
 
 # Scaling and placement
@@ -45,8 +43,8 @@ v_xy = matrix_to_function(velocity_matrix)
 streamlinepixels = streamlines_matrix(v_xy; physwidth, physheight)
 
 cent1 = Oadj + (-Δx, Δy)
-legend1 = BinLegend(;maxlegend = 1.0, minlegend = 0.0, noofbins = 2, 
-                colorscheme = leonardo, 
+legend1 = BinLegend(;maxlegend = 1.0, minlegend = 0.0, noofbins = 2,
+                colorscheme = leonardo,
                 nan_color = color_with_lumin(PALETTE[1], 80), name = Symbol("Value{Float64}"))
 bw(x::Bool) = legend1(Float64(x))
 ulp, _ = place_image(cent1, bw.(streamlinepixels))
@@ -59,7 +57,7 @@ settext(str, ulp, markup = true)
 
 complex_convolution_matrix = convolution_matrix(velocity_matrix, streamlinepixels)
 legend2 = BinLegendVector(;operand_example = first(complex_convolution_matrix),
-        max_magn_legend = lenient_max(complex_convolution_matrix), 
+        max_magn_legend = lenient_max(complex_convolution_matrix),
         noof_ang_bins = 40, noof_magn_bins = 5,
         name = Symbol("Convolution matrix"))
 cent2 = Oadj + (Δx, Δy)
@@ -74,8 +72,8 @@ settext(str, ulp, markup = true)
 
 cent3 = Oadj + (-Δx, 0.0m)
 curmat = lic_matrix_current(complex_convolution_matrix, 0, zeroval = -0.0)
-legend3 = BinLegend(;maxlegend = 1.0, minlegend = -1.0, noofbins = 256, 
-                       colorscheme = reverse(Greys_9), 
+legend3 = BinLegend(;maxlegend = 1.0, minlegend = -1.0, noofbins = 256,
+                       colorscheme = reverse(Greys_9),
                        name = Symbol(" "))
 
 ulp, _ = place_image(cent3, legend3.(curmat))
@@ -92,8 +90,8 @@ speedmatrix = hypot.(velocity_matrix)
 binwidth = 0.1m/s
 lum = 50
 cols = isoluminant_cgo_80_c38_n256.colors .|> co -> color_with_lumin(co, lum)
-legend4 = BinLegend(maxlegend = max_velocity, binwidth = binwidth, 
-          colorscheme = cols, 
+legend4 = BinLegend(maxlegend = max_velocity, binwidth = binwidth,
+          colorscheme = cols,
           name = :Speed)
 ulp, _ = place_image(cent4, legend4.(speedmatrix));
 @layer begin

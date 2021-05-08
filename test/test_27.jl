@@ -10,11 +10,10 @@ import Interpolations: interpolate, Gridded, Linear, Flat, extrapolate
 import MechanicalSketch: Greys_9, BinLegend, circle
 
 let
-empty_figure(joinpath(@__DIR__, "test_27.png"));
+empty_figure(filename = joinpath(@__DIR__, "test_27.png"));
 
 if !@isdefined m²
-    @import_expand m # Will error if m² already is in the namespace
-    @import_expand s
+    @import_expand(m, s)
 end
 
 include("test_functions_24.jl")
@@ -45,7 +44,7 @@ fxy = extrapolate(fxy_inter, Flat());
 
 global const OU_27 = O + (0.0, -0.25HE + EM)
 global const NO_3 = noisepic_3(A, physheight, physwidth)
-legend = BinLegend(;maxlegend = 1.0, noofbins = 128, 
+legend = BinLegend(;maxlegend = 1.0, noofbins = 128,
                        colorscheme = reverse(Greys_9), name = Symbol("Value{Float64}"))
 upleftpoint, lowrightpoint = place_image(OU_27, legend.(NO_3))
 draw_legend(lowrightpoint + (EM, 0) + (0.0m, PHYSHEIGHT_23), legend)
@@ -70,7 +69,7 @@ h = DU_2 / (NS_3 -1 )
                                                   # 57.021068 seconds (62.33 M allocations: 2.247 GiB, 0.59% gc time)
                                                   # 59.596110 seconds (59.04 M allocations: 2.002 GiB, 0.58% gc time)
 
-botlegend = BinLegend(;maxlegend = maximum(M), noofbins = 128, 
+botlegend = BinLegend(;maxlegend = maximum(M), noofbins = 128,
                        colorscheme = reverse(Greys_9), name = Symbol("Value{Float64}"))
 upleftpoint, lowrightpoint = place_image(OB, botlegend.(M) )
 draw_legend(lowrightpoint + (EM, 0) + (0.0m, PHYSHEIGHT_23), botlegend)

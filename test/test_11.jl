@@ -8,7 +8,7 @@ using Ipopt   # Nonlinear solver
 let
 BACKCOLOR = color_with_lumin(PALETTE[1], 80)
 function restart()
-    empty_figure(joinpath(@__DIR__, "test_11.png"))
+    empty_figure(filename = joinpath(@__DIR__, "test_11.png"))
     background(BACKCOLOR)
     sethue(PALETTE[1])
 end
@@ -85,7 +85,7 @@ innerst = modify_latex(inner)
 l = L"\text{Minimize: }\sum_{n=2}^{%$NP} %$innerst";
 _, _, scalefactor = place_image(p, l, height = 2EM)
 
-l2 = latexify(quote 
+l2 = latexify(quote
          (x[j] - x[j-1])^2 + (y[j] - y[j-1])^2 <= h^2
     end);
 l3 = "\\textrm{;where }" * modify_latex(l2)

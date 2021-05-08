@@ -12,14 +12,12 @@ using Test
 
 let
 if !@isdefined s⁻¹
-    @import_expand m # Will error if m² already is in the namespace
-    @import_expand s
-    @import_expand °
+    @import_expand(m,s,°)
 end
 
 BACKCOLOR = color_with_lumin(PALETTE[8], 80)
 function restart()
-    empty_figure(joinpath(@__DIR__, "test_20.png"))
+    empty_figure(filename = joinpath(@__DIR__, "test_20.png"))
     background(BACKCOLOR)
     sethue(PALETTE[5])
 end
@@ -69,7 +67,7 @@ legend3.(bibo)
 # Since we have values on both sides of zero, create a legend including zero.
 binwidth = 0.1m²∙s⁻¹
 binbounds = Tuple((-5:5)binwidth)
-# Distinguishing between positive and negative is often important. We 
+# Distinguishing between positive and negative is often important. We
 # truncate a colorscheme to make our own.
 cv(x) = get(PuOr_8, x, :clamp)
 nomiddle = [[cv(x) for x in range(0, 0.3, length = 10)];

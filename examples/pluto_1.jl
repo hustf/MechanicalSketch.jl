@@ -55,7 +55,7 @@ l7 = for i in 1:200
 # ╔═╡ 53105580-6894-11eb-3af3-3feadd3c43bf
 begin
 	l1, l2, l3, l4, l5, l6, l7
-	this_fig = empty_figure(joinpath(@__DIR__, "pluto_1.png"))
+	this_fig = empty_figure(filename = joinpath(@__DIR__, "pluto_1.png"))
 	background("green")
 end
 

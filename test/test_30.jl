@@ -12,10 +12,9 @@ import Statistics:       mean
 
 let
 if !@isdefined m²
-    @import_expand ~m # Will error if m² already is in the namespace
-    @import_expand s
+    @import_expand(~m, s)
 end
-empty_figure(joinpath(@__DIR__, "test_30.png"));
+empty_figure(filename = joinpath(@__DIR__, "test_30.png"));
 
 
 global curpoint = O + (-WI / 2 + EM, -HE / 2 + 3.5EM)

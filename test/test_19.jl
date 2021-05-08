@@ -7,7 +7,7 @@ import MechanicalSketch: box, clipreset, readpng, placeimage, setopacity
 #let
 BACKCOLOR = color_with_lumin(PALETTE[8], 80);
 function restart()
-    empty_figure(joinpath(@__DIR__, "test_19.png"))
+    empty_figure(filename = joinpath(@__DIR__, "test_19.png"))
     background(BACKCOLOR)
     sethue(PALETTE[1])
 end

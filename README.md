@@ -11,6 +11,20 @@ There's no intention to make this very general, rather to add functionality as t
 
 Sketches should look good and be in a consistent pallette. The test images are in .png format, but .svg is better for zooming. For post-editing figures, not all svg editors handle fonts. 'Inkscape' seems to work well. You might need to install additional fonts for some test images.
 
+# Status
+The current release is somewhat forced. Newly introduced functions could simplify the tests / examples, but this has not been fully implemented.
+
+Also, Luxor has introduced some new functions which are not imported here.
+
+Some functionality may be covered both here and in 'MechGluecode'.
+
+We have not picked an interface. Nothing is as of yet exported.
+
+TODO:
+- Drop unnecessary dependencies.
+- Use baremodules to export a subset of functions.
+- Consider adding terminalmenus for picking functions, at least a way of listing those.
+
 # Installation
 pkg> registry add github.com/hustf/M8
 pgk> add MechanicalSketch

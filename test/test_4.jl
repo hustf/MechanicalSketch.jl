@@ -4,7 +4,7 @@ import MechanicalSketch: FS, EM, translate, color_with_lumin, midpoint, getrotat
 import MechanicalSketch: empty_figure, finish, color_from_palette
 
 let
-    this_fig = empty_figure(joinpath(@__DIR__, "test_4.png"))
+    this_fig = empty_figure(filename = joinpath(@__DIR__, "test_4.png"))
     background(color_from_palette("seagreen1"))
     sethue(color_with_lumin(color_from_palette("darkblue"), 20))
 

@@ -15,8 +15,7 @@ let
 
 
 if !@isdefined m²
-    @import_expand m # Will error if m² already is in the namespace
-    @import_expand s
+    @import_expand(m, s)
 end
 
 include("test_functions_32.jl")
@@ -50,10 +49,10 @@ fxy_lin(x, y) = (0.5 * (x / physwidth + 0.5), 0.0)m∙s⁻¹
 # Phase and amplitude for the visualization. This can generate cyclic movies
 complex_convolution_matrix_linear = convolute_image_32(fxy_lin; physwidth, physheight)
 
-legend = BinLegend(;maxlegend = 0.2, minlegend = -1.0, noofbins = 256, 
-                       colorscheme = reverse(Greys_9), 
+legend = BinLegend(;maxlegend = 0.2, minlegend = -1.0, noofbins = 256,
+                       colorscheme = reverse(Greys_9),
                        nan_color = color_with_lumin(PALETTE[1], 80), name = Symbol("Value{Float64}"))
-                       
+
 # Define scene functions (parts of each image)
 
 # Rectangular flow field plot including a visual frame counter

@@ -9,11 +9,10 @@ import Statistics: cor
 let
 
 set_figure_height(3777)
-empty_figure(joinpath(@__DIR__, "test_31.png"));
+empty_figure(filename = joinpath(@__DIR__, "test_31.png"));
 
 if !@isdefined m²
-    @import_expand m # Will error if m² already is in the namespace
-    @import_expand s
+    @import_expand(m, s)
 end
 
 global curpoint = O + (-WI / 2 + EM, -HE / 2 + 4.5EM)

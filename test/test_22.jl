@@ -8,15 +8,13 @@ import MechanicalSketch: color_with_lumin
 import MechanicalSketch.Luxor.ColorTypes: LCHuvA, LCHabA, HSVA, HSLA, LCHabA, RGBA
 let
 if !@isdefined m²
-    @import_expand m # Will error if m² already is in the namespace
-    @import_expand s
-    @import_expand °
+    @import_expand(m, s, °)
 end
 
 
 BACKCOLOR = color_with_lumin(PALETTE[8], 70)
 function restart()
-    empty_figure(joinpath(@__DIR__, "test_22.png"))
+    empty_figure(filename = joinpath(@__DIR__, "test_22.png"))
     background(BACKCOLOR)
     sethue(color_with_lumin(PALETTE[6], 10))
 end
@@ -30,7 +28,7 @@ physwidth = 2.2m
 physheight = physwidth
 totheight = 2.1 * physheight
 set_scale_sketch(totheight, HE)
-centers = totheight / 4 * Point.([(-1.2, 1), (1.2, 1), 
+centers = totheight / 4 * Point.([(-1.2, 1), (1.2, 1),
                                  (-1.2, -1), (0,0) ,(1.2, -1)])
 
 xs, ys = x_y_iterators_at_pixels(;physwidth, physheight)

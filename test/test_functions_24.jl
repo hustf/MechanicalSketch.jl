@@ -1,5 +1,5 @@
 function restart(backcolor)
-    empty_figure(joinpath(@__DIR__, "test_24.png"))
+    empty_figure(filename = joinpath(@__DIR__, "test_24.png"))
     background(backcolor)
     sethue(PALETTE[8])
 end
@@ -219,8 +219,7 @@ end
 
 # Below, we're reusing code to generate the same flow field as in test_23. The cutoff value is no longer NaN.
 if !@isdefined m²
-    @import_expand m # Will error if m² already is in the namespace
-    @import_expand s
+    @import_expand(m, s)
 end
 ϕ_vortex_23 =  generate_complex_potential_vortex(; pos = complex(0.0, 1.0)m, vorticity = 1.0m²/s / 2π)
 ϕ_source_23 = generate_complex_potential_source(; pos = complex(3.0, 0.0)m, massflowout = 1.0m²/s)

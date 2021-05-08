@@ -1,11 +1,12 @@
 module MechanicalSketch
+# TODO import new Luxor functions from latest revision.
 import Luxor
 import Luxor: Drawing,Turtle, Pencolor, Penwidth, Forward, Turn, HueShift, SVGimage,
 paper_sizes,
 Tiler, Partition,
 rescale,
 
-finish, preview,
+finish, preview, snapshot,
 origin, rulers, background,
 
 @png, @pdf, @svg, @eps, @draw, @imagematrix,
@@ -230,10 +231,29 @@ Initial scale is set with set_scale_sketch()
     pt height = 70m/s
     pt height = 20kN
 """
-function empty_figure(filename = "HiThere.png";
+function empty_figure(;filename = :rec,
         backgroundcolor = color_with_lumin(PALETTE[8], 10),
         hue = PALETTE[8], height = missing, width = missing)
     fig = Drawing(WI, HE, filename)
+    configure_mechanical(;backgroundcolor, hue, height, width)
+    fig
+end 
+"""
+configure_mechanical(;
+        backgroundcolor = color_with_lumin(PALETTE[8], 10),
+        hue = PALETTE[8], height = missing, width = missing)
+
+Establish a drawing sized for A4 300 dpi figures (WI, HE),
+black on white figure, line width 3 pt  default.
+
+Initial scale is set with set_scale_sketch()
+pt height = 20m
+pt height = 70m/s
+pt height = 20kN
+"""
+function configure_mechanical(;
+    backgroundcolor = color_with_lumin(PALETTE[8], 10),
+    hue = PALETTE[8], height = missing, width = missing)
     # Font for the 'toy' text interface
     # (use e.g. JuliaMono for unicode symbols like ∈. There are no nice fonts for text AND math.
     fontface("Calibri")
@@ -247,8 +267,9 @@ function empty_figure(filename = "HiThere.png";
     setdash("solid")
     # Origo at centre
     origin()
-    # Scale and rotation in pixels - x right, y up ('z' is in.). And rotations may
-    # clockwise. Just deal with it. Or stick to using dimensions.
+    # Scale and rotation in pixels - x right, y up ('z' is in.). And rotations 
+    # are clockwise. Just deal with it. Or stick to using quantities. Functions taking
+    # e.g. angles convert to ccw rotations.
     setmatrix([1, 0, 0, 1, WI / 2, HE / 2])
     @assert !ismissing(width) + !ismissing(height) < 2 "Width or height can be specified here."
     if ismissing(width) && ismissing(height)
@@ -258,16 +279,14 @@ function empty_figure(filename = "HiThere.png";
     else
         set_scale_sketch(width, WI)
     end
-    fig
-end 
-
+end
 
 """
     text(t, pt::Point, angle::T; kwargs) where {T <: Angle}
 For angles with unit, use rotation around z axis.
 """
 text(t, pt::Point, angle::T) where {T <: Angle} = text(t, pt; angle = - ustrip( angle |> rad))
-# TODO collect luxor functions with angle arguments in separate file.
+
 polyrotate!(f, ang::Angle) = polyrotate!(f, - ustrip( ang |> rad))
 
 
@@ -295,4 +314,5 @@ include("colorlegends_vector.jl")
 include("place_image.jl")
 include("latex.jl")
 include("chart.jl")
+include("macros.jl")
 end # module

@@ -5,14 +5,14 @@ import MechanicalSketch: text_table, area_filled, set_scale_sketch, circle, °, 
 let
 BACKCOLOR = color_with_lumin(PALETTE[8], 80);
 function restart()
-    empty_figure(joinpath(@__DIR__, "test_18.png"))
+    empty_figure(filename = joinpath(@__DIR__, "test_18.png"))
     background(BACKCOLOR)
     sethue(PALETTE[1])
 end
 restart()
 diameters = [6mm, 8mm, 10mm, 12mm]
 mbls = rope_breaking_strength.(diameters)
-weights = rope_weight.(diameters) |> kg/km
+weights = rope_weight.(diameters) .|> kg/km
 circleradius(A) = sqrt(A/π)
 radius_filled = circleradius.(area_filled.(diameters))
 

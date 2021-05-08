@@ -1,5 +1,5 @@
 function restart_25(backcolor)
-    empty_figure(joinpath(@__DIR__, "test_25.png"))
+    empty_figure(filename = joinpath(@__DIR__, "test_25.png"))
     background(backcolor)
     sethue(PALETTE[8])
 end

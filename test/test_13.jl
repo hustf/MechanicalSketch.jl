@@ -10,7 +10,7 @@ import MechanicalSketch: rope_pos_tension, setline, kW
 let
 BACKCOLOR = PALETTE[8];
 function restart()
-    empty_figure(joinpath(@__DIR__, "test_13.png"))
+    empty_figure(filename = joinpath(@__DIR__, "test_13.png"))
     background(BACKCOLOR)
     sethue(PALETTE[5])
 end

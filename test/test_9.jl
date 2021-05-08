@@ -4,7 +4,7 @@ import MechanicalSketch:m, color_with_lumin, drawcart, setline, circle, PALETTE
 let
 BACKCOLOR = color_with_lumin(PALETTE[3], 70)
 function restart()
-    empty_figure(joinpath(@__DIR__, "test_9.png"))
+    empty_figure(filename = joinpath(@__DIR__, "test_9.png"))
     background(BACKCOLOR)
     sethue(PALETTE[5])
 end

@@ -10,7 +10,7 @@ import MechanicalSketch: ∙, ∇_rectangle, SVector, draw_streamlines
 import Interpolations: interpolate, Gridded, Linear, Flat, extrapolate
 import MechanicalSketch: Greys_9
 let
-empty_figure(joinpath(@__DIR__, "test_26.png"));
+empty_figure(filename = joinpath(@__DIR__, "test_26.png"));
 include("test_functions_24.jl")
 include("test_functions_26.jl")
 # Reuse the flow field from test_23.jl, a matrix of complex velocities with an element per pixel.
@@ -36,7 +36,7 @@ global const OU_26 = O + (0.0, -0.25HE + EM)
 NO_2 = noisepic_2(A, PHYSWIDTH_23, PHYSHEIGHT_23)
 
 # Show the noise image at the top figure
-legend = BinLegend(;maxlegend = 1.0, noofbins = 128, 
+legend = BinLegend(;maxlegend = 1.0, noofbins = 128,
                        colorscheme = reverse(Greys_9), name = Symbol("Value{Float64}"))
 upleftpoint, lowrightpoint = place_image(OU_26, legend.(NO_2))
 draw_legend(lowrightpoint + (EM, 0) + (0.0m, PHYSHEIGHT_23), legend)
