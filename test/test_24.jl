@@ -72,6 +72,7 @@ ys = reverse(ys)
 #  M_xy_test[ii, jj] == M_xy[i, j]
 #  ii = end + 1 - j
 #  jj = i
+# TODO fix this, used to work with earlier versions.
 fxy_inter = interpolate((xs, ys), transpose(A)[ : , end:-1:1], Gridded(Linear()));
 fxy = extrapolate(fxy_inter, Flat());
 fxy(0.0m, 0.0m)

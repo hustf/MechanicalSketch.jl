@@ -24,6 +24,8 @@ Catenary Problem
 # It also don't work well with quantities. In this case, we don't bother making a wrapper,
 # this is just an experiment with JuMP.
 
+# Also note, this will sometimes simply exit with a crash, depending on the calling context.
+
 NP = 20             # number of start and end points of chainlinks
 L = 1               # difference in x-coords of endlinks
 h = 2 * L / (NP - 1) # length of each link

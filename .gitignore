@@ -1,3 +1,4 @@
 .vscode
 .old
 luxor-drawing*
+test/std*

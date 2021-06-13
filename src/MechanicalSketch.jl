@@ -1,20 +1,28 @@
 module MechanicalSketch
 # TODO import new Luxor functions from latest revision.
 import Luxor
-import Luxor: Drawing,Turtle, Pencolor, Penwidth, Forward, Turn, HueShift, SVGimage,
+import Luxor:
+# Layout
+Drawing, SVGimage,
 paper_sizes,
 Tiler, Partition,
-rescale,
+rescale, currentdrawing,
 
 finish, preview, snapshot,
 origin, rulers, background,
 
-@png, @pdf, @svg, @eps, @draw, @imagematrix,
+@png, @pdf, @svg, @eps, @draw, @drawsvg, @savesvg,
+
+# Turtle
+Turtle, Pencolor, Penwidth, Forward, Turn, HueShift,
+
+# Play
 
 newpath, closepath, newsubpath,
 
 BezierPath, BezierPathSegment, bezier, bezier′, bezier′′, makebezierpath, drawbezierpath, bezierpathtopoly, beziertopoly, pathtobezierpaths,
-bezierfrompoints, beziercurvature, bezierstroke, setbezierhandles, shiftbezierhandles, brush,
+bezierfrompoints, beziercurvature, bezierstroke, setbezierhandles, beziersegmentangles,
+shiftbezierhandles, brush,
 
 strokepath, fillpath,
 
@@ -31,17 +39,18 @@ boxbottomright,
 
 intersectboundingboxes, boundingboxesintersect, pointcrossesboundingbox,
 
-boxmap,
+BoxmapTile, boxmap,
 
-circle, circlepath, currentdrawing, ellipse, hypotrochoid, epitrochoid,
+circle, circlepath, ellipse, hypotrochoid, epitrochoid,
 squircle, center3pts, curve,
 arc, carc, arc2r, carc2r, isarcclockwise, arc2sagitta, carc2sagitta,
 spiral, sector, intersection2circles,
 intersection_line_circle, intersectionlinecircle, intersectioncirclecircle, ispointonline,
 intersectlinepoly, polyintersect, polyintersections, circlepointtangent,
-circletangent2circles, pointinverse,
+circletangent2circles, pointinverse, pointcircletangent, circlecircleoutertangents,
+circlecircleinnertangents, ellipseinquad,
 
-ngon, ngonside, star, pie,
+ngon, ngonside, star, pie, polycross,
 do_action, paint, paint_with_alpha, fillstroke,
 
 Point, O, randompoint, randompointarray, midpoint, between, slope, intersectionlines,
@@ -49,6 +58,7 @@ pointlinedistance, getnearestpointonline, isinside,
 perpendicular, crossproduct, dotproduct, distance,
 prettypoly, polysmooth, polysplit, poly, simplify,  polycentroid,
 polysortbyangle, polysortbydistance, offsetpoly, polyfit,
+currentpoint, hascurrentpoint, getworldposition, anglethreepoints,
 
 polyperimeter, polydistances, polyportion, polyremainder, nearestindex,
 polyarea, polysample, insertvertices!,
@@ -85,7 +95,7 @@ GridHex, GridRect, nextgridpoint,
 
 Table, highlightcells,
 
-readpng, placeimage, readsvg,
+readpng, readsvg, placeimage, svgstring,
 
 julialogo, juliacircles,
 
@@ -106,17 +116,26 @@ noise, initnoise,
 
 # experimental polygon functions
 polyremovecollinearpoints, polytriangulate!, polytriangulate,
-ispointinsidetriangle, ispolyclockwise, polyorientation,
+ispointinsidetriangle, ispolyclockwise, polyorientation, ispolyconvex,
+
+# triangles
+trianglecircumcenter, triangleincenter, trianglecenter, triangleorthocenter,
 
 # Turtle
 Circle, Rectangle, Penup, Pendown, Message, Reposition, Orientation,
-# misc
-layoutgraph, image_as_matrix,
 
-# internals and etc.
+# misc
+image_as_matrix, @imagematrix, image_as_matrix!, @imagematrix!,
+
+# experimental
+layoutgraph, Style, applystyle,
+tidysvg,
+
+# internals and etc (not exported by Luxor).
 
 get_current_redvalue, get_current_greenvalue, get_current_bluevalue, get_current_alpha,
 weighted_color_mean, Colors, parse, comp1, comp2, comp3, comp4
+
 
 using MechanicalUnits
 #import MechanicalUnits: Power, oneunit, numtype, AbstractQuantity # TODO import these to MechanicalUnits!
@@ -237,7 +256,7 @@ function empty_figure(;filename = :rec,
     fig = Drawing(WI, HE, filename)
     configure_mechanical(;backgroundcolor, hue, height, width)
     fig
-end 
+end
 """
 configure_mechanical(;
         backgroundcolor = color_with_lumin(PALETTE[8], 10),
@@ -267,7 +286,7 @@ function configure_mechanical(;
     setdash("solid")
     # Origo at centre
     origin()
-    # Scale and rotation in pixels - x right, y up ('z' is in.). And rotations 
+    # Scale and rotation in pixels - x right, y up ('z' is in.). And rotations
     # are clockwise. Just deal with it. Or stick to using quantities. Functions taking
     # e.g. angles convert to ccw rotations.
     setmatrix([1, 0, 0, 1, WI / 2, HE / 2])
