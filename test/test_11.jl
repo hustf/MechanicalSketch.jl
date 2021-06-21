@@ -2,6 +2,10 @@ using MechanicalSketch
 import MechanicalSketch: °, background, sethue, O, EM, finish, HE, WI, empty_figure
 import MechanicalSketch: m, dimension_aligned, place_image, modify_latex, color_with_lumin
 import MechanicalSketch: @latexify, latexify, LaTeXString, @L_str, PALETTE, Point
+
+@info "test_11.jl is currently disabled because the solver will
+    suppress the versions of a number of other packages. "
+#=
 using JuMP    # Julia Mathematical Programming language
 using Ipopt   # Nonlinear solver
 
@@ -27,11 +31,11 @@ Catenary Problem
 # Also note, this will sometimes simply exit with a crash, depending on the calling context.
 
 NP = 20             # number of start and end points of chainlinks
-L = 1               # difference in x-coords of endlinks
+L = 1.0               # difference in x-coords of endlinks
 h = 2 * L / (NP - 1) # length of each link
 
-mo = Model()
-set_optimizer(mo, Ipopt.Optimizer)
+mo = Model(Ipopt.Optimizer)
+
 
 @variables(mo, begin
     x[1:NP], (base_name = "Pos x, c.o.g. of link", lower_bound = 0.0L, upper_bound = L)
@@ -40,21 +44,22 @@ end)
 
 # Anchor ends
 @constraints(mo, begin
-    x[1] == 0
-    x[NP] == L
-    y[1] == 0
-    y[NP] == 0
+    x[1] == 0.01
+    x[NP] == L-0.01
+    y[1] == 0.0
+    y[NP] == 0.0
 end)
 
+# Link together pieces
+for j in 2:NP
+    @NLconstraint(mo, (x[j] - x[j-1])^2 + (y[j] - y[j-1])^2 <= h^2)
+end
 # Minimize potential energy from center of mass for link
 @objective(mo, Min, sum(2:NP) do j
     (y[j-1] + y[j] ) / 2
 end)
 
-# Link together pieces
-for j in 2:NP
-    @constraint(mo, (x[j] - x[j-1])^2 + (y[j] - y[j-1])^2 <= h^2)
-end
+
 
 optimize!(mo)
 
@@ -97,3 +102,4 @@ finish();
 
 nothing
 end #let
+=#

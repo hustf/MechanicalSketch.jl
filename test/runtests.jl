@@ -69,9 +69,11 @@ end end
 @time @testset "23" begin let
     include("test_23.jl")
 end end
+#=
 @time @testset "24" begin let
     include("test_24.jl")
 end end
+=#
 @time @testset "25" begin let
     include("test_25.jl")
 end end
