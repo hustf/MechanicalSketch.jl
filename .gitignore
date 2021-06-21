@@ -2,3 +2,5 @@
 .old
 luxor-drawing*
 test/std*
+*.gif
+*.png
