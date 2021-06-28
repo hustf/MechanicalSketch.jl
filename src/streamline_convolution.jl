@@ -1,3 +1,4 @@
+#= ForwardDiff and Interpolations removed as dependencies from this version.
 """
     draw_streamlines(pt, f_xy; physwidth = 10.0m, physheight = 4.0m, centered = true, 
         h = 0.1s, nsteps = 10, probability = 0.0001)
@@ -58,7 +59,7 @@ Return x for x in the interval [-maxabs, maxabs]
 
 Repeating between these values.
 """
-sawtooth(x, maxabs) = rem(x, 2maxabs, RoundNearest)
+sawtooth(x, maxabs) =   rem(x, 2maxabs, RoundNearest)
 
 """
     line_integral_convolution_complex(f_xy, n_xy, x_mid, y_mid, f_s, f_0)
@@ -107,7 +108,7 @@ function line_integral_convolution_complex(f_xy, n_xy, x_mid, y_mid, f_s, f_0)
     ŝ
 end
 
-
+=#
 
 """
     noise_between_wavelengths(λ_min, λ_max, x)
@@ -181,7 +182,7 @@ function noise_between_wavelengths(λ_min, λ_max, xs::T, ys::T; normalize = tru
     no = [ noise_between_wavelengths(λ_min, λ_max, x, y) for y in ys, x in xs]
     normalize ? normalize_datarange(no) : no
 end
-
+#=
 """
     noise_for_lic(f_xy, xs, ys)
 
@@ -385,7 +386,7 @@ end
 
 Linear floating index of q given that index 1 corresponds to 'mini' and 'maxindex' corresponds to 'maxi'.
 """
-float_index(maxindex::Int, mini::T, maxi::T, q::T) where T = 1 + (maxindex - 1) * (q - mini) / (maxi - mini)
+float_index(maxindex::Int, mini::T, maxi::T, q::T) where T =  1 + (maxindex - 1) * (q - mini) / (maxi - mini)
 
 
 """
@@ -791,3 +792,4 @@ function color_matrix_mix(lumin_mat, quant_scalar_mat, legend, luminosity_variat
         color_with_lumin(col, lum)
     end
 end
+=#

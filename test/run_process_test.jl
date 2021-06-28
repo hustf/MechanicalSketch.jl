@@ -11,14 +11,11 @@ NOTE: All process output goes to the same file, and can be overwritten by
     and run those separately.
 """
 function runno(iter)
-    #procs = [run(pipeline(`julia -E include("test_$(first(iter)).jl")`; stderr = "stderr.txt", stdout="stdout.txt"))]
-    #procs = [run(`julia -E include\(\"test_$(first(iter)).jl\"\)`)]
-    procs = [run(pipeline(`julia -E include\(\"test_$(first(iter)).jl\"\)`; stderr = "stderr_$(first(iter)).txt", stdout="stdout_$(first(iter)).txt"); wait = false)]
+    procs = [run(pipeline(`julia -E include\(\"test_$(first(iter)).jl\"\)`; stderr = "stderr_$(first(iter)).txt", stdout="stderr_$(first(iter)).txt"); wait = false)]
     for i in iter[2:end]
-        #push!(procs, run(pipeline(`julia -E include("test_$i.jl")`; stderr = "stderr.txt", stdout="stdout.txt"); wait = false))
         push!(procs, run(pipeline(
                                   `julia -E include\(\"test_$i.jl\"\)`;
-                                  stderr = "stderr_$i.txt", stdout="stdout_$i.txt")
+                                  stderr = "stderr_$i.txt", stdout="stderr_$i.txt")
                ; wait = false))
     end
     procs

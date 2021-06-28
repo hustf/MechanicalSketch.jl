@@ -1,3 +1,4 @@
+#= ForwardDiff is removed as a dependency from this version
 import MechanicalSketch
 import MechanicalSketch: empty_figure, PALETTE, O, HE, WI, EM, finish, ∙, settext
 import MechanicalSketch: @import_expand, set_scale_sketch, color_with_lumin
@@ -129,3 +130,4 @@ set_scale_sketch(m)
 finish()
 
 end # let
+=#

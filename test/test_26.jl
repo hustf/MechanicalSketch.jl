@@ -1,3 +1,4 @@
+#= ForwardDiff is removed from dependencies in this version.
 import MechanicalSketch
 import MechanicalSketch: empty_figure, finish
 import MechanicalSketch: PALETTE, settext, setline, WI, EM, HE, O
@@ -86,3 +87,4 @@ settext(str, O + (-WI/2 + EM, 2 * EM) , markup = true)
 finish()
 set_scale_sketch()
 end
+=#

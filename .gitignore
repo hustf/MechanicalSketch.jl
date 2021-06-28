@@ -4,3 +4,4 @@ luxor-drawing*
 test/std*
 *.gif
 *.png
+Manifest.toml

@@ -1,3 +1,4 @@
+#= DSP is removed from test dependencies in this version.
 import MechanicalSketch
 import MechanicalSketch: empty_figure, PALETTE, O, HE, WI, EM, finish, ∙, Point
 import MechanicalSketch: @import_expand, set_scale_sketch, settext, scale_pt_to_unit
@@ -100,3 +101,4 @@ settext("
 finish()
 set_scale_sketch()
 #end
+=#

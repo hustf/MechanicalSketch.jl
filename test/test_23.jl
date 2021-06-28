@@ -1,3 +1,4 @@
+#= ForwardDiff is removed from dependencies in this version.
 import MechanicalSketch
 import MechanicalSketch: color_with_lumin, background, O, WI, HE, EM, FS, finish,
        PALETTE, color_from_palette, setfont, settext, empty_figure, sethue, @layer
@@ -98,3 +99,4 @@ dimension_aligned(OB + (-physwidth / 2, - physheight / 2 ),  OB +  (-physwidth /
 
 finish()
 end #let
+=#

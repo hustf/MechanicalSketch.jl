@@ -1,3 +1,4 @@
+#= Interpolations.jl and ForwardDiff.jl are removed as dependencies in this version.
 """
     function_to_interpolated_function(f_xy; physwidth = 10.0m, physheight = 4.0m)
 
@@ -95,3 +96,4 @@ function matrix_to_function(matrix)   # temp ::Array{Float64,2})
     extrapolate(fxy_inter, Flat())
 end
 
+=#

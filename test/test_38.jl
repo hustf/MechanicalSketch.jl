@@ -1,3 +1,4 @@
+#= ForwardDiff is removed as a dependency from this version
 import MechanicalSketch: @import_expand, empty_figure, WI, HE, EM, O, PT, finish
 import MechanicalSketch: settext, place_image, PALETTE, color_with_lumin, snapshot
 import MechanicalSketch: circle, ∙, arrow_nofill, Point, @layer, sethue, draw_expr
@@ -164,6 +165,6 @@ end
 
 
 snapshot(fname = joinpath(@__DIR__, "test_38.png"))
-
+=#
 
 

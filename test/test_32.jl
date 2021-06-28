@@ -1,3 +1,4 @@
+#= ForwardDiff as a dependency is removed from this version
 import MechanicalSketch
 import MechanicalSketch: background, sethue, O, WI, HE, EM, FS
 import MechanicalSketch: PALETTE, setfont, settext, setline, fontsize, color_with_lumin, color_with_lumin
@@ -149,3 +150,4 @@ animate(movie, scenes,
     framerate = 30)
 set_scale_sketch(m)
 end # let
+=#

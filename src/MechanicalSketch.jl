@@ -1,5 +1,4 @@
 module MechanicalSketch
-# TODO import new Luxor functions from latest revision.
 import Luxor
 import Luxor:
 # Layout
@@ -138,12 +137,11 @@ weighted_color_mean, Colors, parse, comp1, comp2, comp3, comp4
 
 
 using MechanicalUnits
-#import MechanicalUnits: Power, oneunit, numtype, AbstractQuantity # TODO import these to MechanicalUnits!
 import MechanicalUnits.Unitfu: Power, oneunit, numtype, AbstractQuantity
 @import_expand kW # Don't use ~ since that would also import WI, which we use elsewhere.
 import Latexify, LaTeXStrings, NodeJS
-import Latexify: @latexify, latexify, @latexrecipe
-import LaTeXStrings: LaTeXString, @L_str
+using Latexify: @latexify, latexify, @latexrecipe
+using LaTeXStrings: LaTeXString, @L_str
 """
 Rotations given with units occur around the positive z axis, when y is up and x is to the right.
 We don't dispatch on the dimension of angles, because the dimension is NonDims (for good reason).
@@ -152,17 +150,17 @@ In the context of this package, defining Angle is considered harmless:
 const Angle = Union{typeof(1.0°), typeof(1°), typeof(1.0f0°), typeof(1.0rad), typeof(1rad), typeof(1.0f0*rad)}
 # TODO move Angle to numeric types...
 import ColorSchemes
-import ColorSchemes: getinverse, get
-import ColorSchemes: RGB, RGBA
-import ColorSchemes: HSV, HSVA, HSL, HSLA, LCHab, LCHabA, LCHuv, LCHuvA # Cylindrical hue colorspaces
-import ColorSchemes: isoluminant_cgo_70_c39_n256, leonardo, PuOr_8, Greys_9 # We also define ColSchemeNoMiddle in 'colors.jl'
+using ColorSchemes: getinverse, get
+using ColorSchemes: RGB, RGBA
+using ColorSchemes: HSV, HSVA, HSL, HSLA, LCHab, LCHabA, LCHuv, LCHuvA # Cylindrical hue colorspaces
+using ColorSchemes: isoluminant_cgo_70_c39_n256, leonardo, PuOr_8, Greys_9 # We also define ColSchemeNoMiddle in 'colors.jl'
 import Base: -, +, *, /, hypot, product, show
-import Colors: @colorant_str
-import FileIO: @format_str, File, save
-import ForwardDiff
+using Colors: @colorant_str
+using FileIO: @format_str, File, save
+#import ForwardDiff
 import StaticArrays
-import StaticArrays: SA, SVector
-import Interpolations:   interpolate, Linear, Flat, extrapolate, Extrapolation, Gridded
+using StaticArrays: SA, SVector
+#import Interpolations:   interpolate, Linear, Flat, extrapolate, Extrapolation, Gridded
 const CHORD_ZERO = 0.25
 const FOIL_CHORD_POS = [0, 0.0125, 0.025, 0.05, 0.075, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 0.95, 1]
 const FOIL_HALF_T = [0, 0.117, 0.1575, 0.2179, 0.2649, 0.3042, 0.4146, 0.4764, 0.5, 0.4816, 0.4149, 0.3159, 0.1989, 0.0811, 0.0306, 0]
