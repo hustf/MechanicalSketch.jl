@@ -37,7 +37,7 @@ function showpower(p::Point, power::Power;
     fontsize(symbsize)
     fontface("DejaVu Sans")
     str = "⚡"
-    WI, HE = textextents(str)[3:4]
+    wi, he = textextents(str)[3:4]
     # Outline symbol
     sethue(avgcol)
     fontface("DejaVu Sans Bold")
@@ -46,7 +46,7 @@ function showpower(p::Point, power::Power;
     # Shadow text
     fontface("DejaVu Sans")
     fontsize(fs)
-    labelpower && text(string(rounded), p + (1.5WI, 0) - fs.*(0.03, -0.04))
+    labelpower && text(string(rounded), p + (1.5wi, 0) - fs.*(0.03, -0.04))
 
     # Inside symbol
     sethue(color_with_lumin(color_from_palette("red"), luminback))
@@ -54,7 +54,7 @@ function showpower(p::Point, power::Power;
     text(str, p)
     # Front text
     fontsize(fs)
-    labelpower && text(string(rounded), p + (1.5WI, 0))
+    labelpower && text(string(rounded), p + (1.5wi, 0))
 
     # Make a mask of the symbol
     clipreset()
@@ -68,10 +68,10 @@ function showpower(p::Point, power::Power;
 
     # fill the symbol from bottom according to relative power
     sethue(curcol)
-    rect(p, WI , -fractionpower * HE, :fill)
+    rect(p, wi , -fractionpower * he, :fill)
     sethue(contrastcol)
     setline(PT)
-    rect(p, WI , -fractionpower * HE, :stroke)
+    rect(p, wi , -fractionpower * he, :stroke)
 
     # Clean up
     clipreset()

@@ -95,7 +95,7 @@ end
 """
     set_figure_height(h::Int)
 
-Updates global constant HE. Take care if functions are defined with closures (captured globals)
+Updates global HE. Take care if functions are defined with closures (captured globals)
 """
 function set_figure_height(h::Int)
     global HE = h
@@ -103,7 +103,7 @@ end
 """
     set_figure_width(w::Int)
 
-Updates global constant WI. Take care if functions are defined with closures (captured globals)
+Updates global WI. Take care if functions are defined with closures (captured globals)
 """
 function set_figure_width(w::Int)
     global WI = w

@@ -29,7 +29,7 @@ rect, box, cropmarks,
 
 setantialias, setline, setlinecap, setlinejoin, setdash,
 
-move, rmove, line, rule, rline, arrow, arrowhead, dimension,
+move, rmove, line, rule, rline, arrow, arrowhead, dimension, tickline,
 
 BoundingBox, boxwidth, boxheight, boxdiagonal, boxaspectratio,
 boxtop, boxbottom, boxtopleft, boxtopcenter, boxtopright, boxmiddleleft,
@@ -40,17 +40,19 @@ intersectboundingboxes, boundingboxesintersect, pointcrossesboundingbox,
 
 BoxmapTile, boxmap,
 
-circle, circlepath, ellipse, hypotrochoid, epitrochoid,
+circle, circlepath, crescent, ellipse, hypotrochoid, epitrochoid,
 squircle, center3pts, curve,
 arc, carc, arc2r, carc2r, isarcclockwise, arc2sagitta, carc2sagitta,
 spiral, sector, intersection2circles,
 intersection_line_circle, intersectionlinecircle, intersectioncirclecircle, ispointonline,
+ispointonpoly,
 intersectlinepoly, polyintersect, polyintersections, circlepointtangent,
 circletangent2circles, pointinverse, pointcircletangent, circlecircleoutertangents,
 circlecircleinnertangents, ellipseinquad,
 
 ngon, ngonside, star, pie, polycross,
-do_action, paint, paint_with_alpha, fillstroke,
+do_action, paint, paint_with_alpha, fillstroke, setstrokescale,
+setblendextend, 
 
 Point, O, randompoint, randompointarray, midpoint, between, slope, intersectionlines,
 pointlinedistance, getnearestpointonline, isinside,
@@ -68,7 +70,7 @@ polymove!, polyscale!, polyrotate!, polyreflect!,
 
 strokepreserve, fillpreserve,
 gsave, grestore, @layer,
-scale, rotate, translate,
+scale, rotate, translate, rotate_point_around_point,
 clip, clippreserve, clipreset,
 
 getpath, getpathflat, pathtopoly,
@@ -100,7 +102,7 @@ julialogo, juliacircles,
 
 barchart,
 
-mesh, setmesh, mask,
+mesh, setmesh, add_mesh_patch, mask,
 
 # animation
 Movie, Scene, animate,
@@ -200,7 +202,7 @@ We want to make quality figures for A4 with 5 cm total margin. Width and height 
     HE = Int(round(w_300f * 2 / 3))
 
 """
-const WI = 1889
+global WI = 1889
 "HE is the pixel height of the figure. See WI and orgo, O"
 global HE = 1259
 const SCALE = Dict{Symbol, Quantity{Float64}}()
