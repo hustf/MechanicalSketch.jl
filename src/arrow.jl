@@ -395,7 +395,6 @@ function arrow(centerpos::Point, radius, α_sta::Angle, α_end::Angle;
     newpath()
     move(p0.x, p0.y)
     if clockwise
-        @show r, β_sta, β_cutoff
         arc(0, 0, r, β_sta, β_cutoff, action = :stroke)
     else
         carc(0, 0, r,  β_sta, β_cutoff, action = :stroke)
