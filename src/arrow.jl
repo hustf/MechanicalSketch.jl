@@ -395,9 +395,10 @@ function arrow(centerpos::Point, radius, α_sta::Angle, α_end::Angle;
     newpath()
     move(p0.x, p0.y)
     if clockwise
-        arc(0, 0, r, β_sta, β_cutoff, :stroke)
+        @show r, β_sta, β_cutoff
+        arc(0, 0, r, β_sta, β_cutoff, action = :stroke)
     else
-        carc(0, 0, r,  β_sta, β_cutoff, :stroke)
+        carc(0, 0, r,  β_sta, β_cutoff, action = :stroke)
     end
     closepath()
     # prepare to add decorations at points along shaft
